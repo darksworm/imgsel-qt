@@ -30,5 +30,9 @@ protected:
     InputMode inputMode;
     std::string filterString;
     Image *selectedImage;
+
+private:
+    QThreadPool* threadPool;
+    std::vector<QFuture<std::optional<QImage>>> imageFutures;
 };
 
