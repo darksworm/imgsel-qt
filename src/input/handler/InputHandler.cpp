@@ -1,4 +1,5 @@
 #include <linux/input-event-codes.h>
+#include <QtCore/Qt>
 #include "InputHandler.h"
 #include "instruction/ModeChangeInstruction.h"
 #include "../../lib/keycode/keycode.h"
@@ -7,17 +8,17 @@
 #include "instruction/MoveInstruction.h"
 
 InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
-    if (keyCode == KEY_ESC) {
+    if (keyCode == Qt::Key_Escape) {
         return new InputInstruction(InputInstructionType::CANCEL);
     }
 
-    if (keyCode == KEY_CAPSLOCK) {
+    if (keyCode == Qt::Key_CapsLock) {
         InputMode mode = getNextMode();
 
         return new ModeChangeInstruction(mode);
     }
 
-    if (keyCode == KEY_ENTER) {
+    if (keyCode == Qt::Key_Enter) {
         return new CopyInstruction();
     }
 
@@ -25,35 +26,35 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
         addModifier(keyCode);
     }
 
-    if (keyCode == KEY_C && isModifierActive("CONTROL")) {
+    if (keyCode == Qt::Key_C && isModifierActive("CONTROL")) {
         return new InputInstruction(InputInstructionType::EXIT);
     }
 
     ImagePickerMove move = ImagePickerMove::NONE;
 
     switch (keyCode) {
-        case KEY_LEFT:
+        case Qt::Key_Left:
             move = ImagePickerMove::LEFT;
             break;
-        case KEY_RIGHT:
+        case Qt::Key_Right:
             move = ImagePickerMove::RIGHT;
             break;
-        case KEY_DOWN:
+        case Qt::Key_Down:
             move = ImagePickerMove::DOWN;
             break;
-        case KEY_UP:
+        case Qt::Key_Up:
             move = ImagePickerMove::UP;
             break;
-        case KEY_PAGEDOWN:
+        case Qt::Key_PageDown:
             move = ImagePickerMove::PG_DOWN;
             break;
-        case KEY_PAGEUP:
+        case Qt::Key_PageUp:
             move = ImagePickerMove::PG_UP;
             break;
-        case KEY_HOME:
+        case Qt::Key_Home:
             move = ImagePickerMove::HOME;
             break;
-        case KEY_END:
+        case Qt::Key_End:
             move = ImagePickerMove::END;
             break;
         default:
@@ -82,10 +83,9 @@ void InputHandler::removeModifier(unsigned keyCode) {
 
 bool InputHandler::isModifier(unsigned keyCode) {
     switch (keyCode) {
-        case KEY_RIGHTSHIFT:
-        case KEY_LEFTSHIFT:
+        case Qt::Key_Shift:
             return true;
-        case KEY_LEFTCTRL:
+        case Qt::Key_Control:
             return true;
     }
 

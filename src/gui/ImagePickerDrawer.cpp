@@ -3,6 +3,7 @@
 #include "ImagePickerDrawer.h"
 #include "../exceptions/OutOfBounds.h"
 #include "../exceptions/ImageNotLoadable.h"
+#include "ImagePickerMove.h"
 #include <memory>
 
 ImagePickerDrawer::ImagePickerDrawer(WindowManager *windowManager, std::vector<Image> *images) {

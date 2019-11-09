@@ -1,6 +1,8 @@
 #pragma once
 
+#include <vector>
 #include "../input/handler/InputMode.h"
+#include "../image/image.h"
 
 class Config {
     friend class ConfigBuilder;
@@ -23,6 +25,8 @@ private:
 
     unsigned int xMargin = 40;
     unsigned int yMargin = 20;
+
+    std::vector<Image> images;
 
     Config() = default;
 
@@ -73,5 +77,9 @@ public:
 
     unsigned int getXMargin() const {
         return xMargin;
+    }
+
+    std::vector<Image> getImages() const {
+        return images;
     }
 };

@@ -4,6 +4,23 @@
 #include "ConfigBuilder.h"
 
 void ConfigManager::loadConfig() {
+    std::vector<std::string> imageExtensions = {
+        "jpg",
+        "jpeg",
+        "png",
+        "gif"
+    };
+
+    std::vector<Image> images;
+    for (const auto &img:cliParams.imageFiles) {
+        for (const auto &ext:imageExtensions) {
+            if (img.length() >= ext.length() && 0 == img.compare(img.length() - ext.length(), ext.length(), ext)) {
+                images.emplace_back(img);
+                break;
+            }
+        }
+    }
+
     ConfigManager::config = ConfigBuilder()
             .setIsDebug(DEBUG)
             .setImageCacheSizeBytes(cliParams.cacheSize)
@@ -23,6 +40,8 @@ void ConfigManager::loadConfig() {
 
             .setYMargin(cliParams.imageYMargin.has_value() ? cliParams.imageYMargin.value() : 30)
             .setXMargin(cliParams.imageXMargin.has_value() ? cliParams.imageXMargin.value() : 30)
+
+            .setImages(images)
 
             .build();
 }

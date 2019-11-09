@@ -1,6 +1,9 @@
 #pragma once
 
+#include <utility>
+
 #include "Config.h"
+#include "../image/image.h"
 
 class ConfigBuilder {
 private:
@@ -71,6 +74,11 @@ public:
 
     ConfigBuilder& setXPadding(unsigned int xPadding) {
         config->xPadding = xPadding;
+        return *this;
+    }
+
+    ConfigBuilder& setImages(std::vector<Image> images) {
+        config->images = std::move(images);
         return *this;
     }
 };

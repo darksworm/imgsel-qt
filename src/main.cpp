@@ -1,152 +1,94 @@
-#include <thread>
 #include "lib/CLI11/include/CLI/CLI.hpp"
-#include "lib/spdlog/include/spdlog/spdlog.h"
-
-#include <X11/extensions/XTest.h>
-#include <Imlib2.h>
-
-#include "gui/WindowManager.h"
-#include "gui/drawer/ShapeDrawerFactory.h"
-
-#include "config/ConfigManager.h"
-#include "util/ThreadSafeQueue.h"
-#include "input/XEventWrapper.h"
-
-#include <vector>
-#include <string>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include <sys/file.h>
-#include "input/InstructionRouter.h"
-#include "input/XInputHandler.h"
+#include <QApplication>
+#include <QDebug>
+#include <QScreen>
+#include <QtCore/QCommandLineParser>
+#include "gui/MainWindow.cpp"
 #include "util/helpers.h"
+#include "config/ConfigManager.h"
 
-int main(int argc, char *argv[]) {
-    int pid_file = open("/tmp/imgsel.pid", O_CREAT | O_RDWR, 0666);
-    int rc = flock(pid_file, LOCK_EX | LOCK_NB);
-    if (rc && EWOULDBLOCK == errno) {
-        std::cout << "another proccess is already running!";
-        exit(1);
-    }
-
-    auto homeDir = getHomeDir();
-
-    struct stat info;
-    if (stat((homeDir + "/.imgsel/logs").c_str(), &info) != 0) {
-        mkdir((homeDir + "/.imgsel").c_str(), S_IRWXU | S_IRGRP | S_IROTH);
-        mkdir((homeDir + "/.imgsel/logs").c_str(), S_IRWXU | S_IRGRP | S_IROTH);
-    }
-
-    spdlog::set_level(spdlog::level::debug);
-    spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
-
-    auto file_logger = spdlog::rotating_logger_mt("basic_logger", homeDir + "/.imgsel/logs/log.txt", 1024 * 1024 * 5, 3);
-    spdlog::set_default_logger(file_logger);
-
-    if (!XInitThreads()) {
-        spdlog::critical("Failed to initialize XLib threads!");
-        exit(1);
-    }
-
-    CLI::App app{"IMGSEL - Image selection tool."};
+int initConfig(int argc, char **argv) {
+    CLI::App cli_app{"IMGSEL - Image selection tool."};
 
     CLIParams params = CLIParams();
 
-    app.add_option("--files", params.imageFiles, "List of images to display.")
+    cli_app.add_option("--files", params.imageFiles, "List of images to display.")
             ->required()
             ->check(CLI::ExistingFile);
 
-    app.add_option("--cache-size", params.cacheSize, "How many (max) bytes of memory to use for caching loaded images.",
-                   1024 * 1024 * 100);
+    cli_app.add_option("--cache-size", params.cacheSize,
+                       "How many (max) bytes of memory to use for caching loaded images.",
+                       1024 * 1024 * 100);
 
-    app.add_flag("--vim", params.startInVimMode, "Set the initial mode to VIM mode.");
+    cli_app.add_flag("--vim", params.startInVimMode, "Set the initial mode to VIM mode.");
 
-    auto rowCountOption = app.add_option("--rows", params.rows, "How many rows to display");
-    auto colCountOption = app.add_option("--cols", params.cols, "How many cols to display");
+    auto rowCountOption = cli_app.add_option("--rows", params.rows, "How many rows to display");
+    auto colCountOption = cli_app.add_option("--cols", params.cols, "How many cols to display");
 
     rowCountOption->needs(colCountOption)->required();
     colCountOption->needs(rowCountOption);
 
-    auto widthOption = app.add_option("--max-width", params.maxImageWidth,
-                                      "The max image width. Any images larger than this will be scaled to this width");
-    auto heightOption = app.add_option("--max-height", params.maxImageHeight,
-                                       "The max image height. Any images larger than this will be scaled to this height");
+    auto widthOption = cli_app.add_option("--max-width", params.maxImageWidth,
+                                          "The max image width. Any images larger than this will be scaled to this width");
+    auto heightOption = cli_app.add_option("--max-height", params.maxImageHeight,
+                                           "The max image height. Any images larger than this will be scaled to this height");
 
-    auto xPadding = app.add_option("--x-padding", params.imageXPadding, "Padding between image and selection box in pixels on the x axis");
-    auto yPadding = app.add_option("--y-padding", params.imageYPadding, "Padding between image and selection box in pixels on the y axis");
+    auto xPadding = cli_app.add_option("--x-padding", params.imageXPadding,
+                                       "Padding between image and selection box in pixels on the x axis");
+    auto yPadding = cli_app.add_option("--y-padding", params.imageYPadding,
+                                       "Padding between image and selection box in pixels on the y axis");
 
     xPadding->needs(yPadding);
     yPadding->needs(xPadding);
 
-    auto xMargin = app.add_option("--x-margin", params.imageXMargin, "Margin between images in pixels on the x axis");
-    auto yMargin = app.add_option("--y-margin", params.imageYMargin, "Margin between images in pixels on the y axis");
+    auto xMargin = cli_app.add_option("--x-margin", params.imageXMargin,
+                                      "Margin between images in pixels on the x axis");
+    auto yMargin = cli_app.add_option("--y-margin", params.imageYMargin,
+                                      "Margin between images in pixels on the y axis");
 
     xMargin->needs(yMargin);
     yMargin->needs(xMargin);
 
-    app.add_flag("--print-path", params.printFilePath,
-                 "Write file path to stdout instead of copying it's contents to the clipboard.");
+    cli_app.add_flag("--print-path", params.printFilePath,
+                     "Write file path to stdout instead of copying it's contents to the clipboard.");
 
     heightOption->needs(widthOption)->required();
     widthOption->needs(heightOption);
 
-    CLI11_PARSE(app, argc, argv);
+    CLI11_PARSE(cli_app, argc, argv);
 
     ConfigManager::setCLIParams(params);
+
+    return 0;
+}
+
+int main(int argc, char *argv[]) {
+    int configInitExitCode = initConfig(argc, argv);
+
+    if (configInitExitCode) {
+        return configInitExitCode;
+    }
+
     auto config = ConfigManager::getOrLoadConfig();
 
-    std::vector<std::string> imageExtensions = {
-            "jpg",
-            "jpeg",
-            "png",
-            "gif"
-    };
+    QApplication app(argc, argv);
+    MainWindow window;
 
-    std::vector<Image> images;
-    for (const auto &img:params.imageFiles) {
-        for (const auto &ext:imageExtensions) {
-            if (img.length() >= ext.length() && 0 == img.compare(img.length() - ext.length(), ext.length(), ext)) {
-                images.emplace_back(img);
-                break;
-            }
-        }
-    }
+    window.setWindowFlags(
+            Qt::Widget | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint |
+            Qt::MaximizeUsingFullscreenGeometryHint);
+    window.setParent(0);
+    window.setAttribute(Qt::WA_NoSystemBackground, true);
+    window.setAttribute(Qt::WA_TranslucentBackground, true);
 
-    // set up cache for images
-    imlib_set_cache_size(config.getImageCacheSizeBytes());
+    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
 
-    auto windowManager = new WindowManager();
+    window.setGeometry(screen->geometry());
+    window.show();
 
-    Display *display = windowManager->getDisplay();
-    windowManager->getWindow();
+    window.setWindowTitle(
+            QApplication::translate("toplevel", "Top-level widget"));
+    window.activateWindow();
 
-    XKeyboardState initKBState;
-    XGetKeyboardControl(display, &initKBState);
-
-    ThreadSafeQueue<XEventWrapper> eventQueue;
-    bool shouldQuit = false;
-
-    std::thread xEventListener(handleXInput, windowManager, &eventQueue, &shouldQuit);
-    std::thread xEventHandler(handleEvents, windowManager, &eventQueue, images, &shouldQuit);
-
-    xEventListener.join();
-    xEventHandler.join();
-
-    XKeyboardState exitKBState;
-    XGetKeyboardControl(display, &exitKBState);
-
-    if (exitKBState.led_mask & 1 != initKBState.led_mask & 1) {
-        auto capsKeycode = XKeysymToKeycode(display, XK_Caps_Lock);
-
-        // Simulate Press
-        XTestFakeKeyEvent(display, capsKeycode, True, CurrentTime);
-        XFlush(display);
-
-        // Simulate Release
-        XTestFakeKeyEvent(display, capsKeycode, False, CurrentTime);
-        XFlush(display);
-    }
-
-    windowManager->destroyWindow();
-    delete windowManager;
-    return 0;
+    return app.exec();
 }

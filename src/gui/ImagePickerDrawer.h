@@ -12,22 +12,7 @@
 #include "drawer/ShapeDrawer.h"
 #include "WindowManager.h"
 #include "drawer/ShapeDrawerFactory.h"
-
-enum class ImagePickerMove {
-    NONE,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-
-    HOME,
-    END,
-
-    LINE,
-
-    PG_DOWN,
-    PG_UP
-};
+#include "ImagePickerMove.h"
 
 class ImagePickerDrawer {
 private:

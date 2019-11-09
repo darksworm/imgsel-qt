@@ -1,7 +1,6 @@
 #include <memory>
 #include <thread>
 #include <iostream>
-#include <spdlog/spdlog.h>
 #include "../gui/WindowManager.h"
 #include "../util/ThreadSafeQueue.h"
 #include "XEventWrapper.h"
