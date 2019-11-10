@@ -67,6 +67,8 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
         } else {
             this->imagePickerDrawer->clearFilter();
         }
+
+        this->imagePickerDrawer->drawFrame(nullptr);
     } else if (dynamic_cast<CopyInstruction *>(instruction)) {
         auto selectedImage = this->imagePickerDrawer->getSelectedImage();
         auto path = selectedImage->getPath();
