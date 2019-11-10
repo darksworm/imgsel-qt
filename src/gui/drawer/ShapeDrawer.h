@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Shape.h"
-#include "../WindowManager.h"
 #include <climits>
 #include <numeric>
 #include <optional>

@@ -13,8 +13,6 @@
 
 class ImagePickerDrawer {
 private:
-    WindowManager *windowManager;
-
     ShapeProperties shapeProperties;
     ShapeDrawer* shapeDrawer;
 

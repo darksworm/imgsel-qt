@@ -2,7 +2,6 @@
 #include <QScreen>
 #include "lib/CLI11/include/CLI/CLI.hpp"
 #include "gui/MainWindow.cpp"
-#include "util/helpers.h"
 #include "config/ConfigManager.h"
 
 int initConfig(int argc, char **argv) {

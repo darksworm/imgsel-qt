@@ -1,7 +1,26 @@
 #pragma once
 
 #include "Config.h"
-#include "../util/helpers.h"
+
+struct CLIParams {
+    unsigned int cacheSize;
+    std::vector<std::string> imageFiles;
+    bool startInVimMode = false;
+
+    std::optional<unsigned int> maxImageWidth;
+    std::optional<unsigned int> maxImageHeight;
+
+    std::optional<unsigned int> rows;
+    std::optional<unsigned int> cols;
+
+    bool printFilePath = false;
+
+    std::optional<unsigned int> imageXMargin;
+    std::optional<unsigned int> imageYMargin;
+
+    std::optional<unsigned int> imageXPadding;
+    std::optional<unsigned int> imageYPadding;
+};
 
 class ConfigManager {
 public:
