@@ -1,8 +1,7 @@
 #pragma once
 
-#include <X11/Xutil.h>
-#include <X11/Xlib.h>
-#include <X11/extensions/xf86vmode.h>
+#include <QtGui/QPixmap>
+
 #include <functional>
 #include <memory>
 #include <map>
@@ -10,8 +9,6 @@
 #include "../image/image.h"
 #include "Shape.h"
 #include "drawer/ShapeDrawer.h"
-#include "WindowManager.h"
-#include "drawer/ShapeDrawerFactory.h"
 #include "ImagePickerMove.h"
 
 class ImagePickerDrawer {
@@ -24,8 +21,8 @@ private:
     Shape *selectedShape;
     int page = 0;
 
-    std::vector<Image> *images;
-    std::vector<Image> *allImages;
+    std::vector<Image> images;
+    std::vector<Image> allImages;
     std::map<long,Shape> shapes;
 
     std::vector<Image>::iterator getPageImageStart();
@@ -42,8 +39,10 @@ private:
 
     bool redrawAllInNextFrame = false;
 
+    QPixmap &pixmap;
+
 public:
-    ImagePickerDrawer(WindowManager* windowManager, std::vector<Image> *images);
+    ImagePickerDrawer(QPixmap& pixmap);
 
     void drawFrame(Image* selectedImage, bool redrawAll = false);
 

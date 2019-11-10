@@ -1,15 +1,15 @@
 #pragma once
 
+#include <QPainter>
+#include <QtGui/QImage>
 #include <string>
 #include "ShapeDrawer.h"
 
 class ImageDrawer : public ShapeDrawer {
 protected:
-    Shape calcNextShape(ShapeProperties properties, Image *hotkey, bool selected, long index) override;
-
     Shape drawNextShape(ShapeProperties shapeProperties, Shape shape) override;
 
-    ShapeProperties calcShapeProps(Window window) override;
+    ShapeProperties calcShapeProps() override;
 
     XPoint getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions) override;
 
@@ -18,7 +18,7 @@ protected:
     void clearSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) override;
 
 public:
-    ImageDrawer(WindowManager *windowManager) : ShapeDrawer(windowManager) {};
+    ImageDrawer(QPixmap &pixmap) : ShapeDrawer(pixmap) {};
 };
 
 

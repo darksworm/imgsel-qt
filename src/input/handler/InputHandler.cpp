@@ -1,10 +1,8 @@
-#include <linux/input-event-codes.h>
-#include <QtCore/Qt>
+#include "../../gui/ImagePickerDrawer.h"
 #include "InputHandler.h"
 #include "instruction/ModeChangeInstruction.h"
 #include "../../lib/keycode/keycode.h"
 #include "instruction/CopyInstruction.h"
-#include "../../gui/ImagePickerDrawer.h"
 #include "instruction/MoveInstruction.h"
 
 InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {

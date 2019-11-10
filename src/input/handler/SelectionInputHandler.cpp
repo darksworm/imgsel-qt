@@ -1,15 +1,12 @@
-
-
-#include <linux/input-event-codes.h>
-#include "SelectionInputHandler.h"
 #include "../../gui/ImagePickerDrawer.h"
 #include "instruction/MoveInstruction.h"
 #include "instruction/ModeChangeInstruction.h"
+#include "SelectionInputHandler.h"
 
 InputInstruction *SelectionInputHandler::handleKeyPress(unsigned keyCode) {
     auto instruction = InputHandler::handleKeyPress(keyCode);
 
-    if (keyCode == KEY_Q) {
+    if (keyCode == Qt::Key_Q) {
         instruction = new InputInstruction(InputInstructionType::EXIT);
         return instruction;
     }
@@ -18,20 +15,20 @@ InputInstruction *SelectionInputHandler::handleKeyPress(unsigned keyCode) {
         ImagePickerMove move = ImagePickerMove::NONE;
 
         switch (keyCode) {
-            case KEY_SLASH:
+            case Qt::Key_Slash:
                 delete instruction;
                 instruction = new ModeChangeInstruction(InputMode::DEFAULT);
                 break;
-            case KEY_H:
+            case Qt::Key_H:
                 move = ImagePickerMove::LEFT;
                 break;
-            case KEY_L:
+            case Qt::Key_L:
                 move = ImagePickerMove::RIGHT;
                 break;
-            case KEY_J:
+            case Qt::Key_J:
                 move = ImagePickerMove::DOWN;
                 break;
-            case KEY_K:
+            case Qt::Key_K:
                 move = ImagePickerMove::UP;
                 break;
             default:
@@ -42,15 +39,15 @@ InputInstruction *SelectionInputHandler::handleKeyPress(unsigned keyCode) {
         if (move != ImagePickerMove::NONE) {
             delete instruction;
             instruction = new MoveInstruction(move, repeatNextCommandTimes);
-        } else if (keyCode == KEY_C) {
+        } else if (keyCode == Qt::Key_C) {
             // change to the same mode, but clear filters.
             instruction = new ModeChangeInstruction(InputMode::VIM, 0, false, true);
         }
     }
 
-    if (keyCode == KEY_0 && repeatNextCommand) {
+    if (keyCode == Qt::Key_C && repeatNextCommand) {
         repeatNextCommandTimes = repeatNextCommandTimes * 10;
-    } else if (keyCode >= KEY_1 && keyCode <= KEY_9) {
+    } else if (keyCode >= Qt::Key_1 && keyCode <= Qt::Key_9) {
         if (repeatNextCommand) {
             repeatNextCommandTimes = repeatNextCommandTimes * 10 + (keyCode - 1);
         } else {
@@ -58,12 +55,12 @@ InputInstruction *SelectionInputHandler::handleKeyPress(unsigned keyCode) {
         }
 
         repeatNextCommand = true;
-    } else if (!isModifier(keyCode) && keyCode != KEY_G) {
+    } else if (!isModifier(keyCode) && keyCode != Qt::Key_G) {
         repeatNextCommandTimes = 1;
         repeatNextCommand = false;
     }
 
-    if (keyCode == KEY_G) {
+    if (keyCode == Qt::Key_G) {
         delete instruction;
 
         if (isModifierActive("SHIFT")) {

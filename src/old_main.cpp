@@ -5,7 +5,6 @@
 #include <Imlib2.h>
 
 #include "gui/WindowManager.h"
-#include "gui/drawer/ShapeDrawerFactory.h"
 
 #include "config/ConfigManager.h"
 #include "util/ThreadSafeQueue.h"

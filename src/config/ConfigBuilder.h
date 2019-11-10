@@ -81,4 +81,9 @@ public:
         config->images = std::move(images);
         return *this;
     }
+    
+    ConfigBuilder& setScreenGeometry(QRect screenGeometry) {
+        config->screenGeometry = screenGeometry;
+        return *this;
+    }
 };

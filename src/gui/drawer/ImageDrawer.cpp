@@ -1,101 +1,100 @@
-#include <Imlib2.h>
 #include "ImageDrawer.h"
 #include "../../exceptions/ImageNotLoadable.h"
 #include "../../config/ConfigManager.h"
 
+std::optional<QImage> loadImage(std::string path) {
+    std::optional<QImage> result;
+    result.reset();
 
-Shape ImageDrawer::calcNextShape(ShapeProperties properties, Image *hotkey, bool selected, long index) {
-    return Shape();
-}
-
-Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     auto config = ConfigManager::getOrLoadConfig();
-    Imlib_Image img;
-    Pixmap pix;
-    int width, height;
 
-    img = imlib_load_image(shape.image->getPath().c_str());
+    QImage image(path.c_str());
 
-    if (!img) {
-        throw ImageNotLoadable();
+    if(image.isNull()) {
+        return result;
     }
 
-    imlib_context_set_image(img);
-    width = imlib_image_get_width();
-    height = imlib_image_get_height();
+    auto width = image.width();
+    auto height = image.height();
 
     if (config.getMaxImageHeight() + config.getMaxImageWidth() > 0) {
         if (config.getMaxImageWidth() > 0 && width > config.getMaxImageWidth()) {
             auto scale = (double)config.getMaxImageWidth() / width;
             int new_height = height * scale;
-            img = imlib_create_cropped_scaled_image(0, 0, width, height, config.getMaxImageWidth(), new_height);
-            imlib_free_image();
-            imlib_context_set_image(img);
-
-            width = config.getMaxImageWidth();
-            height = new_height;
+            image = image.scaledToHeight(new_height);
         }
 
         if (config.getMaxImageHeight() > 0 && height > config.getMaxImageHeight()) {
             auto scale = (double)config.getMaxImageHeight() / height;
             int new_width = width * scale;
-            img = imlib_create_cropped_scaled_image(0, 0, width, height, new_width, config.getMaxImageHeight());
-            imlib_free_image();
-            imlib_context_set_image(img);
-
-            width = new_width;
-            height = config.getMaxImageHeight();
+            image = image.scaledToWidth(new_width);
         }
     }
 
-    pix = XCreatePixmap(windowManager->getDisplay(), windowManager->getWindow(), width, height,
-                        windowManager->getDepth());
+    result = image;
+    return result;
+}
 
-    imlib_context_set_display(windowManager->getDisplay());
-    imlib_context_set_visual(windowManager->getVisual());
-    imlib_context_set_colormap(windowManager->getColorMap());
-    imlib_context_set_drawable(windowManager->getWindow());
+Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
+    auto config = ConfigManager::getOrLoadConfig();
+
+    auto img = loadImage(shape.image->getPath());
+
+    if (!img.has_value()) {
+        throw ImageNotLoadable();
+    }
+
+    int width = img.value().width(),
+        height = img.value().height();
 
     XPoint imagePos = XPoint();
     imagePos.x = shapeProperties.position.x + shapeProperties.dimensions.x / 2 - width / 2;
     imagePos.y = shapeProperties.position.y + shapeProperties.dimensions.y / 2 - height / 2;
 
-    imlib_render_image_on_drawable(imagePos.x, imagePos.y);
+    QPainter paint = QPainter();
+    paint.begin(&pixmap);
+    paint.drawImage(imagePos.x, imagePos.y, img.value());
+//
+//    auto test1 = new QPixmap(width,  height);
+//    QPainter test = QPainter();
+//    test.begin(test1);
+//
+//    test.drawImage(0, 0, img.value());
+//
+//    test1->save("test.png");
+//    exit(0);
 
     lastShapePosition = shapeProperties.position;
 
-    imlib_free_image();
-    XFreePixmap(windowManager->getDisplay(), pix);
+//    auto font = XLoadQueryFont(windowManager->getDisplay(), "fixed");
+//    XSetFont(windowManager->getDisplay(), textGC, font->fid);
 
-    auto font = XLoadQueryFont(windowManager->getDisplay(), "fixed");
-    XSetFont(windowManager->getDisplay(), textGC, font->fid);
+//    auto displayName = shape.image->getFilenameWithoutExtension();
+//    unsigned int textWidth = 0;
+//    auto maxTextWidth = shapeProperties.dimensions.x - 20;
 
-    auto displayName = shape.image->getFilenameWithoutExtension();
-    unsigned int textWidth = 0;
-    auto maxTextWidth = shapeProperties.dimensions.x - 20;
+//    do {
+//        textWidth = XTextWidth(font, displayName.c_str(), displayName.length());
+//
+//        if(textWidth >= maxTextWidth) {
+//            displayName = displayName.substr(0, displayName.length() - 1);
+//        }
+//    } while (textWidth >= maxTextWidth);
 
-    do {
-        textWidth = XTextWidth(font, displayName.c_str(), displayName.length());
-
-        if(textWidth >= maxTextWidth) {
-            displayName = displayName.substr(0, displayName.length() - 1);
-        }
-    } while (textWidth >= maxTextWidth);
-
-    XDrawString(
-            windowManager->getDisplay(),
-            windowManager->getWindow(),
-            textGC,
-            lastShapePosition.value().x + shapeProperties.dimensions.x / 2 - textWidth / 2,
-            lastShapePosition.value().y + shapeProperties.nameRect.y,
-            displayName.c_str(),
-            (int) displayName.length()
-    );
+//    XDrawString(
+//            windowManager->getDisplay(),
+//            windowManager->getWindow(),
+//            textGC,
+//            lastShapePosition.value().x + shapeProperties.dimensions.x / 2 - textWidth / 2,
+//            lastShapePosition.value().y + shapeProperties.nameRect.y,
+//            displayName.c_str(),
+//            (int) displayName.length()
+//    );
 
     return shape;
 }
 
-ShapeProperties ImageDrawer::calcShapeProps(Window window) {
+ShapeProperties ImageDrawer::calcShapeProps() {
     auto config = ConfigManager::getOrLoadConfig();
 
     ShapeProperties shapeProperties{
@@ -158,51 +157,51 @@ XPoint ImageDrawer::getNextShapePosition(ShapeProperties shapeProperties, Dimens
 void ImageDrawer::drawSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) {
     if (shape.selected) {
         auto pos = shape.position;
-        XDrawRectangle(windowManager->getDisplay(), windowManager->getWindow(), selectedShapeGC, pos.x, pos.y,
-                       shapeProperties.dimensions.x, shapeProperties.dimensions.y);
+//        XDrawRectangle(windowManager->getDisplay(), windowManager->getWindow(), selectedShapeGC, pos.x, pos.y,
+//                       shapeProperties.dimensions.x, shapeProperties.dimensions.y);
     }
 }
 
 void ImageDrawer::clearSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) {
     auto pos = shape.position;
 
-    XClearArea(
-            windowManager->getDisplay(),
-            windowManager->getWindow(),
-            pos.x - selectedShapeLineWidth,
-            pos.y - selectedShapeLineWidth,
-            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
-            selectedShapeLineWidth * 2,
-            false
-    );
-
-    XClearArea(
-            windowManager->getDisplay(),
-            windowManager->getWindow(),
-            pos.x - selectedShapeLineWidth,
-            pos.y - selectedShapeLineWidth + shapeProperties.dimensions.y,
-            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
-            selectedShapeLineWidth * 2,
-            false
-    );
-
-    XClearArea(
-            windowManager->getDisplay(),
-            windowManager->getWindow(),
-            pos.x - selectedShapeLineWidth,
-            pos.y - selectedShapeLineWidth,
-            (2 * selectedShapeLineWidth),
-            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
-            false
-    );
-
-    XClearArea(
-            windowManager->getDisplay(),
-            windowManager->getWindow(),
-            pos.x - selectedShapeLineWidth + shapeProperties.dimensions.x,
-            pos.y - selectedShapeLineWidth,
-            (2 * selectedShapeLineWidth),
-            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
-            false
-    );
+//    XClearArea(
+//            windowManager->getDisplay(),
+//            windowManager->getWindow(),
+//            pos.x - selectedShapeLineWidth,
+//            pos.y - selectedShapeLineWidth,
+//            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
+//            selectedShapeLineWidth * 2,
+//            false
+//    );
+//
+//    XClearArea(
+//            windowManager->getDisplay(),
+//            windowManager->getWindow(),
+//            pos.x - selectedShapeLineWidth,
+//            pos.y - selectedShapeLineWidth + shapeProperties.dimensions.y,
+//            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
+//            selectedShapeLineWidth * 2,
+//            false
+//    );
+//
+//    XClearArea(
+//            windowManager->getDisplay(),
+//            windowManager->getWindow(),
+//            pos.x - selectedShapeLineWidth,
+//            pos.y - selectedShapeLineWidth,
+//            (2 * selectedShapeLineWidth),
+//            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
+//            false
+//    );
+//
+//    XClearArea(
+//            windowManager->getDisplay(),
+//            windowManager->getWindow(),
+//            pos.x - selectedShapeLineWidth + shapeProperties.dimensions.x,
+//            pos.y - selectedShapeLineWidth,
+//            (2 * selectedShapeLineWidth),
+//            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
+//            false
+//    );
 }

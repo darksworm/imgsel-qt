@@ -1,5 +1,8 @@
 #define DEBUG true
 
+#include <QtGui/QScreen>
+#include <QtGui/QGuiApplication>
+#include <QCursor>
 #include "ConfigManager.h"
 #include "ConfigBuilder.h"
 
@@ -21,6 +24,9 @@ void ConfigManager::loadConfig() {
         }
     }
 
+    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+    auto geo = screen->geometry();
+
     ConfigManager::config = ConfigBuilder()
             .setIsDebug(DEBUG)
             .setImageCacheSizeBytes(cliParams.cacheSize)
@@ -40,6 +46,8 @@ void ConfigManager::loadConfig() {
 
             .setYMargin(cliParams.imageYMargin.has_value() ? cliParams.imageYMargin.value() : 30)
             .setXMargin(cliParams.imageXMargin.has_value() ? cliParams.imageXMargin.value() : 30)
+
+            .setScreenGeometry(geo)
 
             .setImages(images)
 

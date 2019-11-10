@@ -1,8 +1,6 @@
-#include "lib/CLI11/include/CLI/CLI.hpp"
 #include <QApplication>
-#include <QDebug>
 #include <QScreen>
-#include <QtCore/QCommandLineParser>
+#include "lib/CLI11/include/CLI/CLI.hpp"
 #include "gui/MainWindow.cpp"
 #include "util/helpers.h"
 #include "config/ConfigManager.h"
@@ -69,9 +67,9 @@ int main(int argc, char *argv[]) {
         return configInitExitCode;
     }
 
+    QApplication app(argc, argv);
     auto config = ConfigManager::getOrLoadConfig();
 
-    QApplication app(argc, argv);
     MainWindow window;
 
     window.setWindowFlags(

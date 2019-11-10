@@ -5,6 +5,7 @@
 #include "../util/ThreadSafeQueue.h"
 #include "../input/handler/InputHandler.h"
 #include "ImagePickerMove.h"
+#include "ImagePickerDrawer.h"
 
 class MainWindow: public QWidget {
     void paintEvent(QPaintEvent *event) override;
@@ -20,19 +21,13 @@ protected:
 
     void handleInstruction(InputInstruction* instruction);
 
-    void clearFilter();
-
-    bool move(ImagePickerMove move, unsigned int steps);
-
-    void setFilter(std::function<bool(Image *)> filter, std::string filterString);
-
     std::unique_ptr<InputHandler> inputHandler;
-    InputMode inputMode;
-    std::string filterString;
-    Image *selectedImage;
 
 private:
     QThreadPool* threadPool;
     std::vector<QFuture<std::optional<QImage>>> imageFutures;
+    InputMode inputMode;
+    QPixmap screenBuffer;
+    ImagePickerDrawer* imagePickerDrawer;
 };
 
