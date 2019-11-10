@@ -63,7 +63,7 @@ InputInstruction *SelectionInputHandler::handleKeyPress(unsigned keyCode) {
     if (keyCode == Qt::Key_G) {
         delete instruction;
 
-        if (isModifierActive("SHIFT")) {
+        if (isModifierActive(Qt::Key_Shift)) {
             if (repeatNextCommand) {
                 unsigned targetLine = repeatNextCommandTimes;
                 instruction = new MoveInstruction(ImagePickerMove::LINE, targetLine);

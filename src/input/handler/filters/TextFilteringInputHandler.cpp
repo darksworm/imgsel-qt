@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <linux/input-event-codes.h>
 #include <QtCore/Qt>
+#include <QtCore/QChar>
 #include "TextFilteringInputHandler.h"
-#include "../../../lib/keycode/keycode.h"
 #include "../instruction/FilterInstruction.h"
 
 std::string TextFilteringInputHandler::getFilterText() {
@@ -76,7 +76,7 @@ std::string TextFilteringInputHandler::bufferToString() {
     std::string bufferString;
 
     for (auto &&keyPress: buffer) {
-        bufferString.push_back(*keycode_linux_rawname(keyPress));
+        bufferString.push_back(QChar(keyPress).toLatin1());
     }
 
     return bufferString;

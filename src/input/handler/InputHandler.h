@@ -15,11 +15,8 @@ protected:
     void addModifier(unsigned keyCode);
     void removeModifier(unsigned keyCode);
     bool isModifier(unsigned keyCode);
-
-    std::string keyCodeToYAMLName(unsigned keyCode);
-
-    bool isModifierActive(std::string keyName);
+    bool isModifierActive(unsigned key);
 
 private:
-    std::set<std::string> activeModifiers;
+    std::set<unsigned int> activeModifiers;
 };

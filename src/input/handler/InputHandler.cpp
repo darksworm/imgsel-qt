@@ -1,7 +1,6 @@
 #include "../../gui/ImagePickerDrawer.h"
 #include "InputHandler.h"
 #include "instruction/ModeChangeInstruction.h"
-#include "../../lib/keycode/keycode.h"
 #include "instruction/CopyInstruction.h"
 #include "instruction/MoveInstruction.h"
 
@@ -24,7 +23,7 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
         addModifier(keyCode);
     }
 
-    if (keyCode == Qt::Key_C && isModifierActive("CONTROL")) {
+    if (keyCode == Qt::Key_C && isModifierActive(Qt::Key_Control)) {
         return new InputInstruction(InputInstructionType::EXIT);
     }
 
@@ -76,7 +75,7 @@ InputInstruction *InputHandler::handleKeyRelease(unsigned keyCode) {
 }
 
 void InputHandler::removeModifier(unsigned keyCode) {
-    activeModifiers.erase(linux_keycode_to_yaml_name(keyCode));
+    activeModifiers.erase(keyCode);
 }
 
 bool InputHandler::isModifier(unsigned keyCode) {
@@ -91,9 +90,9 @@ bool InputHandler::isModifier(unsigned keyCode) {
 }
 
 void InputHandler::addModifier(unsigned keyCode) {
-    activeModifiers.insert(linux_keycode_to_yaml_name(keyCode));
+    activeModifiers.insert(keyCode);
 }
 
-bool InputHandler::isModifierActive(std::string keyName) {
-    return activeModifiers.find(keyName) != activeModifiers.end();
+bool InputHandler::isModifierActive(unsigned int key) {
+    return activeModifiers.find(key) != activeModifiers.end();
 }
