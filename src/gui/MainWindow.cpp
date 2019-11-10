@@ -1,5 +1,6 @@
 #include <QtGui/QPainter>
 #include <QtConcurrent/QtConcurrent>
+#include <QClipboard>
 #include <iostream>
 #include "MainWindow.h"
 #include "../config/ConfigManager.h"
@@ -14,7 +15,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
 
     painter.drawPixmap(0, 0, screenBuffer);
-    std::cout << "paint" << "\n";
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -76,12 +76,19 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
         if (config.shouldPrintFilePath()) {
             std::cout << path;
         } else {
+#if defined(Q_OS_LINUX)
             auto ext = selectedImage->getExtension();
             ext = ext == "jpg" ? "jpeg" : ext;
 
             // TODO: handle 's in filenames
             std::string command = "cat '" + path + "' | xclip -selection clipboard -target image/" + ext + " -i";
             system(command.c_str());
+#else
+            auto img = QPixmap(QString(path.c_str()));
+            QApplication::clipboard()->setPixmap(img, QClipboard::Clipboard);
+            QApplication::clipboard()->setPixmap(img, QClipboard::Selection);
+            QApplication::processEvents();
+#endif
         }
 
         QCoreApplication::exit(0);

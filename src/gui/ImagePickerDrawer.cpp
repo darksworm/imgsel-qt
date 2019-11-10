@@ -93,8 +93,6 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
             shapeProperties.position = shapeDrawer->getNextShapePosition(shapeProperties, *windowDimensions, lastShapePosition);
             shape.position = shapeProperties.position;
 
-            std::cout << "x" << shape.position.x << "\n" << "y" << shape.position.y;
-
             try {
                 shapeDrawer->drawNextShape(shapeProperties, shape);
             } catch (ImageNotLoadable &e) {
