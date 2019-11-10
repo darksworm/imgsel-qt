@@ -3,6 +3,7 @@
 #include <cstring>
 #include <algorithm>
 #include <linux/input-event-codes.h>
+#include <QtCore/Qt>
 #include "TextFilteringInputHandler.h"
 #include "../../../lib/keycode/keycode.h"
 #include "../instruction/FilterInstruction.h"
@@ -43,7 +44,7 @@ std::function<bool(Image *)> TextFilteringInputHandler::getFilter() {
 
 InputInstruction *TextFilteringInputHandler::handleKeyPress(unsigned keyPress) {
     switch (keyPress) {
-        case KEY_BACKSPACE: {
+        case Qt::Key_Backspace: {
             if (!this->buffer.empty()) {
                 this->buffer.pop_back();
             }
@@ -51,7 +52,7 @@ InputInstruction *TextFilteringInputHandler::handleKeyPress(unsigned keyPress) {
             return new FilterInstruction(this->getFilter(), this->getFilterText());
         }
 
-        case KEY_DELETE: {
+        case Qt::Key_Backslash: {
             this->buffer.clear();
 
             return new FilterInstruction(this->getFilter(), this->getFilterText());
@@ -68,7 +69,7 @@ bool TextFilteringInputHandler::shouldAddToBuffer(unsigned keyPress) {
 }
 
 bool TextFilteringInputHandler::isTextualKey(unsigned keyPress) {
-    return keyPress == KEY_SPACE || strlen(keycode_linux_rawname(keyPress)) == 1;
+    return keyPress >= Qt::Key_Space && keyPress <= Qt::Key_AsciiTilde;
 }
 
 std::string TextFilteringInputHandler::bufferToString() {

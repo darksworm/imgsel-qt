@@ -16,7 +16,7 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
         return new ModeChangeInstruction(mode);
     }
 
-    if (keyCode == Qt::Key_Enter) {
+    if (keyCode == Qt::Key_Return || keyCode == Qt::Key_Enter) {
         return new CopyInstruction();
     }
 

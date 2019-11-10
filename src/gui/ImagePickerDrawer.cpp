@@ -31,7 +31,8 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
     oldShapes.insert(shapes.begin(), shapes.end());
 
     shapes.clear();
-    shapeDrawer->lastShapePosition.reset();
+    std::optional<XPoint> lastShapePosition;
+    lastShapePosition.reset();
 
     std::unique_ptr<Dimensions> windowDimensions(new Dimensions);
 
@@ -70,20 +71,17 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
             if (!redrawAll && oldShape.image->getPath() == shape.image->getPath()) {
                 shouldDrawShape = false;
                 shape = oldShape;
-                shapeDrawer->lastShapePosition = oldShape.position;
+                lastShapePosition = oldShape.position;
 
                 if (oldShape.selected && !selected) {
                     shapeDrawer->clearSelectedShapeIndicator(shapeProperties, oldShape);
                 }
             } else {
                 if (!this->shapes.empty()) {
-                    shapeDrawer->lastShapePosition = (--this->shapes.end())->second.position;
+                    lastShapePosition = (--this->shapes.end())->second.position;
                 }
-                // TODO: rewrite for qt
-//                // TODO: these parameters are wack
-//                XClearArea(windowManager->getDisplay(), windowManager->getWindow(), oldShape.position.x - 2,
-//                           oldShape.position.y - 2, shapeProperties.dimensions.x + 4, shapeProperties.dimensions.y + 4,
-//                           false);
+
+                shapeDrawer->clearShape(shapeProperties, oldShape);
             }
         } catch (std::out_of_range &e) {
             // nothing to do here
@@ -92,7 +90,7 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         shape.selected = selected;
 
         if (shouldDrawShape) {
-            shapeProperties.position = shapeDrawer->getNextShapePosition(shapeProperties, *windowDimensions);
+            shapeProperties.position = shapeDrawer->getNextShapePosition(shapeProperties, *windowDimensions, lastShapePosition);
             shape.position = shapeProperties.position;
 
             std::cout << "x" << shape.position.x << "\n" << "y" << shape.position.y;
@@ -107,6 +105,8 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
                     continue;
                 }
             }
+
+            lastShapePosition = shape.position;
         }
 
         shapes.emplace(drawnShapeCnt, shape);
@@ -126,11 +126,7 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         unsigned i = drawnShapeCnt;
         do {
             auto oldShape = oldShapes.at(i);
-            // TODO: rewrite for qt
-//            XClearArea(windowManager->getDisplay(), windowManager->getWindow(), oldShape.position.x - 2,
-//                       oldShape.position.y - 2, shapeProperties.dimensions.x + 4, shapeProperties.dimensions.y + 4,
-//                       false);
-        } while (++i < oldShapes.size());
+            shapeDrawer->clearShape(shapeProperties, oldShape);} while (++i < oldShapes.size());
     }
 
     redrawAllInNextFrame = false;

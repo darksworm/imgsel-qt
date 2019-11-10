@@ -13,8 +13,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     QWidget::paintEvent(event);
     QPainter painter(this);
 
-    this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), false);
-
     painter.drawPixmap(0, 0, screenBuffer);
     std::cout << "paint" << "\n";
 }
@@ -86,6 +84,8 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
 
         QCoreApplication::exit(0);
     }
+
+    this->repaint();
 }
 
 MainWindow::MainWindow() : QWidget() {
@@ -106,5 +106,6 @@ MainWindow::MainWindow() : QWidget() {
 
     screenBuffer = QPixmap(geo.width(), geo.height());
 
+    this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
 }
 

@@ -10,7 +10,7 @@ std::optional<QImage> loadImage(std::string path) {
 
     QImage image(path.c_str());
 
-    if(image.isNull()) {
+    if (image.isNull()) {
         return result;
     }
 
@@ -19,13 +19,13 @@ std::optional<QImage> loadImage(std::string path) {
 
     if (config.getMaxImageHeight() + config.getMaxImageWidth() > 0) {
         if (config.getMaxImageWidth() > 0 && width > config.getMaxImageWidth()) {
-            auto scale = (double)config.getMaxImageWidth() / width;
+            auto scale = (double) config.getMaxImageWidth() / width;
             int new_height = height * scale;
             image = image.scaledToHeight(new_height);
         }
 
         if (config.getMaxImageHeight() > 0 && height > config.getMaxImageHeight()) {
-            auto scale = (double)config.getMaxImageHeight() / height;
+            auto scale = (double) config.getMaxImageHeight() / height;
             int new_width = width * scale;
             image = image.scaledToWidth(new_width);
         }
@@ -45,7 +45,7 @@ Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     }
 
     int width = img.value().width(),
-        height = img.value().height();
+            height = img.value().height();
 
     XPoint imagePos = XPoint();
     imagePos.x = shapeProperties.position.x + shapeProperties.dimensions.x / 2 - width / 2;
@@ -54,42 +54,30 @@ Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     QPainter paint = QPainter();
     paint.begin(&pixmap);
     paint.drawImage(imagePos.x, imagePos.y, img.value());
-//
-//    auto test1 = new QPixmap(width,  height);
-//    QPainter test = QPainter();
-//    test.begin(test1);
-//
-//    test.drawImage(0, 0, img.value());
-//
-//    test1->save("test.png");
-//    exit(0);
 
-    lastShapePosition = shapeProperties.position;
+    QFont font;
+    font.setFamily(font.defaultFamily());
+    QFontMetrics fm(font);
 
-//    auto font = XLoadQueryFont(windowManager->getDisplay(), "fixed");
-//    XSetFont(windowManager->getDisplay(), textGC, font->fid);
+    QString displayName = QString::fromUtf8(shape.image->getFilenameWithoutExtension().c_str());
+    unsigned int textWidth = 0;
+    auto maxTextWidth = shapeProperties.dimensions.x - 20;
 
-//    auto displayName = shape.image->getFilenameWithoutExtension();
-//    unsigned int textWidth = 0;
-//    auto maxTextWidth = shapeProperties.dimensions.x - 20;
+    do {
+        textWidth = fm.horizontalAdvance(displayName);
 
-//    do {
-//        textWidth = XTextWidth(font, displayName.c_str(), displayName.length());
-//
-//        if(textWidth >= maxTextWidth) {
-//            displayName = displayName.substr(0, displayName.length() - 1);
-//        }
-//    } while (textWidth >= maxTextWidth);
+        if(textWidth >= maxTextWidth) {
+            displayName = displayName.chopped(displayName.length() - 1);
+        }
+    } while (textWidth >= maxTextWidth);
 
-//    XDrawString(
-//            windowManager->getDisplay(),
-//            windowManager->getWindow(),
-//            textGC,
-//            lastShapePosition.value().x + shapeProperties.dimensions.x / 2 - textWidth / 2,
-//            lastShapePosition.value().y + shapeProperties.nameRect.y,
-//            displayName.c_str(),
-//            (int) displayName.length()
-//    );
+    paint.setFont(font);
+    paint.setPen(Qt::white);
+    paint.drawText(
+            shapeProperties.position.x + shapeProperties.dimensions.x / 2 - textWidth / 2,
+            shapeProperties.position.y + shapeProperties.nameRect.y,
+            displayName
+    );
 
     return shape;
 }
@@ -98,7 +86,8 @@ ShapeProperties ImageDrawer::calcShapeProps() {
     auto config = ConfigManager::getOrLoadConfig();
 
     ShapeProperties shapeProperties{
-            .dimensions = Dimensions(config.getMaxImageWidth() + config.getXPadding() * 2,  config.getMaxImageHeight() + config.getYPadding() * 2),
+            .dimensions = Dimensions(config.getMaxImageWidth() + config.getXPadding() * 2,
+                                     config.getMaxImageHeight() + config.getYPadding() * 2),
             .margins = Dimensions(config.getXMargin(), config.getYMargin()),
             .itemCounts = Dimensions(config.getCols() > 0 ? config.getCols() : 4,
                                      config.getRows() > 0 ? config.getRows() : 4),
@@ -114,8 +103,8 @@ ShapeProperties ImageDrawer::calcShapeProps() {
     return shapeProperties;
 }
 
-XPoint ImageDrawer::getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions) {
-    auto lastShapePosition = this->lastShapePosition;
+XPoint ImageDrawer::getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions,
+                                         std::optional<XPoint> lastShapePosition) {
     XPoint newShapePosition;
 
     unsigned int xMargin, yMargin;
@@ -157,51 +146,64 @@ XPoint ImageDrawer::getNextShapePosition(ShapeProperties shapeProperties, Dimens
 void ImageDrawer::drawSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) {
     if (shape.selected) {
         auto pos = shape.position;
-//        XDrawRectangle(windowManager->getDisplay(), windowManager->getWindow(), selectedShapeGC, pos.x, pos.y,
-//                       shapeProperties.dimensions.x, shapeProperties.dimensions.y);
+        QPainter painter;
+        painter.begin(&pixmap);
+        painter.setPen(Qt::red);
+        painter.drawRect(QRect(pos.x, pos.y, shapeProperties.dimensions.x, shapeProperties.dimensions.y));
+        painter.end();
     }
 }
 
 void ImageDrawer::clearSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) {
     auto pos = shape.position;
+    QPainter painter;
+    painter.begin(&pixmap);
 
-//    XClearArea(
-//            windowManager->getDisplay(),
-//            windowManager->getWindow(),
-//            pos.x - selectedShapeLineWidth,
-//            pos.y - selectedShapeLineWidth,
-//            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
-//            selectedShapeLineWidth * 2,
-//            false
-//    );
-//
-//    XClearArea(
-//            windowManager->getDisplay(),
-//            windowManager->getWindow(),
-//            pos.x - selectedShapeLineWidth,
-//            pos.y - selectedShapeLineWidth + shapeProperties.dimensions.y,
-//            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
-//            selectedShapeLineWidth * 2,
-//            false
-//    );
-//
-//    XClearArea(
-//            windowManager->getDisplay(),
-//            windowManager->getWindow(),
-//            pos.x - selectedShapeLineWidth,
-//            pos.y - selectedShapeLineWidth,
-//            (2 * selectedShapeLineWidth),
-//            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
-//            false
-//    );
-//
-//    XClearArea(
-//            windowManager->getDisplay(),
-//            windowManager->getWindow(),
-//            pos.x - selectedShapeLineWidth + shapeProperties.dimensions.x,
-//            pos.y - selectedShapeLineWidth,
-//            (2 * selectedShapeLineWidth),
-//            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
-//            false
-//    );
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
+
+    painter.fillRect(
+            pos.x - selectedShapeLineWidth,
+            pos.y - selectedShapeLineWidth,
+            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
+            selectedShapeLineWidth * 2,
+            Qt::transparent);
+
+    painter.fillRect(
+            pos.x - selectedShapeLineWidth,
+            pos.y - selectedShapeLineWidth + shapeProperties.dimensions.y,
+            shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
+            selectedShapeLineWidth * 2,
+            Qt::transparent);
+
+    painter.fillRect(
+            pos.x - selectedShapeLineWidth,
+            pos.y - selectedShapeLineWidth,
+            (2 * selectedShapeLineWidth),
+            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
+            Qt::transparent);
+
+    painter.fillRect(
+            pos.x - selectedShapeLineWidth + shapeProperties.dimensions.x,
+            pos.y - selectedShapeLineWidth,
+            (2 * selectedShapeLineWidth),
+            shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
+            Qt::transparent);
+
+    painter.end();
+}
+
+void ImageDrawer::clearShape(ShapeProperties shapeProperties, Shape shape) {
+    // TODO: these parameters are wack
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setCompositionMode(QPainter::CompositionMode_Source);
+
+    painter.fillRect(
+            shape.position.x - 2,
+            shape.position.y - 2,
+            shapeProperties.dimensions.x + 4,
+            shapeProperties.dimensions.y + 4,
+            Qt::transparent);
+
+    painter.end();
 }
