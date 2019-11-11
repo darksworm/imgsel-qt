@@ -10,6 +10,8 @@ InputHandler *InputHandlerFactory::getInputHandler(InputMode type) {
             return new TextFilteringInputHandler();
         case InputMode::VIM:
             return new SelectionInputHandler();
+        default:
+            throw;
     }
 }
 
