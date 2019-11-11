@@ -112,8 +112,6 @@ MainWindow::MainWindow() : QWidget() {
     if (!InputHandlerFactory::isCorrectHandler(inputHandler.get(), inputMode)) {
         inputHandler.reset(InputHandlerFactory::getInputHandler(inputMode));
     }
-    this->threadPool = new QThreadPool(this);
-    this->threadPool->setMaxThreadCount(10);
 
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
 
