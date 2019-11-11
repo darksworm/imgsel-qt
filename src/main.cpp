@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     window.setWindowFlags(
             Qt::Widget | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint |
             Qt::MaximizeUsingFullscreenGeometryHint);
-    window.setParent(0);
+    window.setParent(nullptr);
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
 

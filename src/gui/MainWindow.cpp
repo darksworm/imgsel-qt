@@ -11,10 +11,17 @@
 #include "../input/handler/instruction/CopyInstruction.h"
 
 void MainWindow::paintEvent(QPaintEvent *event) {
+    auto config = ConfigManager::getOrLoadConfig();
     QWidget::paintEvent(event);
     QPainter painter(this);
 
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    painter.fillRect(0, 0, config.getScreenGeometry().width(), config.getScreenGeometry().height(),
+                     QColor(QRgba64::fromRgba(0, 0, 0, 200)));
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
     painter.drawPixmap(0, 0, screenBuffer);
+    painter.end();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
