@@ -23,10 +23,10 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     painter.drawPixmap(0, 0, screenBuffer);
 
     if (imagePickerDrawer->getFilterString().length() > 0) {
-        QFont font;
-        font.setFamily(font.defaultFamily());
-        font.setPixelSize(28);
-        QFontMetrics fm(font);
+        QFont queryFont;
+        queryFont.setFamily(queryFont.defaultFamily());
+        queryFont.setPixelSize(28);
+        QFontMetrics fm(queryFont);
 
         QString displayName = QString::fromUtf8(imagePickerDrawer->getFilterString().c_str());
         unsigned int textWidth = 0;
@@ -40,11 +40,21 @@ void MainWindow::paintEvent(QPaintEvent *event) {
             }
         } while (textWidth >= maxTextWidth);
 
-        painter.setFont(font);
+        painter.setFont(queryFont);
         painter.setPen(Qt::white);
 
         painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, 36, displayName);
     }
+
+    QFont inputModeFont;
+    inputModeFont.setFamily(inputModeFont.defaultFamily());
+    inputModeFont.setPixelSize(12);
+
+    painter.setFont(inputModeFont);
+    painter.setPen(Qt::white);
+
+    auto modeText = inputMode == InputMode::VIM ? "VIM" : "DEFAULT";
+    painter.drawText(5, config.getScreenGeometry().height() - 10, modeText);
 
     painter.end();
 }
