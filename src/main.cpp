@@ -71,9 +71,7 @@ int main(int argc, char *argv[]) {
 
     MainWindow window;
 
-    window.setWindowFlags(
-            Qt::Widget | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::X11BypassWindowManagerHint |
-            Qt::MaximizeUsingFullscreenGeometryHint);
+    window.setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog);
     window.setParent(nullptr);
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
@@ -83,10 +81,11 @@ int main(int argc, char *argv[]) {
     window.setGeometry(screen->geometry());
     window.show();
     window.raise();
-    window.setFocus();
 
     window.setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
     window.activateWindow();
+    window.move(screen->geometry().x(), screen->geometry().y());
+    window.setFocus();
 
     return app.exec();
 }
