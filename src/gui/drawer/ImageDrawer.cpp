@@ -67,7 +67,7 @@ Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
         textWidth = fm.horizontalAdvance(displayName);
 
         if(textWidth >= maxTextWidth) {
-            displayName = displayName.chopped(displayName.length() - 1);
+            displayName = displayName.left(displayName.length() - 1);
         }
     } while (textWidth >= maxTextWidth);
 
