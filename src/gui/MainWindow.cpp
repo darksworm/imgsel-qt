@@ -61,6 +61,7 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
     } else if (dynamic_cast<ModeChangeInstruction *>(instruction)) {
         auto modeChangeInstruction = (ModeChangeInstruction *) instruction;
         inputMode = modeChangeInstruction->newMode;
+        inputHandler.reset(InputHandlerFactory::getInputHandler(inputMode));
         this->imagePickerDrawer->drawFrame(nullptr, false);
 
         if (modeChangeInstruction->shouldClearFilters) {
