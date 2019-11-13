@@ -21,6 +21,31 @@ void MainWindow::paintEvent(QPaintEvent *event) {
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
     painter.drawPixmap(0, 0, screenBuffer);
+
+    if (imagePickerDrawer->getFilterString().length() > 0) {
+        QFont font;
+        font.setFamily(font.defaultFamily());
+        font.setPixelSize(28);
+        QFontMetrics fm(font);
+
+        QString displayName = QString::fromUtf8(imagePickerDrawer->getFilterString().c_str());
+        unsigned int textWidth = 0;
+        auto maxTextWidth = config.getScreenGeometry().width() - 20;
+
+        do {
+            textWidth = fm.horizontalAdvance(displayName);
+
+            if (textWidth >= maxTextWidth) {
+                displayName = displayName.left(displayName.length() - 1);
+            }
+        } while (textWidth >= maxTextWidth);
+
+        painter.setFont(font);
+        painter.setPen(Qt::white);
+
+        painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, 36, displayName);
+    }
+
     painter.end();
 }
 
