@@ -274,6 +274,7 @@ void ImagePickerDrawer::setFilter(std::function<bool(Image *)> filter, std::stri
     this->page = 0;
     lastPreloadedImageIndex = 0;
     redrawAllInNextFrame = true;
+    selectedShape = nullptr;
     this->filterString = std::move(filterString);
     images.clear();
 }
@@ -285,6 +286,7 @@ void ImagePickerDrawer::clearFilter() {
 
     this->filter.reset();
     this->images = std::vector<Image>(allImages.begin(), allImages.end());
+    selectedShape = nullptr;
 
     redrawAllInNextFrame = true;
 }

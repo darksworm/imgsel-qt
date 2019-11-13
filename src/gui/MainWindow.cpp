@@ -114,6 +114,11 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
         this->imagePickerDrawer->drawFrame(nullptr);
     } else if (dynamic_cast<CopyInstruction *>(instruction)) {
         auto selectedImage = this->imagePickerDrawer->getSelectedImage();
+
+        if (selectedImage == nullptr) {
+            return;
+        }
+
         auto path = selectedImage->getPath();
 
         if (config.shouldPrintFilePath()) {
