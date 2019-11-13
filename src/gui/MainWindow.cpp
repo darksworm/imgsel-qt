@@ -20,7 +20,22 @@ void MainWindow::paintEvent(QPaintEvent *event) {
                      QColor(QRgba64::fromRgba(0, 0, 0, 200)));
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    painter.drawPixmap(0, 0, screenBuffer);
+    if(focused) {
+        painter.drawPixmap(0, 0, screenBuffer);
+    } else {
+        QImage im = screenBuffer.toImage().convertToFormat(QImage::Format_ARGB32);
+        for (int y = 0; y < im.height(); ++y) {
+            QRgb *scanLine = (QRgb*)im.scanLine(y);
+            for (int x = 0; x < im.width(); ++x) {
+                QRgb pixel = *scanLine;
+                uint ci = uint(qGray(pixel));
+                *scanLine = qRgba(ci, ci, ci, qAlpha(pixel)/3);
+                ++scanLine;
+            }
+        }
+
+        painter.drawImage(0, 0, im);
+    }
 
     if (imagePickerDrawer->getFilterString().length() > 0) {
         QFont queryFont;
@@ -162,5 +177,17 @@ MainWindow::MainWindow() : QWidget() {
     screenBuffer = QPixmap(geo.width(), geo.height());
 
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
+}
+
+void MainWindow::focusOutEvent(QFocusEvent *event) {
+    QWidget::focusOutEvent(event);
+    focused = false;
+    this->repaint();
+}
+
+void MainWindow::focusInEvent(QFocusEvent *event) {
+    QWidget::focusInEvent(event);
+    focused = true;
+    this->repaint();
 }
 

@@ -20,9 +20,14 @@ protected:
 
     std::unique_ptr<InputHandler> inputHandler;
 
+    void focusOutEvent(QFocusEvent *event) override;
+
+    void focusInEvent(QFocusEvent *event) override;
+
 private:
     InputMode inputMode;
     QPixmap screenBuffer;
     ImagePickerDrawer* imagePickerDrawer;
+    bool focused = false;
 };
 

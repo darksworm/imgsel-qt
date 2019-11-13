@@ -82,9 +82,10 @@ int main(int argc, char *argv[]) {
 
     window.setGeometry(screen->geometry());
     window.show();
+    window.raise();
+    window.setFocus();
 
-    window.setWindowTitle(
-            QApplication::translate("toplevel", "Top-level widget"));
+    window.setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
     window.activateWindow();
 
     return app.exec();
