@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QScreen>
-#include "lib/CLI11/include/CLI/CLI.hpp"
+#include "lib/CLI11.hpp"
 #include "gui/MainWindow.cpp"
 #include "config/ConfigManager.h"
 
