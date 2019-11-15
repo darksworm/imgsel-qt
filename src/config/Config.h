@@ -26,6 +26,9 @@ private:
     unsigned int xMargin = 40;
     unsigned int yMargin = 20;
 
+    std::optional<unsigned int> width;
+    std::optional<unsigned int> height;
+
     QRect screenGeometry;
 
     std::vector<Image> images;
@@ -88,4 +91,13 @@ public:
     QRect getScreenGeometry() const {
         return screenGeometry;
     };
+
+
+    std::optional<unsigned int> getWidth() const {
+        return width;
+    }
+
+    std::optional<unsigned int> getHeight() const {
+        return height;
+    }
 };

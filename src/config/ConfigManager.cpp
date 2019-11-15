@@ -24,11 +24,22 @@ void ConfigManager::loadConfig() {
         }
     }
 
-    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
-    auto geo = screen->geometry();
+    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
 
-    ConfigManager::config = ConfigBuilder()
-            .setIsDebug(DEBUG)
+    auto builder = ConfigBuilder();
+
+    QRect geo;
+
+    if (cliParams.width.has_value()) {
+        builder = builder.setWidth(cliParams.width.value())
+                .setHeight(cliParams.height.value());
+
+         geo = QRect(0, 0, cliParams.width.value(), cliParams.height.value());
+    } else {
+         geo = screen->geometry();
+    }
+
+    builder.setIsDebug(DEBUG)
             .setImageCacheSizeBytes(cliParams.cacheSize)
 
             .setDefaultInputMode(cliParams.startInVimMode ? InputMode::VIM : InputMode::DEFAULT)
@@ -49,9 +60,11 @@ void ConfigManager::loadConfig() {
 
             .setScreenGeometry(geo)
 
-            .setImages(images)
+            .setImages(images);
 
-            .build();
+
+    ConfigManager::config = builder.build();
+    ConfigManager::configLoaded = true;
 }
 
 Config ConfigManager::getOrLoadConfig() {

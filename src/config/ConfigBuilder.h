@@ -86,4 +86,14 @@ public:
         config->screenGeometry = screenGeometry;
         return *this;
     }
+
+    ConfigBuilder& setWidth(unsigned int width) {
+        config->width = width;
+        return *this;
+    }
+
+    ConfigBuilder& setHeight(unsigned int height) {
+        config->height = height;
+        return *this;
+    }
 };

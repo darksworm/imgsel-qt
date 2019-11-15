@@ -20,6 +20,9 @@ struct CLIParams {
 
     std::optional<unsigned int> imageXPadding;
     std::optional<unsigned int> imageYPadding;
+
+    std::optional<unsigned int> width;
+    std::optional<unsigned int> height;
 };
 
 class ConfigManager {

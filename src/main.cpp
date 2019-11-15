@@ -43,6 +43,14 @@ int initConfig(int argc, char **argv) {
     auto yMargin = cli_app.add_option("--y-margin", params.imageYMargin,
                                       "Margin between images in pixels on the y axis");
 
+    auto width = cli_app.add_option("--width", params.width,
+                                      "Screen width");
+    auto height = cli_app.add_option("--height", params.height,
+                                    "Screen height");
+
+    width->needs(height);
+    height->needs(width);
+
     xMargin->needs(yMargin);
     yMargin->needs(xMargin);
 
@@ -78,7 +86,11 @@ int main(int argc, char *argv[]) {
 
     QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
 
-    window.setGeometry(screen->geometry());
+    if (config.getHeight().has_value()) {
+        window.setGeometry(0, 0, config.getWidth().value(), config.getHeight().value());
+    } else {
+        window.setGeometry(screen->geometry());
+    }
     window.show();
     window.raise();
 
