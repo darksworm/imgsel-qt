@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 project(IMGSEL-QT)
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
 
 add_executable(${PROJECT_NAME} main.cpp gui/ImagePickerDrawer.cpp gui/ImagePickerDrawer.h exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/Shape.h gui/dimensions.h
@@ -16,20 +16,20 @@ find_package(Qt5Widgets REQUIRED)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 
 find_program(
-  CLANG_TIDY_EXE
-  NAMES "clang-tidy"
-  DOC "Path to clang-tidy executable"
-  )
-if(NOT CLANG_TIDY_EXE)
-  message(STATUS "clang-tidy not found.")
-else()
-  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-  set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*")
-endif()
+        CLANG_TIDY_EXE
+        NAMES "clang-tidy"
+        DOC "Path to clang-tidy executable"
+)
+if (NOT CLANG_TIDY_EXE)
+    message(STATUS "clang-tidy not found.")
+else ()
+    message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+    set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*")
+endif ()
 
 set_target_properties(
-  ${PROJECT_NAME} PROPERTIES
-  CXX_STANDARD 17
-  CXX_STANDARD_REQUIRED ON
-  COMPILE_FLAGS "${WARNING_FLAGS}"
+        ${PROJECT_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        COMPILE_FLAGS "${WARNING_FLAGS}"
 )

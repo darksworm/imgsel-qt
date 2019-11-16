@@ -8,10 +8,10 @@
 
 void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = {
-        "jpg",
-        "jpeg",
-        "png",
-        "gif"
+            "jpg",
+            "jpeg",
+            "png",
+            "gif"
     };
 
     std::vector<Image> images;
@@ -34,9 +34,9 @@ void ConfigManager::loadConfig() {
         builder = builder.setWidth(cliParams.width.value())
                 .setHeight(cliParams.height.value());
 
-         geo = QRect(0, 0, cliParams.width.value(), cliParams.height.value());
+        geo = QRect(0, 0, cliParams.width.value(), cliParams.height.value());
     } else {
-         geo = screen->geometry();
+        geo = screen->geometry();
     }
 
     builder.setIsDebug(DEBUG)

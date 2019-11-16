@@ -15,7 +15,7 @@ public:
 
         auto pathLen = this->path.length();
 
-        if(lastDotPos != std::string::npos && lastDotPos + 1 < pathLen) {
+        if (lastDotPos != std::string::npos && lastDotPos + 1 < pathLen) {
             extension = this->path.substr(lastDotPos + 1);
         } else {
             extension = "";
@@ -23,7 +23,7 @@ public:
 
         auto lastSlashPos = this->path.find_last_of('/');
 
-        if(lastSlashPos != std::string::npos && lastSlashPos + 1 < pathLen) {
+        if (lastSlashPos != std::string::npos && lastSlashPos + 1 < pathLen) {
             filename = this->path.substr(lastSlashPos + 1);
         } else {
             filename = this->path;
@@ -31,7 +31,7 @@ public:
 
         lastDotPos = filename.find_last_of('.');
 
-        if(lastDotPos != std::string::npos) {
+        if (lastDotPos != std::string::npos) {
             filenameWithoutExtension = filename.substr(0, lastDotPos);
         }
     }
@@ -50,7 +50,7 @@ public:
         return filenameWithoutExtension;
     }
 
-    bool operator==(Image& other) {
+    bool operator==(Image &other) {
         return other.path == this->path;
     }
 };

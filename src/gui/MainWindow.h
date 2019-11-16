@@ -6,8 +6,9 @@
 #include "ImagePickerMove.h"
 #include "ImagePickerDrawer.h"
 
-class MainWindow: public QWidget {
+class MainWindow : public QWidget {
     void paintEvent(QPaintEvent *event) override;
+
 public:
     MainWindow();
 
@@ -16,7 +17,7 @@ protected:
 
     void keyReleaseEvent(QKeyEvent *event) override;
 
-    void handleInstruction(InputInstruction* instruction);
+    void handleInstruction(InputInstruction *instruction);
 
     std::unique_ptr<InputHandler> inputHandler;
 
@@ -27,7 +28,7 @@ protected:
 private:
     InputMode inputMode;
     QPixmap screenBuffer;
-    ImagePickerDrawer* imagePickerDrawer;
+    ImagePickerDrawer *imagePickerDrawer;
     bool focused = false;
 };
 

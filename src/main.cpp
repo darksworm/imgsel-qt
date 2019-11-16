@@ -44,9 +44,9 @@ int initConfig(int argc, char **argv) {
                                       "Margin between images in pixels on the y axis");
 
     auto width = cli_app.add_option("--width", params.width,
-                                      "Screen width");
+                                    "Screen width");
     auto height = cli_app.add_option("--height", params.height,
-                                    "Screen height");
+                                     "Screen height");
 
     width->needs(height);
     height->needs(width);
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
 
-    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
 
     if (config.getHeight().has_value()) {
         window.setGeometry(0, 0, config.getWidth().value(), config.getHeight().value());

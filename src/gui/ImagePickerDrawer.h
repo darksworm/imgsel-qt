@@ -14,14 +14,14 @@
 class ImagePickerDrawer {
 private:
     ShapeProperties shapeProperties;
-    ShapeDrawer* shapeDrawer;
+    ShapeDrawer *shapeDrawer;
 
     Shape *selectedShape;
     int page = 0;
 
     std::vector<Image> images;
     std::vector<Image> allImages;
-    std::map<long,Shape> shapes;
+    std::map<long, Shape> shapes;
 
     std::vector<Image>::iterator getPageImageStart();
 
@@ -29,7 +29,7 @@ private:
 
     void goToImage(long hotkeyIdx);
 
-    std::optional<std::function<bool(Image*)>> filter;
+    std::optional<std::function<bool(Image *)>> filter;
 
     std::string filterString = "";
 
@@ -40,9 +40,9 @@ private:
     QPixmap &pixmap;
 
 public:
-    ImagePickerDrawer(QPixmap& pixmap);
+    ImagePickerDrawer(QPixmap &pixmap);
 
-    void drawFrame(Image* selectedImage, bool redrawAll = false);
+    void drawFrame(Image *selectedImage, bool redrawAll = false);
 
     bool move(ImagePickerMove move, unsigned int steps = 1);
 
@@ -50,7 +50,7 @@ public:
 
     void clearFilter();
 
-    Image* getSelectedImage();
+    Image *getSelectedImage();
 
     std::string getFilterString() {
         return filterString;

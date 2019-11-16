@@ -20,16 +20,16 @@ void MainWindow::paintEvent(QPaintEvent *event) {
                      QColor(QRgba64::fromRgba(0, 0, 0, 200)));
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    if(focused) {
+    if (focused) {
         painter.drawPixmap(0, 0, screenBuffer);
     } else {
         QImage im = screenBuffer.toImage().convertToFormat(QImage::Format_ARGB32);
         for (int y = 0; y < im.height(); ++y) {
-            QRgb *scanLine = (QRgb*)im.scanLine(y);
+            QRgb *scanLine = (QRgb *) im.scanLine(y);
             for (int x = 0; x < im.width(); ++x) {
                 QRgb pixel = *scanLine;
                 uint ci = uint(qGray(pixel));
-                *scanLine = qRgba(ci, ci, ci, qAlpha(pixel)/3);
+                *scanLine = qRgba(ci, ci, ci, qAlpha(pixel) / 3);
                 ++scanLine;
             }
         }
@@ -87,7 +87,8 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 void MainWindow::handleInstruction(InputInstruction *instruction) {
     auto config = ConfigManager::getOrLoadConfig();
 
-    bool shouldExit = this->imagePickerDrawer->getFilterString().empty() && instruction->getType() == InputInstructionType::CANCEL;
+    bool shouldExit = this->imagePickerDrawer->getFilterString().empty() &&
+                      instruction->getType() == InputInstructionType::CANCEL;
 
     if (shouldExit || instruction->getType() == InputInstructionType::EXIT) {
         QCoreApplication::exit(1);
@@ -171,7 +172,7 @@ MainWindow::MainWindow() : QWidget() {
 
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
 
-    QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
     auto geo = screen->geometry();
 
     screenBuffer = QPixmap(geo.width(), geo.height());

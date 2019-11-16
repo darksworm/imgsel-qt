@@ -90,7 +90,8 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         shape.selected = selected;
 
         if (shouldDrawShape) {
-            shapeProperties.position = shapeDrawer->getNextShapePosition(shapeProperties, *windowDimensions, lastShapePosition);
+            shapeProperties.position = shapeDrawer->getNextShapePosition(shapeProperties, *windowDimensions,
+                                                                         lastShapePosition);
             shape.position = shapeProperties.position;
 
             try {
@@ -124,7 +125,8 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         unsigned i = drawnShapeCnt;
         do {
             auto oldShape = oldShapes.at(i);
-            shapeDrawer->clearShape(shapeProperties, oldShape);} while (++i < oldShapes.size());
+            shapeDrawer->clearShape(shapeProperties, oldShape);
+        } while (++i < oldShapes.size());
     }
 
     redrawAllInNextFrame = false;

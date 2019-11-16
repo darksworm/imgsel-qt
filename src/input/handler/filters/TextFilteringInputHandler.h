@@ -15,7 +15,9 @@ public:
 
 protected:
     bool shouldAddToBuffer(unsigned keyPress) override;
+
     std::string bufferToString();
+
 private:
     bool isTextualKey(unsigned keyPress);
 };

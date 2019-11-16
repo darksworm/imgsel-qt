@@ -31,7 +31,7 @@ std::function<bool(Image *)> TextFilteringInputHandler::getFilter() {
                 auto fileName = image->getFilename();
                 auto lastSlashPos = fileName.find_last_of('.');
 
-                if(lastSlashPos != std::string::npos) {
+                if (lastSlashPos != std::string::npos) {
                     fileName = fileName.substr(0, lastSlashPos);
                 }
 

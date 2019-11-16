@@ -11,7 +11,8 @@ private:
     std::function<bool(Image *hotkey)> filterFunc;
     std::string filterString;
 public:
-    explicit FilterInstruction(std::function<bool(Image *hotkey)> filterFunc, std::string filterString) : InputInstruction(
+    explicit FilterInstruction(std::function<bool(Image *hotkey)> filterFunc, std::string filterString)
+            : InputInstruction(
             InputInstructionType::FILTER), filterString(std::move(filterString)) {
         this->filterFunc = std::move(filterFunc);
     }
