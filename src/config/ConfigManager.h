@@ -3,7 +3,6 @@
 #include "Config.h"
 
 struct CLIParams {
-    unsigned int cacheSize;
     std::vector<std::string> imageFiles;
     bool startInVimMode = false;
 

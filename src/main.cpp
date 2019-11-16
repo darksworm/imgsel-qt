@@ -4,7 +4,7 @@
 #include "gui/MainWindow.cpp"
 #include "config/ConfigManager.h"
 
-int initConfig(int argc, char **argv) {
+int parseCLIParams(int argc, char **argv) {
     CLI::App cli_app{"IMGSEL - Image selection tool."};
 
     CLIParams params = CLIParams();
@@ -12,10 +12,6 @@ int initConfig(int argc, char **argv) {
     cli_app.add_option("--files", params.imageFiles, "List of images to display.")
             ->required()
             ->check(CLI::ExistingFile);
-
-    cli_app.add_option("--cache-size", params.cacheSize,
-                       "How many (max) bytes of memory to use for caching loaded images.",
-                       1024 * 1024 * 100);
 
     cli_app.add_flag("--vim", params.startInVimMode, "Set the initial mode to VIM mode.");
 
@@ -43,10 +39,10 @@ int initConfig(int argc, char **argv) {
     auto yMargin = cli_app.add_option("--y-margin", params.imageYMargin,
                                       "Margin between images in pixels on the y axis");
 
-    auto width = cli_app.add_option("--width", params.width,
-                                    "Screen width");
-    auto height = cli_app.add_option("--height", params.height,
-                                     "Screen height");
+    auto width = cli_app.add_option("--window-width", params.width,
+                                    "Window width");
+    auto height = cli_app.add_option("--window-height", params.height,
+                                     "Window height");
 
     width->needs(height);
     height->needs(width);
@@ -68,7 +64,7 @@ int initConfig(int argc, char **argv) {
 }
 
 int main(int argc, char *argv[]) {
-    int configInitExitCode = initConfig(argc, argv);
+    int configInitExitCode = parseCLIParams(argc, argv);
 
     if (configInitExitCode) {
         return configInitExitCode;

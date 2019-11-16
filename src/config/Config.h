@@ -9,7 +9,6 @@ class Config {
 
 private:
     bool isDebug;
-    unsigned int imageCacheSizeBytes;
     InputMode defaultInputMode = InputMode::DEFAULT;
 
     unsigned int maxImageWidth = 0;
@@ -38,10 +37,6 @@ private:
 public:
     bool isIsDebug() const {
         return isDebug;
-    }
-
-    unsigned int getImageCacheSizeBytes() {
-        return imageCacheSizeBytes;
     }
 
     InputMode getDefaultInputMode() {

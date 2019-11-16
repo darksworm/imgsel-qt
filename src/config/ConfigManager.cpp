@@ -40,8 +40,6 @@ void ConfigManager::loadConfig() {
     }
 
     builder.setIsDebug(DEBUG)
-            .setImageCacheSizeBytes(cliParams.cacheSize)
-
             .setDefaultInputMode(cliParams.startInVimMode ? InputMode::VIM : InputMode::DEFAULT)
 
             .setCols(cliParams.cols.has_value() ? cliParams.cols.value() : 0)
