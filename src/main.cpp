@@ -60,14 +60,14 @@ int parseCLIParams(int argc, char **argv) {
 
     ConfigManager::setCLIParams(params);
 
-    return 0;
+    return 1;
 }
 
 int main(int argc, char *argv[]) {
-    int configInitExitCode = parseCLIParams(argc, argv);
+    int shouldContinue = parseCLIParams(argc, argv);
 
-    if (configInitExitCode) {
-        return configInitExitCode;
+    if (!shouldContinue) {
+        return 0;
     }
 
     QApplication app(argc, argv);
