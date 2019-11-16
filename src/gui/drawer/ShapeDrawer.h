@@ -17,7 +17,7 @@ protected:
 
     virtual ShapeProperties calcShapeProps() = 0;
 
-    virtual XPoint getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions, std::optional<XPoint> lastShapePosition) = 0;
+    virtual QPoint getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions, std::optional<QPoint> lastShapePosition) = 0;
 
     virtual void drawSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) = 0;
 

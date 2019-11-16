@@ -1,8 +1,6 @@
 
 #include <vector>
-#include <cstring>
 #include <algorithm>
-#include <linux/input-event-codes.h>
 #include <QtCore/Qt>
 #include <QtCore/QChar>
 #include "TextFilteringInputHandler.h"

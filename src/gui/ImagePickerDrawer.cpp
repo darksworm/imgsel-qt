@@ -31,7 +31,7 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
     oldShapes.insert(shapes.begin(), shapes.end());
 
     shapes.clear();
-    std::optional<XPoint> lastShapePosition;
+    std::optional<QPoint> lastShapePosition;
     lastShapePosition.reset();
 
     std::unique_ptr<Dimensions> windowDimensions(new Dimensions);
@@ -57,7 +57,7 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         bool selected = it->getPath() == selectedImage->getPath();
 
         Shape shape{
-                .position = XPoint(),
+                .position = QPoint(),
                 .selected = false,
                 .index = std::distance(images.begin(), it),
                 .image = &*it

@@ -11,7 +11,7 @@ protected:
 
     ShapeProperties calcShapeProps() override;
 
-    XPoint getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions, std::optional<XPoint> lastShapePosition) override;
+    QPoint getNextShapePosition(ShapeProperties shapeProperties, Dimensions windowDimensions, std::optional<QPoint> lastShapePosition) override;
 
     void drawSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) override;
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <X11/Xutil.h>
 #include "../image/image.h"
 #include "dimensions.h"
 
@@ -9,12 +8,12 @@ struct ShapeProperties {
     Dimensions margins;
     Dimensions itemCounts;
 
-    XRectangle nameRect;
-    XPoint position;
+    QRect nameRect;
+    QPoint position;
 };
 
 struct Shape {
-    XPoint position;
+    QPoint position;
 
     bool selected;
     long index;
