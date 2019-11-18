@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <Imlib2.h>
 
 class Image {
 private:
