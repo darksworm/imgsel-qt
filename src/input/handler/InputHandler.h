@@ -2,9 +2,9 @@
 
 #include <string>
 #include <set>
-#include "../../image/image.h"
+#include "../../util/image.h"
 #include "instruction/InputInstruction.h"
-#include "InputMode.h"
+#include "../InputMode.h"
 
 class InputHandler {
 public:

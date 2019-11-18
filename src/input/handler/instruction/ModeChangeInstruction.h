@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "../InputMode.h"
+#include "../../InputMode.h"
 #include "InputInstruction.h"
 
 class ModeChangeInstruction : public InputInstruction {

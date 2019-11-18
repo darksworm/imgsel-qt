@@ -3,7 +3,7 @@
 #include <utility>
 
 #include "Config.h"
-#include "../image/image.h"
+#include "../image.h"
 
 class ConfigBuilder {
 private:

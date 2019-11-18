@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include "../input/handler/InputMode.h"
-#include "../image/image.h"
+#include "../../input/InputMode.h"
+#include "../image.h"
 
 class Config {
     friend class ConfigBuilder;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Shape.h"
+#include "../util/Shape.h"
 #include <climits>
 #include <numeric>
 #include <optional>

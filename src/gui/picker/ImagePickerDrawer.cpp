@@ -3,12 +3,11 @@
 #include <utility>
 #include <memory>
 
-#include "../exceptions/OutOfBounds.h"
-#include "../exceptions/ImageNotLoadable.h"
-#include "../config/ConfigManager.h"
-
-#include "drawer/ImageDrawer.h"
+#include "../drawer/ImageDrawer.h"
 #include "ImagePickerMove.h"
+#include "../../util/config/ConfigManager.h"
+#include "../../util/exceptions/ImageNotLoadable.h"
+#include "../../util/exceptions/OutOfBounds.h"
 
 ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
     auto config = ConfigManager::getOrLoadConfig();

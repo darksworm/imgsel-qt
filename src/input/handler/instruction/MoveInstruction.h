@@ -1,7 +1,7 @@
 #pragma once
 
 #include "InputInstruction.h"
-#include "../../../gui/ImagePickerDrawer.h"
+#include "../../../gui/picker/ImagePickerMove.h"
 
 class MoveInstruction : public InputInstruction {
 private:

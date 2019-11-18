@@ -1,4 +1,4 @@
-#include "../../gui/ImagePickerDrawer.h"
+#include <QtCore/Qt>
 #include "instruction/MoveInstruction.h"
 #include "instruction/ModeChangeInstruction.h"
 #include "SelectionInputHandler.h"

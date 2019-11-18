@@ -3,7 +3,7 @@
 #include <QClipboard>
 #include <iostream>
 #include "MainWindow.h"
-#include "../config/ConfigManager.h"
+#include "../util/config/ConfigManager.h"
 #include "../input/handler/InputHandlerFactory.h"
 #include "../input/handler/instruction/MoveInstruction.h"
 #include "../input/handler/instruction/ModeChangeInstruction.h"

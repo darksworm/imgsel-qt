@@ -3,8 +3,7 @@
 #include <QtWidgets/QWidget>
 #include <QKeyEvent>
 #include "../input/handler/InputHandler.h"
-#include "ImagePickerMove.h"
-#include "ImagePickerDrawer.h"
+#include "picker/ImagePickerDrawer.h"
 
 class MainWindow : public QWidget {
     void paintEvent(QPaintEvent *event) override;

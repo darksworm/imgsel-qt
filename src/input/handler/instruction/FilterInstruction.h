@@ -4,7 +4,7 @@
 #include <functional>
 
 #include "InputInstruction.h"
-#include "../../../image/image.h"
+#include "../../../util/image.h"
 
 class FilterInstruction : public InputInstruction {
 private:

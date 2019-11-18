@@ -1,8 +1,9 @@
-#include "../../gui/ImagePickerDrawer.h"
+#include <QtCore/Qt>
 #include "InputHandler.h"
 #include "instruction/ModeChangeInstruction.h"
 #include "instruction/CopyInstruction.h"
 #include "instruction/MoveInstruction.h"
+#include "../../gui/picker/ImagePickerMove.h"
 
 InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
     if (keyCode == Qt::Key_Escape) {

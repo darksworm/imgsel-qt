@@ -6,9 +6,9 @@
 #include <memory>
 #include <map>
 
-#include "../image/image.h"
-#include "Shape.h"
-#include "drawer/ShapeDrawer.h"
+#include "../../util/image.h"
+#include "../util/Shape.h"
+#include "../drawer/ShapeDrawer.h"
 #include "ImagePickerMove.h"
 
 class ImagePickerDrawer {

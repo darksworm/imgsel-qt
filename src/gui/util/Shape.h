@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../image/image.h"
-#include "dimensions.h"
+#include "../../util/image.h"
+#include "Dimensions.h"
 
 struct ShapeProperties {
     Dimensions dimensions;

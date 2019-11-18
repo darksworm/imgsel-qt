@@ -1,6 +1,6 @@
 #include "ImageDrawer.h"
-#include "../../exceptions/ImageNotLoadable.h"
-#include "../../config/ConfigManager.h"
+#include "../../util/config/ConfigManager.h"
+#include "../../util/exceptions/ImageNotLoadable.h"
 
 std::optional<QImage> loadImage(std::string path) {
     std::optional<QImage> result;

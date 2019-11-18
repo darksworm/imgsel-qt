@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "InputMode.h"
+#include "../InputMode.h"
 #include "InputHandler.h"
 
 class InputHandlerFactory {

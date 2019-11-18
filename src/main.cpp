@@ -1,8 +1,8 @@
 #include <QApplication>
 #include <QScreen>
-#include "lib/CLI11.hpp"
+#include "util/lib/CLI11.hpp"
 #include "gui/MainWindow.cpp"
-#include "config/ConfigManager.h"
+#include "util/config/ConfigManager.h"
 
 int parseCLIParams(int argc, char **argv) {
     CLI::App cli_app{"IMGSEL - Image selection tool."};
