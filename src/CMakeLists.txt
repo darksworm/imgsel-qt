@@ -13,6 +13,15 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp)
 find_package(Qt5Widgets REQUIRED)
 
+IF(UNIX AND NOT APPLE)
+    find_package(X11)
+    if(X11_FOUND)
+        find_package(Qt5X11Extras REQUIRED)
+        target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES} Qt5::X11Extras)
+        add_compile_definitions(WITH_X11)
+    endif()
+endif()
+
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 
 find_program(

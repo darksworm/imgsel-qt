@@ -3,6 +3,10 @@
 #include "util/lib/CLI11.hpp"
 #include "gui/MainWindow.cpp"
 #include "util/config/ConfigManager.h"
+#ifdef WITH_X11
+#include <QtX11Extras/QX11Info>
+#include <tkPort.h>
+#endif
 
 int parseCLIParams(int argc, char **argv) {
     CLI::App cli_app{"IMGSEL - Image selection tool."};
@@ -74,25 +78,18 @@ int main(int argc, char *argv[]) {
     auto config = ConfigManager::getOrLoadConfig();
 
     MainWindow window;
-
-    window.setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog);
-    window.setParent(nullptr);
+    window.setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
+    window.setWindowFlags(window.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog);
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
-
-    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
-
-    if (config.getHeight().has_value()) {
-        window.setGeometry(0, 0, config.getWidth().value(), config.getHeight().value());
-    } else {
-        window.setGeometry(screen->geometry());
-    }
+    window.setGeometry(config.getScreenGeometry());
     window.show();
     window.raise();
 
-    window.setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
-    window.activateWindow();
-    window.move(screen->geometry().x(), screen->geometry().y());
+#ifdef WITH_X11
+    XMoveWindow(QX11Info::display(), window.winId(), 0, 0);
+#endif
+
     window.setFocus();
 
     return app.exec();
