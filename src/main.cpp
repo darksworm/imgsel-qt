@@ -8,10 +8,9 @@
 #include <tkPort.h>
 #endif
 
-int parseCLIParams(int argc, char **argv) {
+int main(int argc, char *argv[]) {
+    CLIParams params;
     CLI::App cli_app{"IMGSEL - Image selection tool."};
-
-    CLIParams params = CLIParams();
 
     cli_app.add_option("--files", params.imageFiles, "List of images to display.")
             ->required()
@@ -61,18 +60,7 @@ int parseCLIParams(int argc, char **argv) {
     widthOption->needs(heightOption);
 
     CLI11_PARSE(cli_app, argc, argv);
-
     ConfigManager::setCLIParams(params);
-
-    return 1;
-}
-
-int main(int argc, char *argv[]) {
-    int shouldContinue = parseCLIParams(argc, argv);
-
-    if (!shouldContinue) {
-        return 0;
-    }
 
     QApplication app(argc, argv);
     auto config = ConfigManager::getOrLoadConfig();
