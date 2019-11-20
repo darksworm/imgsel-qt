@@ -10,7 +10,7 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         input/handler/filters/TextFilteringInputHandler.cpp input/handler/filters/TextFilteringInputHandler.h input/handler/InputHandlerFactory.cpp input/handler/InputHandlerFactory.h
         input/handler/SelectionInputHandler.cpp input/handler/SelectionInputHandler.h input/handler/instruction/InputInstruction.h input/handler/instruction/MoveInstruction.h
         input/handler/instruction/ModeChangeInstruction.h input/handler/instruction/FilterInstruction.h util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
-        gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp)
+        gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp Application.h)
 find_package(Qt5Widgets REQUIRED)
 
 IF(UNIX AND NOT APPLE)

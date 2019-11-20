@@ -1,14 +1,21 @@
-#include <QApplication>
 #include <QScreen>
 #include "util/lib/CLI11.hpp"
 #include "gui/MainWindow.cpp"
 #include "util/config/ConfigManager.h"
+#include "Application.h"
+
 #ifdef WITH_X11
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
 #endif
 
 int main(int argc, char *argv[]) {
+    Application app(argc, argv);
+
+    if (!app.lock()) {
+        return -42;
+    }
+
     CLIParams params;
     CLI::App cli_app{"IMGSEL - Image selection tool."};
 
@@ -62,11 +69,10 @@ int main(int argc, char *argv[]) {
     CLI11_PARSE(cli_app, argc, argv);
     ConfigManager::setCLIParams(params);
 
-    QApplication app(argc, argv);
     auto config = ConfigManager::getOrLoadConfig();
 
     MainWindow window;
-    window.setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
+    window.setWindowTitle(Application::translate("APPLICATION", "IMGSEL-QT"));
     window.setWindowFlags(window.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog);
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);

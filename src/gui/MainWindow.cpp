@@ -1,6 +1,7 @@
 #include <QtGui/QPainter>
 #include <QtConcurrent/QtConcurrent>
 #include <QClipboard>
+#include <QtWidgets/QApplication>
 #include <iostream>
 #include "MainWindow.h"
 #include "../util/config/ConfigManager.h"
