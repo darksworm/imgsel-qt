@@ -40,9 +40,12 @@ IF (UNIX AND NOT APPLE)
     endif ()
 endif ()
 
+install(TARGETS ${PROJECT_NAME} EXPORT imgsel DESTINATION bin)
+
 set_target_properties(
         ${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
+        RUNTIME_OUTPUT_NAME imgsel
         COMPILE_FLAGS "${WARNING_FLAGS}"
 )
