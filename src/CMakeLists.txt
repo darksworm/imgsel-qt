@@ -20,6 +20,15 @@ IF(UNIX AND NOT APPLE)
         target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES} Qt5::X11Extras)
         add_compile_definitions(WITH_X11)
     endif()
+
+    set (WHICH_CMD "which")
+    set (WHICH_ARG "xclip")
+
+    execute_process(COMMAND ${WHICH_CMD} ${WHICH_ARG} RESULT_VARIABLE ret)
+    if(ret GREATER 0)
+        message(FATAL_ERROR "Could not find xclip! Please install xclip!")
+        return()
+    endif()
 endif()
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
