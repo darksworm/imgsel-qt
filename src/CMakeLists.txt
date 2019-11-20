@@ -5,44 +5,39 @@ project(IMGSEL-QT)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
 
-add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
-        input/handler/instruction/InputInstructionType.h input/handler/filters/FilteringInputHandler.h input/handler/InputHandler.cpp input/handler/filters/FilteringInputHandler.cpp
-        input/handler/filters/TextFilteringInputHandler.cpp input/handler/filters/TextFilteringInputHandler.h input/handler/InputHandlerFactory.cpp input/handler/InputHandlerFactory.h
-        input/handler/SelectionInputHandler.cpp input/handler/SelectionInputHandler.h input/handler/instruction/InputInstruction.h input/handler/instruction/MoveInstruction.h
-        input/handler/instruction/ModeChangeInstruction.h input/handler/instruction/FilterInstruction.h util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
-        gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp Application.h)
-find_package(Qt5Widgets REQUIRED)
+add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h
+        util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
+        input/handler/instruction/InputInstructionType.h input/handler/filters/FilteringInputHandler.h
+        input/handler/InputHandler.cpp input/handler/filters/FilteringInputHandler.cpp
+        input/handler/filters/TextFilteringInputHandler.cpp input/handler/filters/TextFilteringInputHandler.h
+        input/handler/InputHandlerFactory.cpp input/handler/InputHandlerFactory.h
+        input/handler/SelectionInputHandler.cpp input/handler/SelectionInputHandler.h
+        input/handler/instruction/InputInstruction.h input/handler/instruction/MoveInstruction.h
+        input/handler/instruction/ModeChangeInstruction.h input/handler/instruction/FilterInstruction.h
+        util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
+        gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h
+        util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
+        Application.h)
 
-IF(UNIX AND NOT APPLE)
+find_package(Qt5Widgets REQUIRED)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+
+IF (UNIX AND NOT APPLE)
     find_package(X11)
-    if(X11_FOUND)
+    if (X11_FOUND)
         find_package(Qt5X11Extras REQUIRED)
         target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES} Qt5::X11Extras)
         add_compile_definitions(WITH_X11)
-    endif()
+    endif ()
 
-    set (WHICH_CMD "which")
-    set (WHICH_ARG "xclip")
+    set(WHICH_CMD "which")
+    set(WHICH_ARG "xclip")
 
     execute_process(COMMAND ${WHICH_CMD} ${WHICH_ARG} RESULT_VARIABLE ret)
-    if(ret GREATER 0)
+    if (ret GREATER 0)
         message(FATAL_ERROR "Could not find xclip! Please install xclip!")
         return()
-    endif()
-endif()
-
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
-
-find_program(
-        CLANG_TIDY_EXE
-        NAMES "clang-tidy"
-        DOC "Path to clang-tidy executable"
-)
-if (NOT CLANG_TIDY_EXE)
-    message(STATUS "clang-tidy not found.")
-else ()
-    message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-    set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" "-checks=*,-clang-analyzer-alpha.*")
+    endif ()
 endif ()
 
 set_target_properties(
