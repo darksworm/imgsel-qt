@@ -18,5 +18,5 @@ A tool that can be used to quickly select a stored image and copy it to your cli
 ![](img/navigate-with-arrow-keys.gif)
 ![](img/advanced-navigation.gif)
 
-### Real life usa
+### Real life speed
 ![](img/its-fast.gif)
