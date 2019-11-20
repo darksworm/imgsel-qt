@@ -20,3 +20,5 @@ A tool that can be used to quickly select a stored image and copy it to your cli
 
 ### Real life speed
 ![](img/its-fast.gif)
+
+For usage instructions see: [INSTALL.md](INSTALL.md), [USAGE.md](USAGE.md)
