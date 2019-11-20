@@ -5,8 +5,10 @@
 #include "Application.h"
 
 #ifdef WITH_X11
+
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
+
 #endif
 
 int main(int argc, char *argv[]) {
@@ -73,7 +75,9 @@ int main(int argc, char *argv[]) {
 
     MainWindow window;
     window.setWindowTitle(Application::translate("APPLICATION", "IMGSEL-QT"));
-    window.setWindowFlags(window.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint | Qt::Dialog);
+    window.setWindowFlags(
+            window.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint |
+            Qt::Dialog);
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
     window.setGeometry(config.getScreenGeometry());
