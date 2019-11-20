@@ -1,3 +1,0 @@
-[submodule "src/lib/CLI11"]
-	path = src/lib/CLI11
-	url = https://github.com/CLIUtils/CLI11
