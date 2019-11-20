@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
     Application app(argc, argv);
 
     if (!app.lock()) {
+        std::cout << "Another instance of the app is already running!";
         return -42;
     }
 
