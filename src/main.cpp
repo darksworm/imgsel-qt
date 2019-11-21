@@ -23,14 +23,14 @@ int main(int argc, char *argv[]) {
     CLIParams params;
     CLI::App cli_app{"IMGSEL - Image selection tool."};
 
-    std::function<bool(std::vector<std::string>)> output_version = [](auto in){
-        std::cout << "IMGSEL v" << PROJECT_VER << "\n";
-        exit(0);
-        return true;
-    };
-
-    auto ver = cli_app.add_option("-v,--version", output_version, "Show application vesrion");
-    ver->default_val("0");
+//    std::function<bool(std::vector<std::string>)> output_version = [](auto in){
+//        std::cout << "IMGSEL v" << PROJECT_VER << "\n";
+//        exit(0);
+//        return true;
+//    };
+//
+//    auto ver = cli_app.add_option("-v,--version", output_version, "Show application vesrion");
+//    ver->default_val("0");
 
     cli_app.add_option("--files", params.imageFiles, "List of images to display.")
             ->required()
