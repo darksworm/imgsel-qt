@@ -32,7 +32,7 @@ IF (UNIX AND NOT APPLE)
     if (X11_FOUND)
         find_package(Qt5X11Extras REQUIRED)
         target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES} Qt5::X11Extras)
-        add_compile_definitions(WITH_X11)
+        add_definitions(-DWITH_X11)
     endif ()
 
     set(WHICH_CMD "which")
