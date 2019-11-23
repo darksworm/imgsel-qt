@@ -31,18 +31,17 @@ IF (UNIX AND NOT APPLE)
     find_package(X11)
     if (X11_FOUND)
         find_package(Qt5X11Extras REQUIRED)
-        find_library(TK_LIBRARY NAMES
-                tk
-                tk87 tk8.7 tk87t tk8.7t
-                tk86 tk8.6 tk86t tk8.6t
-                tk85 tk8.5
-                tk84 tk8.4
-                tk83 tk8.3
-                tk82 tk8.2
-                tk80 tk8.0
-                REQUIRED)
+        find_package(TCL)
+
+        IF (TK_FOUND)
+            FIND_FILE(TKPORT tkPort.h PATHS ${TK_INCLUDE_PATH})
+            IF(TKPORT)
+                add_definitions(-DWITH_X11)
+                include_directories(${TK_INCLUDE_PATH})
+            endif()
+        endif()
+
         target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES} Qt5::X11Extras ${TK_LIBRARY})
-        add_definitions(-DWITH_X11)
     endif ()
 
     set(WHICH_CMD "which")
