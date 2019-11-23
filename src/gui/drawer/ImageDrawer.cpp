@@ -65,7 +65,11 @@ Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     auto maxTextWidth = shapeProperties.dimensions.x - 20;
 
     do {
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
         textWidth = fm.horizontalAdvance(displayName);
+#else
+        textWidth = fm.width(displayName);
+#endif
 
         if (textWidth >= maxTextWidth) {
             displayName = displayName.left(displayName.length() - 1);

@@ -24,7 +24,19 @@ void ConfigManager::loadConfig() {
         }
     }
 
-    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
+    QScreen *screen = nullptr;
+#if QT_VERSION >= QT_VERSION_CHECK(5,10,0)
+    screen = QGuiApplication::screenAt(QCursor::pos());
+#else
+    auto screens = QGuiApplication::screens();
+    auto cursorPos = QCursor::pos();
+    for (const auto &scn:screens) {
+        if (scn->geometry().contains(cursorPos)) {
+            screen = scn;
+            break;
+        }
+    }
+#endif
 
     auto builder = ConfigBuilder();
 

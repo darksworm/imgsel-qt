@@ -49,7 +49,11 @@ void MainWindow::paintEvent(QPaintEvent *event) {
         auto maxTextWidth = config.getScreenGeometry().width() - 20;
 
         do {
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
             textWidth = fm.horizontalAdvance(displayName);
+#else
+            textWidth = fm.width(displayName);
+#endif
 
             if (textWidth >= maxTextWidth) {
                 displayName = displayName.left(displayName.length() - 1);
