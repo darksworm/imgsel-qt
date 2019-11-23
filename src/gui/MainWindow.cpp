@@ -173,8 +173,7 @@ MainWindow::MainWindow() : QWidget() {
 
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
 
-    QScreen *screen = QGuiApplication::screenAt(QCursor::pos());
-    auto geo = screen->geometry();
+    auto geo = config.getScreenGeometry();
 
     screenBuffer = QPixmap(geo.width(), geo.height());
 
