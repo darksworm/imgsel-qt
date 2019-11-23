@@ -86,9 +86,7 @@ int main(int argc, char *argv[]) {
 
     MainWindow window;
     window.setWindowTitle(Application::translate("APPLICATION", "IMGSEL-QT"));
-    window.setWindowFlags(
-            window.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint |
-            Qt::Dialog);
+    window.setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
     window.setGeometry(config.getScreenGeometry());
