@@ -38,6 +38,8 @@ IF (UNIX AND NOT APPLE)
             IF(TKPORT)
                 add_definitions(-DWITH_X11)
                 include_directories(${TK_INCLUDE_PATH})
+            else()
+                message(WARNING "Could not find tkPort.h, this might mean that the created window will not be positioned correctly!")
             endif()
         endif()
 
