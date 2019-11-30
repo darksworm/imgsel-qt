@@ -10,28 +10,18 @@
 
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
+#include <project_config.h>
 
 #endif
 
 int main(int argc, char *argv[]) {
-    Application app(argc, argv);
-
-    if (!app.lock()) {
-        std::cout << "Another instance of the app is already running!";
-        return -42;
-    }
-
     CLIParams params;
     CLI::App cli_app{"IMGSEL - Image selection tool."};
 
-//    std::function<bool(std::vector<std::string>)> output_version = [](auto in){
-//        std::cout << "IMGSEL v" << PROJECT_VER << "\n";
-//        exit(0);
-//        return true;
-//    };
-//
-//    auto ver = cli_app.add_option("-v,--version", output_version, "Show application vesrion");
-//    ver->default_val("0");
+    cli_app.add_flag("-v,--version", [](auto in) {
+        std::cout << "IMGSEL v" << PROJECT_VER << "\n";
+        exit(0);
+    }, "Show application version");
 
     const static IntXIntValidator intXIntValidator;
     const static DirectoriesContainImages directoriesContainImages;
@@ -88,8 +78,15 @@ int main(int argc, char *argv[]) {
     widthOption->needs(heightOption);
 
     CLI11_PARSE(cli_app, argc, argv);
-    ConfigManager::setCLIParams(params);
 
+    Application app(argc, argv);
+
+    if (!app.lock()) {
+        std::cout << "Another instance of the app is already running!";
+        return -42;
+    }
+
+    ConfigManager::setCLIParams(params);
     auto config = ConfigManager::getOrLoadConfig();
 
     MainWindow window;
