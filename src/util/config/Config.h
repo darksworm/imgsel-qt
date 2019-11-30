@@ -38,6 +38,15 @@ private:
     Config() = default;
 
 public:
+    static std::vector<std::string> getImageExtensions() {
+        return {
+                "jpg",
+                "jpeg",
+                "png",
+                "gif"
+        };
+    }
+
     bool isIsDebug() const {
         return isDebug;
     }

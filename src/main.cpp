@@ -4,6 +4,7 @@
 #include "util/config/ConfigManager.h"
 #include "Application.h"
 #include "util/validators/IntXIntValidator.h"
+#include "util/validators/DirectoriesContainImages.h"
 
 #ifdef WITH_X11
 
@@ -32,9 +33,13 @@ int main(int argc, char *argv[]) {
 //    auto ver = cli_app.add_option("-v,--version", output_version, "Show application vesrion");
 //    ver->default_val("0");
 
+    const static IntXIntValidator intXIntValidator;
+    const static DirectoriesContainImages directoriesContainImages;
+
     cli_app.add_option("--files", params.imageFiles, "List of images to display.")
             ->required()
-            ->check(CLI::ExistingFile);
+            ->check(CLI::ExistingPath)
+            ->check(directoriesContainImages);
 
     cli_app.add_flag("--vim", params.startInVimMode, "Set the initial mode to VIM mode.");
 
@@ -66,7 +71,6 @@ int main(int argc, char *argv[]) {
                                     "Window width");
     auto height = cli_app.add_option("--window-height", params.height,
                                      "Window height");
-    const static IntXIntValidator intXIntValidator;
 
     cli_app.add_option("--resize-output-image", params.resizeToSize,
             "Resize image before copying")->check(intXIntValidator);

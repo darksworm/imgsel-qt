@@ -3,24 +3,43 @@
 #include <QtGui/QScreen>
 #include <QtGui/QGuiApplication>
 #include <QCursor>
+#include <QtCore/QDir>
 #include "ConfigManager.h"
 #include "ConfigBuilder.h"
 #include "../StringTools.h"
 
 void ConfigManager::loadConfig() {
-    std::vector<std::string> imageExtensions = {
-            "jpg",
-            "jpeg",
-            "png",
-            "gif"
-    };
-
+    std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
-    for (const auto &img:cliParams.imageFiles) {
-        for (const auto &ext:imageExtensions) {
-            if (img.length() >= ext.length() && 0 == img.compare(img.length() - ext.length(), ext.length(), ext)) {
-                images.emplace_back(img);
-                break;
+
+    QStringList allowedExtensions;
+    for (const auto &ext : Config::getImageExtensions()) {
+        allowedExtensions << "*." + QString::fromStdString(ext);
+    }
+
+    for (auto &path : cliParams.imageFiles) {
+        QDir dir(QString::fromStdString(path));
+
+        if (dir.exists()) {
+            if (dir.isEmpty()) {
+                continue;
+            }
+
+            QStringList dirImages = dir.entryList(allowedExtensions);
+
+            if (dirImages.isEmpty()) {
+                continue;
+            }
+
+            for (const auto& img: dirImages) {
+                images.emplace_back(dir.absoluteFilePath(img).toStdString());
+            }
+        } else {
+            for (const auto &ext:imageExtensions) {
+                if (path.length() >= ext.length() && 0 == path.compare(path.length() - ext.length(), ext.length(), ext)) {
+                    images.emplace_back(path);
+                    break;
+                }
             }
         }
     }
