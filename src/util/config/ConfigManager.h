@@ -22,6 +22,8 @@ struct CLIParams {
 
     std::optional<unsigned int> width;
     std::optional<unsigned int> height;
+
+    std::optional<std::string> resizeToSize;
 };
 
 class ConfigManager {

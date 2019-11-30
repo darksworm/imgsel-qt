@@ -145,6 +145,32 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
         if (config.shouldPrintFilePath()) {
             std::cout << path;
         } else {
+            if(config.getResizeOutputToSize().has_value()) {
+                auto targetSize = config.getResizeOutputToSize().value();
+                QImage image(selectedImage->getPath().c_str());
+
+                auto width = image.width();
+                auto height = image.height();
+
+                if (targetSize.width > 0 && width > targetSize.width) {
+                    auto scale = (double) targetSize.width / width;
+                    int new_height = height * scale;
+                    image = image.scaledToHeight(new_height);
+                }
+
+                if (targetSize.height > 0 && height > targetSize.height) {
+                    auto scale = (double) targetSize.height / height;
+                    int new_width = width * scale;
+                    image = image.scaledToWidth(new_width);
+                }
+
+                QString tempImageName = "/tmp/last-imgsel-image.";
+                tempImageName += selectedImage->getExtension().c_str();
+
+                image.save(tempImageName);
+                path = tempImageName.toStdString();
+            }
+
 #if defined(Q_OS_LINUX)
             auto ext = selectedImage->getExtension();
             ext = ext == "jpg" ? "jpeg" : ext;

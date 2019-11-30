@@ -5,6 +5,7 @@
 #include <QCursor>
 #include "ConfigManager.h"
 #include "ConfigBuilder.h"
+#include "../StringTools.h"
 
 void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = {
@@ -72,6 +73,14 @@ void ConfigManager::loadConfig() {
 
             .setImages(images);
 
+    if(cliParams.resizeToSize.has_value()) {
+        auto sizes = StringTools::splitIntoInts(cliParams.resizeToSize.value(), "x");
+
+        builder.setResizeOutputToSize(Size {
+            .width = (unsigned) sizes.at(0),
+            .height = (unsigned) sizes.at(1)
+        });
+    }
 
     ConfigManager::config = builder.build();
     ConfigManager::configLoaded = true;

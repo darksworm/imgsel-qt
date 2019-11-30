@@ -3,7 +3,7 @@
 #include "gui/MainWindow.cpp"
 #include "util/config/ConfigManager.h"
 #include "Application.h"
-#include "project_config.h"
+#include "util/validators/IntXIntValidator.h"
 
 #ifdef WITH_X11
 
@@ -66,6 +66,10 @@ int main(int argc, char *argv[]) {
                                     "Window width");
     auto height = cli_app.add_option("--window-height", params.height,
                                      "Window height");
+    const static IntXIntValidator intXIntValidator;
+
+    cli_app.add_option("--resize-output-image", params.resizeToSize,
+            "Resize image before copying")->check(intXIntValidator);
 
     width->needs(height);
     height->needs(width);

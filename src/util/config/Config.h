@@ -3,6 +3,7 @@
 #include <vector>
 #include "../../input/InputMode.h"
 #include "../image.h"
+#include "../Size.h"
 
 class Config {
     friend class ConfigBuilder;
@@ -27,6 +28,8 @@ private:
 
     std::optional<unsigned int> width;
     std::optional<unsigned int> height;
+
+    std::optional<Size> resizeOutputToSize;
 
     QRect screenGeometry;
 
@@ -94,5 +97,9 @@ public:
 
     std::optional<unsigned int> getHeight() const {
         return height;
+    }
+
+    std::optional<Size> getResizeOutputToSize() const {
+        return resizeOutputToSize;
     }
 };

@@ -91,4 +91,9 @@ public:
         config->height = height;
         return *this;
     }
+
+    ConfigBuilder &setResizeOutputToSize(Size size) {
+        config->resizeOutputToSize = size;
+        return *this;
+    }
 };
