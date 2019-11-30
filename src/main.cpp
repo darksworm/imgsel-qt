@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     const static IntXIntValidator intXIntValidator;
     const static DirectoriesContainImages directoriesContainImages;
 
-    cli_app.add_option("--files", params.imageFiles, "List of images to display.")
+    cli_app.add_option("--files", params.imageFiles, "List of image files or image directories to display.")
             ->required()
             ->check(CLI::ExistingPath)
             ->check(directoriesContainImages);
