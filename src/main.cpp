@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     auto rowCountOption = cli_app.add_option("--rows", params.rows, "How many rows to display");
     auto colCountOption = cli_app.add_option("--cols", params.cols, "How many cols to display");
 
-    rowCountOption->needs(colCountOption)->required();
+    rowCountOption->needs(colCountOption);
     colCountOption->needs(rowCountOption);
 
     auto widthOption = cli_app.add_option("--max-width", params.maxImageWidth,
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     cli_app.add_flag("--print-path", params.printFilePath,
                      "Write file path to stdout instead of copying it's contents to the clipboard.");
 
-    heightOption->needs(widthOption)->required();
+    heightOption->needs(widthOption);
     widthOption->needs(heightOption);
 
     CLI11_PARSE(cli_app, argc, argv);

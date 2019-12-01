@@ -4,13 +4,18 @@
 #include <QtGui/QGuiApplication>
 #include <QCursor>
 #include <QtCore/QDir>
+#include <QtGui/QImage>
 #include "ConfigManager.h"
 #include "ConfigBuilder.h"
 #include "../StringTools.h"
+#include <set>
+#include <cmath>
 
 void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
+
+    bool autoMode = !cliParams.rows.has_value();
 
     QStringList allowedExtensions;
     for (const auto &ext : Config::getImageExtensions()) {
@@ -71,6 +76,53 @@ void ConfigManager::loadConfig() {
         geo = screen->geometry();
     }
 
+    if (autoMode) {
+        std::multiset<unsigned> widths;
+        std::multiset<unsigned> heights;
+
+        QImage image;
+
+        for (auto &img:images) {
+            image.load(QString::fromStdString(img.getPath()));
+
+            widths.insert(image.width());
+            heights.insert(image.height());
+
+            image.detach();
+        }
+
+        // get middle elements
+        auto widthsIterator = widths.begin();
+        std::advance(widthsIterator, widths.size() / 2);
+
+        auto heightsIterator = heights.begin();
+        std::advance(heightsIterator, heights.size() / 2);
+
+        // because we want medians
+        cliParams.maxImageWidth = *widthsIterator;
+        cliParams.maxImageHeight = *heightsIterator;
+
+        cliParams.imageXPadding = cliParams.maxImageWidth.value() / 2.5;
+        cliParams.imageYPadding = cliParams.maxImageWidth.value() / 2.5;
+
+        cliParams.imageXMargin = cliParams.maxImageWidth.value() / 2.5;
+        cliParams.imageYMargin = cliParams.maxImageWidth.value() / 2.5;
+
+        // we don't want to take up the whole screen
+        double screenUsageModifier = 0.9;
+
+        unsigned maxImagesInHeight = geo.height() /
+                                     (cliParams.maxImageHeight.value() + cliParams.imageYPadding.value() * 2 +
+                                      cliParams.imageYMargin.value()) * screenUsageModifier;
+
+        unsigned maxImagesInWidth = geo.width() /
+                                    (cliParams.maxImageWidth.value() + cliParams.imageXPadding.value() * 2 +
+                                     cliParams.imageXPadding.value()) * screenUsageModifier;
+
+        cliParams.rows = maxImagesInHeight;
+        cliParams.cols = maxImagesInWidth;
+    }
+
     builder.setIsDebug(DEBUG)
             .setDefaultInputMode(cliParams.startInVimMode ? InputMode::VIM : InputMode::DEFAULT)
 
@@ -92,12 +144,12 @@ void ConfigManager::loadConfig() {
 
             .setImages(images);
 
-    if(cliParams.resizeToSize.has_value()) {
+    if (cliParams.resizeToSize.has_value()) {
         auto sizes = StringTools::splitIntoInts(cliParams.resizeToSize.value(), "x");
 
-        builder.setResizeOutputToSize(Size {
-            .width = (unsigned) sizes.at(0),
-            .height = (unsigned) sizes.at(1)
+        builder.setResizeOutputToSize(Size{
+                .width = (unsigned) sizes.at(0),
+                .height = (unsigned) sizes.at(1)
         });
     }
 
