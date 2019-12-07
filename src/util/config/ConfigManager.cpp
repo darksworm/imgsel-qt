@@ -15,7 +15,7 @@ void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
 
-    bool autoMode = !cliParams.rows.has_value();
+    bool autoMode = !cliParams.rowsAndCols.has_value();
 
     QStringList allowedExtensions;
     for (const auto &ext : Config::getImageExtensions()) {
@@ -67,11 +67,13 @@ void ConfigManager::loadConfig() {
 
     QRect geo;
 
-    if (cliParams.width.has_value()) {
-        builder = builder.setWidth(cliParams.width.value())
-                .setHeight(cliParams.height.value());
+    if (cliParams.size.has_value()) {
+        auto sizes = StringTools::splitIntoInts(cliParams.size.value(), "x");
 
-        geo = QRect(0, 0, cliParams.width.value(), cliParams.height.value());
+        builder = builder.setWidth(sizes.at(0))
+                .setHeight(sizes.at(1));
+
+        geo = QRect(0, 0, sizes.at(0), sizes.at(1));
     } else {
         geo = screen->geometry();
     }
@@ -99,46 +101,49 @@ void ConfigManager::loadConfig() {
         std::advance(heightsIterator, heights.size() / 2);
 
         // because we want medians
-        cliParams.maxImageWidth = *widthsIterator;
-        cliParams.maxImageHeight = *heightsIterator;
+        cliParams.maxImageSize = std::to_string((unsigned)*widthsIterator) + "x" + std::to_string((unsigned)*heightsIterator);
 
-        cliParams.imageXPadding = cliParams.maxImageWidth.value() / 2.5;
-        cliParams.imageYPadding = cliParams.maxImageWidth.value() / 2.5;
+        auto imageSizes = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
 
-        cliParams.imageXMargin = cliParams.maxImageWidth.value() / 2.5;
-        cliParams.imageYMargin = cliParams.maxImageWidth.value() / 2.5;
+        unsigned xEmptySpace = imageSizes.at(0) / 2.5;
+        unsigned yEmptySpace = imageSizes.at(1) / 2.5;
+
+        cliParams.padding = std::to_string(xEmptySpace) + "x" + std::to_string(yEmptySpace);
+        cliParams.margin = *cliParams.padding;
 
         // we don't want to take up the whole screen
         double screenUsageModifier = 0.9;
 
         unsigned maxImagesInHeight = geo.height() /
-                                     (cliParams.maxImageHeight.value() + cliParams.imageYPadding.value() * 2 +
-                                      cliParams.imageYMargin.value()) * screenUsageModifier;
+                                     (imageSizes.at(1) + yEmptySpace * 3) * screenUsageModifier;
 
         unsigned maxImagesInWidth = geo.width() /
-                                    (cliParams.maxImageWidth.value() + cliParams.imageXPadding.value() * 2 +
-                                     cliParams.imageXPadding.value()) * screenUsageModifier;
+                                    (imageSizes.at(0) + xEmptySpace * 3) * screenUsageModifier;
 
-        cliParams.rows = maxImagesInHeight;
-        cliParams.cols = maxImagesInWidth;
+        cliParams.rowsAndCols = std::to_string(maxImagesInWidth) + "x" + std::to_string(maxImagesInHeight);
     }
+
+    auto rowsAndCols = StringTools::splitIntoInts(cliParams.rowsAndCols.value(), "x");
+    auto maxImageSize = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
+    auto padding = StringTools::splitIntoInts(cliParams.padding.value(), "x");
+    auto margin = StringTools::splitIntoInts(cliParams.margin.value(), "x");
 
     builder.setIsDebug(DEBUG)
             .setDefaultInputMode(cliParams.startInVimMode ? InputMode::VIM : InputMode::DEFAULT)
 
-            .setCols(cliParams.cols.has_value() ? cliParams.cols.value() : 0)
-            .setRows(cliParams.rows.has_value() ? cliParams.rows.value() : 0)
+            .setCols(rowsAndCols.at(0))
+            .setRows(rowsAndCols.at(1))
 
-            .setMaxImageHeight(cliParams.maxImageHeight.has_value() ? cliParams.maxImageHeight.value() : 0)
-            .setMaxImageWidth(cliParams.maxImageWidth.has_value() ? cliParams.maxImageWidth.value() : 0)
+            .setMaxImageWidth(maxImageSize.at(0))
+            .setMaxImageHeight(maxImageSize.at(1))
 
             .setPrintFilePath(cliParams.printFilePath)
 
-            .setYPadding(cliParams.imageYPadding.has_value() ? cliParams.imageYPadding.value() : 30)
-            .setXPadding(cliParams.imageXPadding.has_value() ? cliParams.imageXPadding.value() : 30)
+            .setXPadding(padding.at(0))
+            .setYPadding(padding.at(1))
 
-            .setYMargin(cliParams.imageYMargin.has_value() ? cliParams.imageYMargin.value() : 30)
-            .setXMargin(cliParams.imageXMargin.has_value() ? cliParams.imageXMargin.value() : 30)
+            .setXMargin(margin.at(0))
+            .setYMargin(margin.at(1))
 
             .setScreenGeometry(geo)
 

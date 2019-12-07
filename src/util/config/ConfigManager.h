@@ -5,25 +5,14 @@
 struct CLIParams {
     std::vector<std::string> imageFiles;
     bool startInVimMode = false;
-
-    std::optional<unsigned int> maxImageWidth;
-    std::optional<unsigned int> maxImageHeight;
-
-    std::optional<unsigned int> rows;
-    std::optional<unsigned int> cols;
-
     bool printFilePath = false;
 
-    std::optional<unsigned int> imageXMargin;
-    std::optional<unsigned int> imageYMargin;
-
-    std::optional<unsigned int> imageXPadding;
-    std::optional<unsigned int> imageYPadding;
-
-    std::optional<unsigned int> width;
-    std::optional<unsigned int> height;
-
     std::optional<std::string> resizeToSize;
+    std::optional<std::string> maxImageSize;
+    std::optional<std::string> rowsAndCols;
+    std::optional<std::string> margin;
+    std::optional<std::string> padding;
+    std::optional<std::string> size;
 };
 
 class ConfigManager {
