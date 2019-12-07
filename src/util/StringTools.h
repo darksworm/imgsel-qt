@@ -12,7 +12,7 @@ public:
         return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
     }
 
-    static std::vector<int> splitIntoInts(const std::string &s, const std::string &sep) {
+    static std::vector<int> splitIntoInts(const std::string s, const std::string sep) {
         auto split = StringTools::split(s, sep);
         std::vector<int> arr;
 
@@ -25,7 +25,7 @@ public:
         return arr;
     }
 
-    static std::vector<std::string> split(const std::string &str, const std::string &sep) {
+    static std::vector<std::string> split(const std::string str, const std::string sep) {
         char *cstr = const_cast<char *>(str.c_str());
         char *current;
 

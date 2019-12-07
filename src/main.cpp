@@ -21,10 +21,13 @@ int main(int argc, char *argv[]) {
     CLIParams params;
     CLI::App cli_app{"IMGSEL - Image selection tool."};
 
+    cli_app.get_option("--help")
+            ->group("Meta");
     cli_app.add_flag("-v,--version", [](auto in) {
-        std::cout << "IMGSEL v" << PROJECT_VER << "\n";
-        exit(0);
-    }, "Show application version");
+                std::cout << "IMGSEL v" << PROJECT_VER << "\n";
+                exit(0);
+            }, "Show application version")
+            ->group("Meta");
 
     const static IntXIntValidator intXIntValidator;
     const static DirectoriesContainImages directoriesContainImages;
@@ -74,8 +77,11 @@ int main(int argc, char *argv[]) {
     xMargin->needs(yMargin);
     yMargin->needs(xMargin);
 
-    cli_app.add_flag("--print-path", params.printFilePath,
-                     "Write file path to stdout instead of copying it's contents to the clipboard.");
+    auto printPathOpt = cli_app.add_flag("--print-path", params.printFilePath,
+                     "Write file path to stdout instead of copying it's contents to the clipboard.")
+            ->group("Output");
+
+    resizeOpt->excludes(printPathOpt);
 
     heightOption->needs(widthOption);
     widthOption->needs(heightOption);
