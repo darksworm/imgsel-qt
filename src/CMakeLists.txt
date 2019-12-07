@@ -25,6 +25,57 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
 
 find_package(Qt5Widgets REQUIRED)
+
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} Qt5::QWindowsIntegrationPlugin)
+    # workaround for QWindowsIntegrationPlugin dependencies not linking
+    target_link_libraries(${PROJECT_NAME}
+            -lgdi32 -lcomdlg32 -loleaut32 -limm32 -ldwmapi -lwinspool -lopengl32 -lshlwapi -lwtsapi32
+            -lmpr -lnetapi32 -luserenv -lversion -lws2_32 -lkernel32 -luser32 -lshell32 -luuid -lole32
+            -ladvapi32 -lwinmm
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5EventDispatcherSupport.a
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5FontDatabaseSupport.a
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5ThemeSupport.a
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5AccessibilitySupport.a
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5WindowsUIAutomationSupport.a
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5Core.a
+            /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5Gui.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libdwrite.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libd2d1.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libpng16.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libharfbuzz.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libcairo.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libgobject-2.0.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libfontconfig.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libfreetype.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libm.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libusp10.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libmsimg32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libgdi32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libpixman-1.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libffi.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libexpat.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libbz2.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libpng16.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libz.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libharfbuzz_too.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libfreetype_too.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libglib-2.0.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libws2_32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libole32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libwinmm.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libshlwapi.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libpcre.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libintl.a
+            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libiconv.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libz.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libpcre2-16.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libzstd.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
+        )
+endif ()
+
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 
 IF (UNIX AND NOT APPLE)

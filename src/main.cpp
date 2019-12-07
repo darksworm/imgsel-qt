@@ -5,13 +5,16 @@
 #include "Application.h"
 #include "util/validators/IntXIntValidator.h"
 #include "util/validators/DirectoriesContainImages.h"
-
-#ifdef WITH_X11
-
-#include <QtX11Extras/QX11Info>
-#include <tkPort.h>
 #include <project_config.h>
 
+#ifdef WITH_X11
+#include <QtX11Extras/QX11Info>
+#include <tkPort.h>
+#endif
+
+#ifdef WIN32
+#include <QtPlugin>
+Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
 #endif
 
 int main(int argc, char *argv[]) {
