@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.4)
 
-project(imgsel
-        VERSION 0.1.2)
+project(imgsel VERSION 0.2.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
-
-configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 
 add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h
         util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
@@ -22,9 +19,11 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
         Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h)
 
+configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
 
 find_package(Qt5Widgets REQUIRED)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} Qt5::QWindowsIntegrationPlugin)
@@ -75,8 +74,6 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
         )
 endif ()
-
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
 
 IF (UNIX AND NOT APPLE)
     find_package(X11)
