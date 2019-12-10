@@ -145,7 +145,7 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
         if (config.shouldPrintFilePath()) {
             std::cout << path;
         } else {
-            if(config.getResizeOutputToSize().has_value()) {
+            if(config.shouldResizeOutputImage()) {
                 auto targetSize = config.getResizeOutputToSize().value();
                 QImage image(selectedImage->getPath().c_str());
 
@@ -164,11 +164,12 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
                     image = image.scaledToWidth(new_width);
                 }
 
-                QString tempImageName = "/tmp/last-imgsel-image.";
-                tempImageName += selectedImage->getExtension().c_str();
+                auto tempImage = new QTemporaryFile;
+                tempImage->open();
+                image.save(tempImage, QString::fromStdString(selectedImage->getExtension()).toUpper().toStdString().c_str());
+                tempImage->close();
 
-                image.save(tempImageName);
-                path = tempImageName.toStdString();
+                path = tempImage->fileName().toStdString();
             }
 
 #if defined(Q_OS_LINUX)
@@ -184,6 +185,11 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
             QApplication::clipboard()->setPixmap(img, QClipboard::Selection);
             QApplication::processEvents();
 #endif
+        }
+
+        if (config.shouldResizeOutputImage()) {
+            QFile file(QString::fromStdString(path));
+            file.remove();
         }
 
         QCoreApplication::exit(0);

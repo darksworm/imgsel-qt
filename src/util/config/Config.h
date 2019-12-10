@@ -111,4 +111,8 @@ public:
     std::optional<Size> getResizeOutputToSize() const {
         return resizeOutputToSize;
     }
+
+    bool shouldResizeOutputImage() {
+        return getResizeOutputToSize().has_value();
+    }
 };
