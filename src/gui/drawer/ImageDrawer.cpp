@@ -112,15 +112,13 @@ QPoint ImageDrawer::getNextShapePosition(ShapeProperties shapeProperties, Dimens
                                          std::optional<QPoint> lastShapePosition) {
     QPoint newShapePosition;
 
-    unsigned int xMargin, yMargin;
-
-    unsigned int oneRowWidth = shapeProperties.dimensions.x * shapeProperties.itemCounts.x +
+    int oneRowWidth = shapeProperties.dimensions.x * shapeProperties.itemCounts.x +
                                (shapeProperties.margins.x * shapeProperties.itemCounts.x - 1);
-    unsigned int oneColumnHeight = shapeProperties.dimensions.y * shapeProperties.itemCounts.y +
+    int oneColumnHeight = shapeProperties.dimensions.y * shapeProperties.itemCounts.y +
                                    (shapeProperties.margins.y * shapeProperties.itemCounts.y - 1);
 
-    xMargin = (windowDimensions.x - oneRowWidth) / 2;
-    yMargin = (windowDimensions.y - oneColumnHeight) / 2;
+    int xMargin = ((int)windowDimensions.x - oneRowWidth) / 2;
+    int yMargin = ((int)windowDimensions.y - oneColumnHeight) / 2;
 
     if (!lastShapePosition.has_value()) {
         newShapePosition = QPoint(

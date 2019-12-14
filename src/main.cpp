@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
     resizeOpt->excludes(printPathOpt);
 
-    CLI11_PARSE(cli_app, argc, argv);
+    CLI11_PARSE(cli_app, argc, argv)
 
     Application app(argc, argv);
 

@@ -91,6 +91,11 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         if (shouldDrawShape) {
             shapeProperties.position = shapeDrawer->getNextShapePosition(shapeProperties, *windowDimensions,
                                                                          lastShapePosition);
+
+            if(shapeProperties.position.x() < 0 || shapeProperties.position.y() < 0) {
+                std::cerr << "Drawing image outside of window boundaries!" << std::endl;
+            }
+
             shape.position = shapeProperties.position;
 
             try {
