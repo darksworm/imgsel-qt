@@ -20,3 +20,5 @@ See compiling, then
 sudo make install
 ```
 and then imgsel should be available in your shell.
+
+see usage instructions: [USAGE.md](USAGE.md)
