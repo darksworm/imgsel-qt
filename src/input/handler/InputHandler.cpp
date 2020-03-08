@@ -17,7 +17,13 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
     }
 
     if (keyCode == Qt::Key_Return || keyCode == Qt::Key_Enter) {
-        return new CopyInstruction();
+        auto preprocessorFlags = PreprocessorFlags::None;
+
+        if(isModifierActive(Qt::Key_Alt) || isModifierActive(Qt::Key_AltGr)) {
+            preprocessorFlags = preprocessorFlags | PreprocessorFlags::WhatsAppWhitespace;
+        }
+
+        return new CopyInstruction(preprocessorFlags);
     }
 
     if (isModifier(keyCode)) {
@@ -82,8 +88,9 @@ void InputHandler::removeModifier(unsigned keyCode) {
 bool InputHandler::isModifier(unsigned keyCode) {
     switch (keyCode) {
         case Qt::Key_Shift:
-            return true;
         case Qt::Key_Control:
+        case Qt::Key_Alt:
+        case Qt::Key_AltGr:
             return true;
     }
 

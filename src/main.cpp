@@ -12,6 +12,8 @@
 #include <tkPort.h>
 #endif
 
+#include <iostream>
+
 #ifdef WIN32
 #include <QtPlugin>
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
@@ -87,12 +89,17 @@ int main(int argc, char *argv[]) {
     ConfigManager::setCLIParams(params);
     auto config = ConfigManager::getOrLoadConfig();
 
+
     MainWindow window;
+
     window.setWindowTitle(Application::translate("APPLICATION", "IMGSEL-QT"));
     window.setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
+
     window.setAttribute(Qt::WA_NoSystemBackground, true);
     window.setAttribute(Qt::WA_TranslucentBackground, true);
+
     window.setGeometry(config.getScreenGeometry());
+
     window.show();
     window.raise();
 

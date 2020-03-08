@@ -8,8 +8,10 @@
 #include "ConfigManager.h"
 #include "ConfigBuilder.h"
 #include "../StringTools.h"
+#include "../../input/handler/instruction/PreprocessorFlags.h"
 #include <set>
 #include <cmath>
+#include <QtCore/QProcess>
 
 void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = Config::getImageExtensions();
@@ -157,6 +159,19 @@ void ConfigManager::loadConfig() {
                 .height = (unsigned) sizes.at(1)
         });
     }
+
+#ifdef WITH_X11
+    QProcess process;
+    process.setProgram("xdotool");
+    process.setArguments(QStringList() << "getwindowfocus" << "getwindowname");
+    process.start();
+    process.waitForFinished(-1);
+    QString title = process.readAll();
+
+    if (title.toLower().contains("whatsapp")) {
+        builder.addPreprocessorFlag(PreprocessorFlags::WhatsAppWhitespace);
+    }
+#endif
 
     ConfigManager::config = builder.build();
     ConfigManager::configLoaded = true;
