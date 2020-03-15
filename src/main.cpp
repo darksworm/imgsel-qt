@@ -5,6 +5,7 @@
 #include "Application.h"
 #include "util/validators/IntXIntValidator.h"
 #include "util/validators/DirectoriesContainImages.h"
+#include "gui/SettingsWindow.h"
 #include <project_config.h>
 
 #ifdef WITH_X11
@@ -13,11 +14,20 @@
 #endif
 
 #include <iostream>
+#include <libnet.h>
 
 #ifdef WIN32
 #include <QtPlugin>
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
 #endif
+
+void moveWindow(WId id) {
+    // this is outside because the app won't compile if xlib is
+    // explicitly included in any other file.
+#ifdef WITH_X11
+    XMoveWindow(QX11Info::display(), id, 0, 0);
+#endif
+}
 
 int main(int argc, char *argv[]) {
     CLIParams params;
@@ -87,27 +97,18 @@ int main(int argc, char *argv[]) {
     }
 
     ConfigManager::setCLIParams(params);
-    auto config = ConfigManager::getOrLoadConfig();
 
+    auto window = new MainWindow(moveWindow);
 
-    MainWindow window;
+    window->setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
+    window->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
 
-    window.setWindowTitle(Application::translate("APPLICATION", "IMGSEL-QT"));
-    window.setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
+    window->setAttribute(Qt::WA_NoSystemBackground, true);
+    window->setAttribute(Qt::WA_TranslucentBackground, true);
+    window->setGeometry(ConfigManager::getOrLoadConfig().getScreenGeometry());
 
-    window.setAttribute(Qt::WA_NoSystemBackground, true);
-    window.setAttribute(Qt::WA_TranslucentBackground, true);
-
-    window.setGeometry(config.getScreenGeometry());
-
-    window.show();
-    window.raise();
-
-#ifdef WITH_X11
-    XMoveWindow(QX11Info::display(), window.winId(), 0, 0);
-#endif
-
-    window.setFocus();
+    SettingsWindow settingsWindow(window);
+    settingsWindow.show();
 
     return app.exec();
 }

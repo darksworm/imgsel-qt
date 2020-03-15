@@ -17,7 +17,9 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
         gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h
         util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
-        Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h)
+        Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
+        input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
+        gui/SettingsWindow.cpp gui/SettingsWindow.h)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)

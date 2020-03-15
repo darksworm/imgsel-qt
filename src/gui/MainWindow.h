@@ -9,7 +9,10 @@ class MainWindow : public QWidget {
     void paintEvent(QPaintEvent *event) override;
 
 public:
-    MainWindow();
+    explicit MainWindow(void (*fun)(WId));
+
+public Q_SLOTS:
+    void display();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -29,5 +32,6 @@ private:
     QPixmap screenBuffer;
     ImagePickerDrawer *imagePickerDrawer;
     bool focused = false;
+    std::function<void(WId)> shownCB;
 };
 

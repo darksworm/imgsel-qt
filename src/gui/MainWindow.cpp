@@ -96,7 +96,10 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
                       instruction->getType() == InputInstructionType::CANCEL;
 
     if (shouldExit || instruction->getType() == InputInstructionType::EXIT) {
-        QCoreApplication::exit(1);
+        this->imagePickerDrawer->clearFilter();
+        this->imagePickerDrawer->move(ImagePickerMove::HOME);
+        hide();
+        //QCoreApplication::exit(1);
     }
 
     if (instruction->getType() == InputInstructionType::CANCEL) {
@@ -226,13 +229,37 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
             file.remove();
         }
 
-        QCoreApplication::exit(0);
+        this->imagePickerDrawer->clearFilter();
+        this->imagePickerDrawer->move(ImagePickerMove::HOME);
+        hide();
+        //QCoreApplication::exit(0);
     }
 
     this->repaint();
 }
 
-MainWindow::MainWindow() : QWidget() {
+void MainWindow::focusOutEvent(QFocusEvent *event) {
+    QWidget::focusOutEvent(event);
+    focused = false;
+    this->repaint();
+}
+
+void MainWindow::focusInEvent(QFocusEvent *event) {
+    QWidget::focusInEvent(event);
+    focused = true;
+    this->repaint();
+}
+
+void MainWindow::display() {
+    show();
+    raise();
+    setFocus();
+    this->shownCB(winId());
+}
+
+MainWindow::MainWindow(void (*fun)(WId)) : QWidget() {
+    this->shownCB = fun;
+
     auto config = ConfigManager::getOrLoadConfig();
     inputHandler.reset();
     inputMode = config.getDefaultInputMode();
@@ -249,16 +276,3 @@ MainWindow::MainWindow() : QWidget() {
 
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
 }
-
-void MainWindow::focusOutEvent(QFocusEvent *event) {
-    QWidget::focusOutEvent(event);
-    focused = false;
-    this->repaint();
-}
-
-void MainWindow::focusInEvent(QFocusEvent *event) {
-    QWidget::focusInEvent(event);
-    focused = true;
-    this->repaint();
-}
-
