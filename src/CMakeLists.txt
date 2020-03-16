@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.12)
 
 project(imgsel VERSION 0.2.0)
 
@@ -76,6 +76,17 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
         )
 endif ()
+
+include(FetchContent)
+FetchContent_Declare(
+        qhotkey
+        GIT_REPOSITORY https://github.com/Skycoder42/QHotkey.git
+        GIT_TAG        master
+)
+FetchContent_MakeAvailable(qhotkey)
+
+target_link_libraries(${PROJECT_NAME} QHotkey::QHotkey)
+target_include_directories(${PROJECT_NAME} PUBLIC ${qhotkey_SOURCE_DIR}/QHotkey)
 
 IF (UNIX AND NOT APPLE)
     find_package(X11)

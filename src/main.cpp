@@ -16,6 +16,8 @@
 #include <iostream>
 #include <libnet.h>
 
+#include <QHotkey>
+
 #ifdef WIN32
 #include <QtPlugin>
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
@@ -109,6 +111,12 @@ int main(int argc, char *argv[]) {
 
     SettingsWindow settingsWindow(window);
     settingsWindow.show();
+
+    auto hotkey = new QHotkey(QKeySequence("ctrl+alt+x"), true, &app);
+
+    QObject::connect(hotkey, &QHotkey::activated, qApp, [&](){
+        window->display();
+    });
 
     return app.exec();
 }
