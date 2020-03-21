@@ -95,6 +95,11 @@ void ConfigManager::loadConfig() {
             image.detach();
         }
 
+        if (images.empty()) {
+            widths.insert(50);
+            heights.insert(50);
+        }
+
         // get middle elements
         auto widthsIterator = widths.begin();
         std::advance(widthsIterator, widths.size() / 2);
@@ -191,4 +196,8 @@ ConfigManager::ConfigManager() {
 
 void ConfigManager::setCLIParams(CLIParams params) {
     ConfigManager::cliParams = std::move(params);
+}
+
+void ConfigManager::invalidateConfig() {
+    ConfigManager::configLoaded = false;
 }

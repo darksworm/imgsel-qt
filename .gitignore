@@ -2,3 +2,7 @@
 *.o
 cmake-build-debug/
 .idea/
+.clangd/
+CMakeFiles
+src/build
+src/build-lin

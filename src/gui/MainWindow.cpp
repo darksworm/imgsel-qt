@@ -254,12 +254,11 @@ void MainWindow::display() {
     show();
     raise();
     setFocus();
-    this->shownCB(winId());
+
+    emit displayed(WId());
 }
 
-MainWindow::MainWindow(void (*fun)(WId)) : QWidget() {
-    this->shownCB = fun;
-
+MainWindow::MainWindow() : QWidget() {
     auto config = ConfigManager::getOrLoadConfig();
     inputHandler.reset();
     inputMode = config.getDefaultInputMode();

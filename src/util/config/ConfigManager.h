@@ -7,20 +7,19 @@ struct CLIParams {
     bool startInVimMode = false;
     bool printFilePath = false;
 
-    std::optional<std::string> resizeToSize;
-    std::optional<std::string> maxImageSize;
-    std::optional<std::string> rowsAndCols;
-    std::optional<std::string> margin;
-    std::optional<std::string> padding;
-    std::optional<std::string> size;
+    std::optional<std::string> resizeToSize = std::nullopt;
+    std::optional<std::string> maxImageSize = std::nullopt;
+    std::optional<std::string> rowsAndCols = std::nullopt;
+    std::optional<std::string> margin = std::nullopt;
+    std::optional<std::string> padding = std::nullopt;
+    std::optional<std::string> size = std::nullopt;
 };
 
 class ConfigManager {
 public:
     static Config getOrLoadConfig();
-
+    static void invalidateConfig();
     ConfigManager();
-
     static void setCLIParams(CLIParams params);
 
 private:

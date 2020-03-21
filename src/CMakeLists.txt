@@ -5,6 +5,8 @@ project(imgsel VERSION 0.2.0)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
 
+set(CMAKE_AUTOMOC ON)
+
 add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h
         util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
         input/handler/instruction/InputInstructionType.h input/handler/filters/FilteringInputHandler.h
@@ -19,7 +21,7 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
         Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
-        gui/SettingsWindow.cpp gui/SettingsWindow.h)
+        gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp gui/MainWindow.h)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
@@ -117,6 +119,11 @@ IF (UNIX AND NOT APPLE)
     endif ()
 endif ()
 
+# export compile commands for YCM
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
+# Do not build QHotkey tests
+set_target_properties(HotkeyTest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 install(TARGETS ${PROJECT_NAME} EXPORT imgsel DESTINATION bin)
 
 set_target_properties(

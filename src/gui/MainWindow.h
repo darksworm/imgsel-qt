@@ -6,13 +6,17 @@
 #include "picker/ImagePickerDrawer.h"
 
 class MainWindow : public QWidget {
+    Q_OBJECT
     void paintEvent(QPaintEvent *event) override;
 
 public:
-    explicit MainWindow(void (*fun)(WId));
+    explicit MainWindow();
 
-public Q_SLOTS:
+public slots:
     void display();
+
+signals:
+    void displayed(WId windowId);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -32,6 +36,5 @@ private:
     QPixmap screenBuffer;
     ImagePickerDrawer *imagePickerDrawer;
     bool focused = false;
-    std::function<void(WId)> shownCB;
 };
 
