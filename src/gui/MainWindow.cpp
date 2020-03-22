@@ -98,8 +98,8 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
     if (shouldExit || instruction->getType() == InputInstructionType::EXIT) {
         this->imagePickerDrawer->clearFilter();
         this->imagePickerDrawer->move(ImagePickerMove::HOME);
-        hide();
-        //QCoreApplication::exit(1);
+
+        emit exitInstructionReceived();
     }
 
     if (instruction->getType() == InputInstructionType::CANCEL) {
@@ -231,8 +231,8 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
 
         this->imagePickerDrawer->clearFilter();
         this->imagePickerDrawer->move(ImagePickerMove::HOME);
-        hide();
-        //QCoreApplication::exit(0);
+
+        emit exitInstructionReceived();
     }
 
     this->repaint();
@@ -260,18 +260,26 @@ void MainWindow::display() {
 
 MainWindow::MainWindow() : QWidget() {
     auto config = ConfigManager::getOrLoadConfig();
+
     inputHandler.reset();
     inputMode = config.getDefaultInputMode();
+
+    setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
+    setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
+
+    setAttribute(Qt::WA_NoSystemBackground, true);
+    setAttribute(Qt::WA_TranslucentBackground, true);
+
+    auto geo = config.getScreenGeometry();
+    screenBuffer = QPixmap(geo.width(), geo.height());
+
+    setGeometry(geo);
 
     if (!InputHandlerFactory::isCorrectHandler(inputHandler.get(), inputMode)) {
         inputHandler.reset(InputHandlerFactory::getInputHandler(inputMode));
     }
 
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
-
-    auto geo = config.getScreenGeometry();
-
-    screenBuffer = QPixmap(geo.width(), geo.height());
 
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
 }

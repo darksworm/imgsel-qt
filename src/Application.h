@@ -4,11 +4,12 @@
 #include "gui/MainWindow.h"
 #include <QtWidgets/QApplication>
 #include <QtCore/QSharedMemory>
+#include <optional>
 
 class Application : public QApplication {
 Q_OBJECT
 public:
-    Application(int &argc, char **argv);
+    Application(int &argc, char **argv, bool oneShotMode);
 
     ~Application() override;
 
@@ -17,8 +18,12 @@ public:
     void setMainWindow(MainWindow *window);
     void setSettingsWindow(SettingsWindow *window);
 
+signals:
+    void failedToRegisterHotkey(QString hotkey);
+    void successfullyRegisteredHotkey(QString hotkey);
+
 public slots:
-    void hotkeyBindingChanged(QString newBinding);
+    void hotkeyBindingChange(QString newBinding);
 
 private:
     QSharedMemory *_singular;
@@ -26,6 +31,7 @@ private:
     MainWindow *mainWindow;
     SettingsWindow *settingsWindow;
 
-    QMetaObject::Connection hotkeyConnection;
-    bool hotkeyConnected = false;
+    bool oneShotMode = false;
+
+    std::optional<QMetaObject::Connection> hotkeyConnection = std::nullopt;
 };

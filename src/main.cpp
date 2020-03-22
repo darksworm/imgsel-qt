@@ -89,8 +89,7 @@ int main(int argc, char *argv[]) {
         ConfigManager::setCLIParams(params);
     }
 
-    std::cout << "YES";
-    Application app(argc, argv);
+    Application app(argc, argv, oneShotMode);
 //    if (!app.lock()) {
 //        std::cout << "Another instance of the app is already running!";
 //        return -42;
@@ -100,21 +99,13 @@ int main(int argc, char *argv[]) {
 
     app.setMainWindow(window);
 
-    window->setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
-    window->setWindowFlags(
-            Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
-
-    window->setAttribute(Qt::WA_NoSystemBackground, true);
-    window->setAttribute(Qt::WA_TranslucentBackground, true);
-    window->setGeometry(ConfigManager::getOrLoadConfig().getScreenGeometry());
-
     if (oneShotMode) {
         window->display();
     } else {
         auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
         auto settingsWindow = new SettingsWindow(window);
 
-        bool startMinimized = settings.value("start_minimized", false).toBool();
+        bool startMinimized = settings.value("start_minimized", false).toInt();
         if (!startMinimized) {
             settingsWindow->show();
         }
@@ -122,8 +113,7 @@ int main(int argc, char *argv[]) {
         app.setSettingsWindow(settingsWindow);
 
         auto hkSequence = settings.value("hotkey_sequence", "meta+z").toString();
-        app.hotkeyBindingChanged(hkSequence);
-
+        app.hotkeyBindingChange(hkSequence);
     }
 
     return app.exec();

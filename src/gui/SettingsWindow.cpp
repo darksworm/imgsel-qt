@@ -2,6 +2,8 @@
 #include "MainWindow.h"
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
+#include "../Application.h"
+#include <QHotkey>
 
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
@@ -9,20 +11,55 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     createActions();
     createUI();
     createTrayIcon();
-
-    connect(hotkeyChangeButton, &QAbstractButton::clicked, this, &SettingsWindow::onHotkeyChangeButton);
-    connect(trayIcon, &QSystemTrayIcon::messageClicked, this, &SettingsWindow::messageClicked);
-    connect(trayIcon, &QSystemTrayIcon::activated, this, &SettingsWindow::iconActivated);
-
-    window->setGeometry(ConfigManager::getOrLoadConfig().getScreenGeometry());
-
-    auto mainLayout = new QVBoxLayout();
-    mainLayout->addWidget(hotkeyLabel);
-    mainLayout->addWidget(hotkeyChangeButton);
-    setLayout(mainLayout);
-
+    connectUI();
 
     trayIcon->show();
+}
+
+void SettingsWindow::connectUI() {
+    connect(
+        hotkeyChangeButton, &QAbstractButton::clicked, 
+        this, &SettingsWindow::onHotkeyChangeButton
+    );
+
+    connect(
+        hotkeyChangeCancelButton, &QAbstractButton::clicked, 
+        this, &SettingsWindow::onHotkeyChangeCancelButton
+    );
+
+    connect(
+        trayIcon, &QSystemTrayIcon::messageClicked, 
+        this, &SettingsWindow::messageClicked
+    );
+    connect(
+        trayIcon, &QSystemTrayIcon::activated, 
+        this, &SettingsWindow::iconActivated
+    );
+
+    connect(
+        startMinimizedCheckbox, &QCheckBox::stateChanged,
+        this, &SettingsWindow::startMinimizedChanged
+    );
+    // connect(
+    //     resizeForWhatsappCheckbox, &QCheckBox::stateChanged,
+    //     this, &SettingsWindow::resizeForWhatsappChanged
+    // );
+#ifdef WIN32
+    connect(
+        launchOnStartupCheckbox, &QCheckBox::stateChanged,
+        this, &SettingsWindow::launchOnStartupChanged
+    );
+#endif
+
+    connect(
+        (Application *)Application::instance(), &Application::failedToRegisterHotkey,
+        this, &SettingsWindow::failedToRegisterHotkey
+    );
+
+    connect(
+        (Application *)Application::instance(), &Application::successfullyRegisteredHotkey,
+        this, &SettingsWindow::successfullyRegisteredHotkey
+    );
 }
 
 void SettingsWindow::messageClicked() {
@@ -89,47 +126,197 @@ void SettingsWindow::createActions() {
 }
 
 void SettingsWindow::createUI() {
-    hotkeyLabel = new QLabel(("Hotkey: " + settings.value("hotkey_sequence", "meta+x").toString()));
+    auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+
+    hotkeyLabel = new QLabel("Hotkey: " + hotkey);
     hotkeyChangeButton = new QPushButton("Change");
+    hotkeyChangeButton->setAutoDefault(false);
+
+    hotkeyChangeCancelButton = new QPushButton("Cancel");
+    hotkeyChangeCancelButton->setAutoDefault(false);
+    hotkeyChangeCancelButton->hide();
+
+    startMinimizedCheckbox = new QCheckBox("Launch EMOJIGUN minimized");
+
+   // resizeForWhatsappCheckbox = new QCheckBox("Resize images to fit better in whatsapp");
+
+    startMinimizedCheckbox->setChecked(settings.value("start_minimized").toInt());
+    // resizeForWhatsappCheckbox->setChecked(settings.value("resize_for_whatsapp").toInt());
+    // resizeOutputGroup = new QGroupBox("Resize output images");
+    
+    auto dragImagesLabel = new QLabel("- Drag images/archives on this window to add to library -");
+
+    auto hotkeyLayout = new QVBoxLayout();
+    hotkeyLayout->addWidget(hotkeyLabel);
+
+    auto hotkeyBtnLayout = new QHBoxLayout();
+    hotkeyBtnLayout->addWidget(hotkeyChangeButton);
+    hotkeyBtnLayout->addWidget(hotkeyChangeCancelButton);
+
+    hotkeyLayout->addLayout(hotkeyBtnLayout);
+
+    auto mainLayout = new QVBoxLayout();
+
+    mainLayout->addLayout(hotkeyLayout);
+#ifdef WIN32
+    launchOnStartupCheckbox = new QCheckBox("Launch EMOJIGUN on system startup");
+    launchOnStartupCheckbox->setChecked(settings.value("launch_on_startup").toInt());
+    mainLayout->addWidget(launchOnStartupCheckbox);
+#endif
+    mainLayout->addWidget(startMinimizedCheckbox);
+    // mainLayout->addWidget(resizeForWhatsappCheckbox);
+    mainLayout->addWidget(dragImagesLabel);
+    // mainLayout->addWidget(resizeOutputGroup);
+
+    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
+    setLayout(mainLayout);
 }
 
 void SettingsWindow::onHotkeyChangeButton() {
     if (!changingHotkey) {
         hotkeyLabel->setText("Press the button combination you want to bind...");
         hotkeyChangeButton->setText("Save");
-    } else {
-        settings.setValue("hotkey_sequence", hotkeyAccumulator);
-        hotkeyLabel->setText("Hotkey: " + hotkeyAccumulator);
-        hotkeyChangeButton->setText("Change");
-        hotkeyAccumulator = "";
+        hotkeyChangeCancelButton->show();
+        hotkeyChangeButton->setEnabled(false);
 
-        emit hotkeyBindingChanged(hotkeyAccumulator);
+        changingHotkey = true;
+    } else {
+        emit hotkeyBindingChange(hotkeyAccumulator);
+    }
+}
+
+void SettingsWindow::onHotkeyChangeCancelButton() {
+    auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+
+    changingHotkey = false;
+
+    hotkeyLabel->setText("Hotkey: " + hotkey);
+    hotkeyChangeButton->setText("Change");
+
+    hotkeyAccumulator = "";
+    hotkeyChangeCancelButton->hide();
+    hotkeyChangeButton->setEnabled(true);
+}
+
+QString SettingsWindow::translateKey(int key) {
+    if (key == Qt::Key_Shift) {
+        return "shift";
+    } else if (key == Qt::Key_Control) {
+        return "ctrl";
+    } else if (key == Qt::Key_AltGr || key == Qt::Key_Alt) {
+        return "alt";
+    } else if (key == Qt::Key_Meta || key == Qt::Key_Super_L || key == Qt::Key_Super_R) {
+        return "meta";
+    } else {
+        return QKeySequence(key).toString().toLower();
+    }
+}
+
+void SettingsWindow::keyReleaseEvent(QKeyEvent *event) {
+    QDialog::keyReleaseEvent(event);
+
+    if (!changingHotkey) {
+        return;
     }
 
-    changingHotkey = !changingHotkey;
+    auto keys = hotkeyAccumulator.split("+");
+
+    bool onlyKeyIsFKey = keys.length() == 1 && event->key() >= Qt::Key_F1 && event->key() <= Qt::Key_F12;
+
+    if (onlyKeyIsFKey) {
+        return;
+    }
+
+    if (keys.length() > 1) {
+        QStringList modifiers = {"shift", "ctrl", "alt", "meta"};
+
+        bool hasAtleastOneModifier = false;
+        bool allModifiers = true;
+
+        for (int i = 0; i < keys.size(); ++i) {
+            if (modifiers.contains(keys.at(i))) {
+                hasAtleastOneModifier = true;
+            } else {
+                allModifiers = false;
+            }
+        }
+
+        // valid hotkey reached, don't reset the keys.
+        if (hasAtleastOneModifier && !allModifiers) {
+            return;
+        }
+    }
+
+    auto keyName = translateKey(event->key());
+
+    keys.removeAll(keyName);
+    hotkeyAccumulator = keys.join("+");
+
+    hotkeyLabel->setText("Hotkey (recording): " + hotkeyAccumulator);
 }
 
 void SettingsWindow::keyPressEvent(QKeyEvent *event) {
     QDialog::keyPressEvent(event);
 
-    if (changingHotkey) {
-        auto index = event->key();
-        QString keyName;
+    if (!changingHotkey) {
+        return;
+    }
 
-        if (index == Qt::Key_Shift) {
-            keyName = "shift";
-        } else if (index == Qt::Key_Control) {
-            keyName = "ctrl";
-        } else if (index == Qt::Key_AltGr || index == Qt::Key_Alt) {
-            keyName = "alt";
-        } else if (index == Qt::Key_Meta || index == Qt::Key_Super_L || index == Qt::Key_Super_R) {
-            keyName = "meta";
-        } else {
-            keyName = QKeySequence(index).toString();
+    auto keyName = translateKey(event->key());
+    auto keys = hotkeyAccumulator.split("+");
+
+    // no duplicates
+    if (keys.contains(keyName)) {
+        return;
+    }
+
+    hotkeyAccumulator += (hotkeyAccumulator.length() ? "+" : "") + keyName;
+    hotkeyLabel->setText("Hotkey (recording): " + hotkeyAccumulator);
+    
+    keys = hotkeyAccumulator.split("+");
+
+    bool onlyKeyIsFKey = keys.length() == 1 && event->key() >= Qt::Key_F1 && event->key() <= Qt::Key_F12;
+
+    if (keys.length() >= 2|| onlyKeyIsFKey) {
+        auto oldHotkey = settings.value("hotkey_sequence", "meta+x").toString();
+
+        if (oldHotkey == hotkeyAccumulator) {
+            hotkeyChangeButton->setEnabled(false);
+            return;
         }
 
-        hotkeyAccumulator += (hotkeyAccumulator.length() ? "+" : "") + keyName.toLower();
-        hotkeyLabel->setText("Hotkey (recording): " + hotkeyAccumulator);
+        auto testHotkey = new QHotkey(QKeySequence(hotkeyAccumulator), true);
+        hotkeyChangeButton->setEnabled(testHotkey->isRegistered());
+        delete testHotkey;
     }
 }
 
+void SettingsWindow::resizeForWhatsappChanged(int state) {
+    settings.setValue("resize_for_whatsapp", state);
+}
+
+void SettingsWindow::startMinimizedChanged(int state) {
+    settings.setValue("start_minimized", state);
+}
+
+void SettingsWindow::launchOnStartupChanged(int state) {
+    settings.setValue("launch_on_startup", state);
+}
+
+void SettingsWindow::failedToRegisterHotkey(QString hotkey) {
+    QString title =  "Failed to bind hotkey!";
+    QString error = "The key combination " + hotkey + " could not be bound. Please try a different combination.";
+
+    QMessageBox::critical(this, title, error);
+
+    onHotkeyChangeCancelButton();
+}
+
+void SettingsWindow::successfullyRegisteredHotkey(QString hotkey) {
+    if (!changingHotkey) {
+        return;
+    }
+
+    settings.setValue("hotkey_sequence", hotkey);
+    onHotkeyChangeCancelButton();
+}

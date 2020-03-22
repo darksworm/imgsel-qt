@@ -17,6 +17,7 @@ public slots:
 
 signals:
     void displayed(WId windowId);
+    void exitInstructionReceived();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

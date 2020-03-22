@@ -6,8 +6,9 @@
 
 #include <iostream>
 
-Application::Application(int &argc, char *argv[]) : QApplication(argc, argv, true) {
+Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplication(argc, argv, true) {
     _singular = new QSharedMemory("IMGSEL", this);
+    this->oneShotMode = oneShotMode;
 }
 
 Application::~Application() {
@@ -25,24 +26,36 @@ bool Application::lock() {
     return _singular->create(1);
 }
 
-void Application::hotkeyBindingChanged(QString newBinding) {
-    if (hotkeyConnected) {
-        disconnect(hotkeyConnection);
+void Application::hotkeyBindingChange(QString newBinding) {
+    auto hotkey = new QHotkey(QKeySequence(newBinding), true, this);
+
+    if (!hotkey->isRegistered()) {
+        emit failedToRegisterHotkey(newBinding);        
+
+        return;
     }
 
-    auto hotkey = new QHotkey(QKeySequence(newBinding), true, this);
+    if (hotkeyConnection.has_value()) {
+        disconnect(hotkeyConnection.value());
+        hotkeyConnection.reset();
+    }
+
     hotkeyConnection = connect(
         hotkey, &QHotkey::activated,
         this, [&]() {
             mainWindow->display();
         }
     );
+
+    emit successfullyRegisteredHotkey(newBinding);
 }
 
 void Application::setMainWindow(MainWindow *window) {
     this->mainWindow = window;
 
 #ifdef WITH_X11
+    // fix for app not being put in true 0,0 for X11 systems with window managers that
+    // have reserved space for statusbars etc. https://github.com/darksworm/imgsel-x11/issues/23
     connect(
         mainWindow, &MainWindow::displayed,
         this, [&](WId id) {
@@ -50,13 +63,24 @@ void Application::setMainWindow(MainWindow *window) {
         }
     );
 #endif
+
+    connect(
+        mainWindow, &MainWindow::exitInstructionReceived,
+        this, [&]() {
+            if (oneShotMode) {
+                exit(0);
+            } else {
+                mainWindow->hide();
+            }
+        }
+    );
 }
 
 void Application::setSettingsWindow(SettingsWindow *window) {
     this->settingsWindow = window;
 
     connect(
-        settingsWindow, &SettingsWindow::hotkeyBindingChanged, 
-        this, &Application::hotkeyBindingChanged
+        settingsWindow, &SettingsWindow::hotkeyBindingChange, 
+        this, &Application::hotkeyBindingChange
     );
 }
