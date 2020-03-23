@@ -178,7 +178,7 @@ void SettingsWindow::createUI() {
     mainLayout->addWidget(libraryDirectoryLabel);
     mainLayout->addWidget(changeDirectoryButton);
     mainLayout->addWidget(startMinimizedCheckbox);
-    mainLayout->addWidget(dragImagesLabel);
+    // mainLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
 
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
