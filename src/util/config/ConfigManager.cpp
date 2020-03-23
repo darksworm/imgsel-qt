@@ -12,19 +12,36 @@
 #include <set>
 #include <cmath>
 #include <QtCore/QProcess>
+#include "../../Application.h"
 
 void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
 
     bool autoMode = !cliParams.rowsAndCols.has_value();
+    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
 
     QStringList allowedExtensions;
     for (const auto &ext : Config::getImageExtensions()) {
         allowedExtensions << "*." + QString::fromStdString(ext);
     }
 
-    for (auto &path : cliParams.imageFiles) {
+    auto imageFilePaths = cliParams.imageFiles;
+
+    if (!oneShotMode) {
+        QSettings settings("EMOJIGUN", "EMOJIGUN");
+
+        auto defaultDir = Application::defaultLibraryDirectory();
+        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+
+        if (imageDirFromSettings == defaultDir) {
+            QDir().mkdir(imageDirFromSettings);
+        }
+
+        imageFilePaths.emplace_back(imageDirFromSettings.toStdString());
+    }
+
+    for (auto &path : imageFilePaths) {
         QDir dir(QString::fromStdString(path));
 
         if (dir.exists()) {

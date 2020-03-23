@@ -251,6 +251,18 @@ void MainWindow::focusInEvent(QFocusEvent *event) {
 }
 
 void MainWindow::display() {
+    auto config = ConfigManager::getOrLoadConfig();
+    auto geo = config.getScreenGeometry();
+
+    setGeometry(geo);
+
+    inputHandler.reset();
+    inputMode = config.getDefaultInputMode();
+
+    if (!InputHandlerFactory::isCorrectHandler(inputHandler.get(), inputMode)) {
+        inputHandler.reset(InputHandlerFactory::getInputHandler(inputMode));
+    }
+
     show();
     raise();
     setFocus();
@@ -259,27 +271,16 @@ void MainWindow::display() {
 }
 
 MainWindow::MainWindow() : QWidget() {
-    auto config = ConfigManager::getOrLoadConfig();
-
-    inputHandler.reset();
-    inputMode = config.getDefaultInputMode();
-
     setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
 
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
 
+    auto config = ConfigManager::getOrLoadConfig();
     auto geo = config.getScreenGeometry();
     screenBuffer = QPixmap(geo.width(), geo.height());
 
-    setGeometry(geo);
-
-    if (!InputHandlerFactory::isCorrectHandler(inputHandler.get(), inputMode)) {
-        inputHandler.reset(InputHandlerFactory::getInputHandler(inputMode));
-    }
-
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
-
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
 }

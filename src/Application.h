@@ -18,6 +18,9 @@ public:
     void setMainWindow(MainWindow *window);
     void setSettingsWindow(SettingsWindow *window);
 
+    static QString defaultLibraryDirectory();
+    bool isOneShotMode();
+
 signals:
     void failedToRegisterHotkey(QString hotkey);
     void successfullyRegisteredHotkey(QString hotkey);

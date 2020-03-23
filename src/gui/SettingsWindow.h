@@ -28,6 +28,8 @@ private slots:
     void startMinimizedChanged(int state);
     void launchOnStartupChanged(int state);
 
+    void onChangeDirectoryButton();
+
     void failedToRegisterHotkey(QString hotkey);
     void successfullyRegisteredHotkey(QString hotkey);
 
@@ -64,6 +66,9 @@ private:
     QCheckBox* resizeForWhatsappCheckbox;
 
     QGroupBox* resizeOutputGroup;
+
+    QLabel* libraryDirectoryLabel;
+    QPushButton* changeDirectoryButton;
 };
 
 

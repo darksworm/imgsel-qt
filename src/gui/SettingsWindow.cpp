@@ -4,6 +4,9 @@
 #include "../util/config/ConfigManager.h"
 #include "../Application.h"
 #include <QHotkey>
+#include <QStandardPaths>
+
+#include <iostream>
 
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
@@ -44,6 +47,10 @@ void SettingsWindow::connectUI() {
     //     resizeForWhatsappCheckbox, &QCheckBox::stateChanged,
     //     this, &SettingsWindow::resizeForWhatsappChanged
     // );
+    connect(
+        changeDirectoryButton, &QAbstractButton::clicked,
+        this, &SettingsWindow::onChangeDirectoryButton
+    );
 #ifdef WIN32
     connect(
         launchOnStartupCheckbox, &QCheckBox::stateChanged,
@@ -127,9 +134,10 @@ void SettingsWindow::createActions() {
 
 void SettingsWindow::createUI() {
     auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+    auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
 
     hotkeyLabel = new QLabel("Hotkey: " + hotkey);
-    hotkeyChangeButton = new QPushButton("Change");
+    hotkeyChangeButton = new QPushButton("Change hotkey");
     hotkeyChangeButton->setAutoDefault(false);
 
     hotkeyChangeCancelButton = new QPushButton("Cancel");
@@ -143,6 +151,9 @@ void SettingsWindow::createUI() {
     startMinimizedCheckbox->setChecked(settings.value("start_minimized").toInt());
     // resizeForWhatsappCheckbox->setChecked(settings.value("resize_for_whatsapp").toInt());
     // resizeOutputGroup = new QGroupBox("Resize output images");
+    
+    libraryDirectoryLabel = new QLabel("Library path: " + libraryPath);
+    changeDirectoryButton = new QPushButton("Change image library directory");
     
     auto dragImagesLabel = new QLabel("- Drag images/archives on this window to add to library -");
 
@@ -163,8 +174,10 @@ void SettingsWindow::createUI() {
     launchOnStartupCheckbox->setChecked(settings.value("launch_on_startup").toInt());
     mainLayout->addWidget(launchOnStartupCheckbox);
 #endif
-    mainLayout->addWidget(startMinimizedCheckbox);
     // mainLayout->addWidget(resizeForWhatsappCheckbox);
+    mainLayout->addWidget(libraryDirectoryLabel);
+    mainLayout->addWidget(changeDirectoryButton);
+    mainLayout->addWidget(startMinimizedCheckbox);
     mainLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
 
@@ -191,7 +204,7 @@ void SettingsWindow::onHotkeyChangeCancelButton() {
     changingHotkey = false;
 
     hotkeyLabel->setText("Hotkey: " + hotkey);
-    hotkeyChangeButton->setText("Change");
+    hotkeyChangeButton->setText("Change hotkey");
 
     hotkeyAccumulator = "";
     hotkeyChangeCancelButton->hide();
@@ -319,4 +332,19 @@ void SettingsWindow::successfullyRegisteredHotkey(QString hotkey) {
 
     settings.setValue("hotkey_sequence", hotkey);
     onHotkeyChangeCancelButton();
+}
+
+void SettingsWindow::onChangeDirectoryButton() {
+    QFileDialog dialog(this);
+
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+
+    auto loc = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first();
+    dialog.setDirectory(loc);
+
+    if (dialog.exec()) {
+        auto newDir = dialog.selectedFiles().first();
+        settings.setValue("library_path", newDir);
+    }
 }

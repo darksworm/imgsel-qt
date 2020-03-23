@@ -3,11 +3,12 @@
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
 #endif
+#include <QStandardPaths>
 
-#include <iostream>
 
 Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplication(argc, argv, true) {
     _singular = new QSharedMemory("IMGSEL", this);
+
     this->oneShotMode = oneShotMode;
 }
 
@@ -83,4 +84,13 @@ void Application::setSettingsWindow(SettingsWindow *window) {
         settingsWindow, &SettingsWindow::hotkeyBindingChange, 
         this, &Application::hotkeyBindingChange
     );
+}
+
+QString Application::defaultLibraryDirectory() {
+    auto homeDir = QStandardPaths::standardLocations(QStandardPaths::HomeLocation).first();
+    return homeDir + "/" + ".emojigun";
+}
+
+bool Application::isOneShotMode() {
+    return oneShotMode;
 }
