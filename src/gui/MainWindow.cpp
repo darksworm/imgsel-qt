@@ -263,6 +263,8 @@ void MainWindow::display() {
         inputHandler.reset(InputHandlerFactory::getInputHandler(inputMode));
     }
 
+    imagePickerDrawer->drawFrame(nullptr, false);
+
     show();
     raise();
     setFocus();
