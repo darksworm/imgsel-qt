@@ -122,6 +122,9 @@ endif ()
 # export compile commands for YCM
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes-32x25.png icon.png COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
+
 # Do not build QHotkey tests
 set_target_properties(HotkeyTest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 install(TARGETS ${PROJECT_NAME} EXPORT imgsel DESTINATION bin)

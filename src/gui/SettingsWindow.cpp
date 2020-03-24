@@ -16,6 +16,12 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     createTrayIcon();
     connectUI();
 
+    QIcon icon("icon.png");
+
+    setWindowIcon(icon);
+    window->setWindowIcon(icon);
+    trayIcon->setIcon(icon);
+
     trayIcon->show();
 }
 
