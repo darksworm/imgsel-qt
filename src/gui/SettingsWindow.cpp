@@ -75,8 +75,10 @@ void SettingsWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
     switch (reason) {
         case QSystemTrayIcon::Trigger:
         case QSystemTrayIcon::DoubleClick:
+            show();
             break;
         case QSystemTrayIcon::MiddleClick:
+            window->display();
             break;
         default:
             ;
@@ -103,10 +105,11 @@ void SettingsWindow::closeEvent(QCloseEvent *event) {
                                     "system tray. To terminate EMOJIGUN, "
                                     "choose <b>Quit</b> in the context menu "
                                     "of the system tray entry."));
-        hide();
-        event->ignore();
-        settings.setValue("closed_settings_once", true);
     }
+
+    hide();
+    settings.setValue("closed_settings_once", true);
+    event->ignore();
 }
 
 void SettingsWindow::createTrayIcon() {
