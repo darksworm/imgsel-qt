@@ -19,7 +19,6 @@ protected:
     void keyReleaseEvent(QKeyEvent *event) override;
 
 private slots:
-    void messageClicked();
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void onHotkeyChangeButton();
     void onHotkeyChangeCancelButton();

@@ -37,10 +37,6 @@ void SettingsWindow::connectUI() {
     );
 
     connect(
-        trayIcon, &QSystemTrayIcon::messageClicked, 
-        this, &SettingsWindow::messageClicked
-    );
-    connect(
         trayIcon, &QSystemTrayIcon::activated, 
         this, &SettingsWindow::iconActivated
     );
@@ -75,12 +71,6 @@ void SettingsWindow::connectUI() {
     );
 }
 
-void SettingsWindow::messageClicked() {
-    QMessageBox::information(nullptr, tr("Systray"),
-                             tr("Sorry, I already gave what help I could.\n"
-                                "Maybe you should try asking a human?"));
-}
-
 void SettingsWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
     switch (reason) {
         case QSystemTrayIcon::Trigger:
@@ -105,14 +95,17 @@ void SettingsWindow::closeEvent(QCloseEvent *event) {
         return;
     }
 #endif
-    if (trayIcon->isVisible()) {
+    auto hasClosedOnce = settings.value("closed_settings_once", false).toBool();
+
+    if (trayIcon->isVisible() && !hasClosedOnce) {
         QMessageBox::information(this, tr("Systray"),
-                                 tr("The program will keep running in the "
-                                    "system tray. To terminate the program, "
+                                 tr("EMOJIGUN will keep running in the "
+                                    "system tray. To terminate EMOJIGUN, "
                                     "choose <b>Quit</b> in the context menu "
                                     "of the system tray entry."));
         hide();
         event->ignore();
+        settings.setValue("closed_settings_once", true);
     }
 }
 
@@ -189,6 +182,7 @@ void SettingsWindow::createUI() {
 
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
     setLayout(mainLayout);
+    setMinimumWidth(305);
 }
 
 void SettingsWindow::onHotkeyChangeButton() {
@@ -275,7 +269,11 @@ void SettingsWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void SettingsWindow::keyPressEvent(QKeyEvent *event) {
-    QDialog::keyPressEvent(event);
+    if (event->key() != Qt::Key_Escape) {
+        QDialog::keyPressEvent(event);
+    } else if (!changingHotkey) {
+        close();
+    }
 
     if (!changingHotkey) {
         return;
