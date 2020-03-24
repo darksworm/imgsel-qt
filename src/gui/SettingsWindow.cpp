@@ -22,6 +22,7 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     window->setWindowIcon(icon);
     trayIcon->setIcon(icon);
 
+    setAcceptDrops(true);
     trayIcon->show();
 }
 
@@ -353,5 +354,33 @@ void SettingsWindow::onChangeDirectoryButton() {
     if (dialog.exec()) {
         auto newDir = dialog.selectedFiles().first();
         settings.setValue("library_path", newDir);
+    }
+}
+
+void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
+    std::cout << event->mimeData()->text().toStdString();
+
+    if (event->mimeData()->hasImage()){
+        std::cout << "YES";
+        event->acceptProposedAction();
+    }
+
+    std::vector<QString> archiveMimeTypes = {
+        "application/gzip",
+        "application/x-tar",
+        "application/x-rar-compressed",
+        "application/zip"
+    };
+
+    for(const auto& mimeType: archiveMimeTypes) {
+        if (event->mimeData()->hasFormat(mimeType)) {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+void SettingsWindow::dropEvent(QDropEvent *event) {
+    for(const auto& mimeType: event->mimeData()->formats()) {
+        std::cout << mimeType.toStdString();
     }
 }
