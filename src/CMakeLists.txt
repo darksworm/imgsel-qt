@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.12)
 
 project(imgsel VERSION 0.2.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
+
+set(CMAKE_AUTOMOC ON)
 
 add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h
         util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
@@ -17,7 +19,9 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
         gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h
         util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
-        Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h)
+        Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
+        input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
+        gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp gui/MainWindow.h)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
@@ -75,6 +79,17 @@ if (WIN32)
         )
 endif ()
 
+include(FetchContent)
+FetchContent_Declare(
+        qhotkey
+        GIT_REPOSITORY https://github.com/Skycoder42/QHotkey.git
+        GIT_TAG        master
+)
+FetchContent_MakeAvailable(qhotkey)
+
+target_link_libraries(${PROJECT_NAME} QHotkey::QHotkey)
+target_include_directories(${PROJECT_NAME} PUBLIC ${qhotkey_SOURCE_DIR}/QHotkey)
+
 IF (UNIX AND NOT APPLE)
     find_package(X11)
     if (X11_FOUND)
@@ -104,6 +119,14 @@ IF (UNIX AND NOT APPLE)
     endif ()
 endif ()
 
+# export compile commands for YCM
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes-32x25.png icon.png COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
+
+# Do not build QHotkey tests
+set_target_properties(HotkeyTest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 install(TARGETS ${PROJECT_NAME} EXPORT imgsel DESTINATION bin)
 
 set_target_properties(

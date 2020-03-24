@@ -8,21 +8,40 @@
 #include "ConfigManager.h"
 #include "ConfigBuilder.h"
 #include "../StringTools.h"
+#include "../../input/handler/instruction/PreprocessorFlags.h"
 #include <set>
 #include <cmath>
+#include <QtCore/QProcess>
+#include "../../Application.h"
 
 void ConfigManager::loadConfig() {
     std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
 
     bool autoMode = !cliParams.rowsAndCols.has_value();
+    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
 
     QStringList allowedExtensions;
     for (const auto &ext : Config::getImageExtensions()) {
         allowedExtensions << "*." + QString::fromStdString(ext);
     }
 
-    for (auto &path : cliParams.imageFiles) {
+    auto imageFilePaths = cliParams.imageFiles;
+
+    if (!oneShotMode) {
+        QSettings settings("EMOJIGUN", "EMOJIGUN");
+
+        auto defaultDir = Application::defaultLibraryDirectory();
+        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+
+        if (imageDirFromSettings == defaultDir) {
+            QDir().mkdir(imageDirFromSettings);
+        }
+
+        imageFilePaths.emplace_back(imageDirFromSettings.toStdString());
+    }
+
+    for (auto &path : imageFilePaths) {
         QDir dir(QString::fromStdString(path));
 
         if (dir.exists()) {
@@ -93,6 +112,11 @@ void ConfigManager::loadConfig() {
             image.detach();
         }
 
+        if (images.empty()) {
+            widths.insert(50);
+            heights.insert(50);
+        }
+
         // get middle elements
         auto widthsIterator = widths.begin();
         std::advance(widthsIterator, widths.size() / 2);
@@ -158,6 +182,19 @@ void ConfigManager::loadConfig() {
         });
     }
 
+#ifdef WITH_X11
+    QProcess process;
+    process.setProgram("xdotool");
+    process.setArguments(QStringList() << "getwindowfocus" << "getwindowname");
+    process.start();
+    process.waitForFinished(-1);
+    QString title = process.readAll();
+
+    if (title.toLower().contains("whatsapp")) {
+        builder.addPreprocessorFlag(PreprocessorFlags::WhatsAppWhitespace);
+    }
+#endif
+
     ConfigManager::config = builder.build();
     ConfigManager::configLoaded = true;
 }
@@ -176,4 +213,8 @@ ConfigManager::ConfigManager() {
 
 void ConfigManager::setCLIParams(CLIParams params) {
     ConfigManager::cliParams = std::move(params);
+}
+
+void ConfigManager::invalidateConfig() {
+    ConfigManager::configLoaded = false;
 }

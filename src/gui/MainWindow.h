@@ -6,10 +6,18 @@
 #include "picker/ImagePickerDrawer.h"
 
 class MainWindow : public QWidget {
+    Q_OBJECT
     void paintEvent(QPaintEvent *event) override;
 
 public:
-    MainWindow();
+    explicit MainWindow();
+
+public slots:
+    void display();
+
+signals:
+    void displayed(WId windowId);
+    void exitInstructionReceived();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

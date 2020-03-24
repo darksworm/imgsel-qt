@@ -4,6 +4,7 @@
 
 #include "Config.h"
 #include "../image.h"
+#include "../../input/handler/instruction/PreprocessorFlags.h"
 
 class ConfigBuilder {
 private:
@@ -89,6 +90,11 @@ public:
 
     ConfigBuilder &setHeight(unsigned int height) {
         config->height = height;
+        return *this;
+    }
+
+    ConfigBuilder &addPreprocessorFlag(PreprocessorFlags flag) {
+        config->preprocessorFlags = config->preprocessorFlags | flag;
         return *this;
     }
 

@@ -4,6 +4,7 @@
 #include "../../input/InputMode.h"
 #include "../image.h"
 #include "../Size.h"
+#include "../../input/handler/instruction/PreprocessorFlags.h"
 
 class Config {
     friend class ConfigBuilder;
@@ -34,6 +35,8 @@ private:
     QRect screenGeometry;
 
     std::vector<Image> images;
+
+    PreprocessorFlags preprocessorFlags = PreprocessorFlags::None;
 
     Config() = default;
 
@@ -106,6 +109,10 @@ public:
 
     std::optional<unsigned int> getHeight() const {
         return height;
+    }
+
+    PreprocessorFlags getPreprocessorFlags() const {
+        return preprocessorFlags;
     }
 
     std::optional<Size> getResizeOutputToSize() const {
