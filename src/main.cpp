@@ -102,6 +102,8 @@ int main(int argc, char *argv[]) {
     if (oneShotMode) {
         window->display();
     } else {
+        Q_INIT_RESOURCE(qtres);
+
         auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
         auto settingsWindow = new SettingsWindow(window);
 

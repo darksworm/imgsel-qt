@@ -16,7 +16,7 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     createTrayIcon();
     connectUI();
 
-    QIcon icon("icon.png");
+    QIcon icon(":/assets/eyes-32x25.png");
 
     setWindowIcon(icon);
     window->setWindowIcon(icon);

@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h
         util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
@@ -21,13 +22,14 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
         Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
-        gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp gui/MainWindow.h)
-
-configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
+        gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp
+        gui/MainWindow.h qtres.qrc)
 
 find_package(Qt5Widgets REQUIRED)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+
+configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} Qt5::QWindowsIntegrationPlugin)
@@ -122,7 +124,6 @@ endif ()
 # export compile commands for YCM
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes-32x25.png icon.png COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
 
 # Do not build QHotkey tests
