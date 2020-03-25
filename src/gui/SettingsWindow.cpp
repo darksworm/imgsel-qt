@@ -353,5 +353,6 @@ void SettingsWindow::onChangeDirectoryButton() {
     if (dialog.exec()) {
         auto newDir = dialog.selectedFiles().first();
         settings.setValue("library_path", newDir);
+        libraryDirectoryLabel->setText("Library path: " + newDir);
     }
 }
