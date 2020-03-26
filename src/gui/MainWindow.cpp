@@ -191,6 +191,9 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
                         auto scale = (double) targetSize.width / width;
                         int new_height = height * scale;
                         image = image.scaledToHeight(new_height);
+
+                        height = new_height;
+                        width = width * scale;
                     }
 
                     if (targetSize.height > 0 && height > targetSize.height) {
