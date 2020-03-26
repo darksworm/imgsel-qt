@@ -1,6 +1,7 @@
 #include "ImageDrawer.h"
 #include "../../util/config/ConfigManager.h"
 #include "../../util/exceptions/ImageNotLoadable.h"
+#include <iostream>
 
 std::optional<QImage> loadImage(std::string path) {
     std::optional<QImage> result;
@@ -22,6 +23,9 @@ std::optional<QImage> loadImage(std::string path) {
             auto scale = (double) config.getMaxImageWidth() / width;
             int new_height = height * scale;
             image = image.scaledToHeight(new_height);
+
+            height = new_height;
+            width = width * scale;
         }
 
         if (config.getMaxImageHeight() > 0 && height > config.getMaxImageHeight()) {
