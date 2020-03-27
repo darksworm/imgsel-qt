@@ -190,7 +190,7 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
                     if (targetSize.width > 0 && width > targetSize.width) {
                         auto scale = (double) targetSize.width / width;
                         int new_height = height * scale;
-                        image = image.scaledToHeight(new_height);
+                        image = image.scaledToHeight(new_height, Qt::SmoothTransformation);
 
                         height = new_height;
                         width = width * scale;
@@ -199,7 +199,7 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
                     if (targetSize.height > 0 && height > targetSize.height) {
                         auto scale = (double) targetSize.height / height;
                         int new_width = width * scale;
-                        image = image.scaledToWidth(new_width);
+                        image = image.scaledToWidth(new_width, Qt::SmoothTransformation);                    
                     }
 
                     auto tempImage = new QTemporaryFile;
