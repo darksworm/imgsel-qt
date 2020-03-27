@@ -6,8 +6,6 @@
 #include <QHotkey>
 #include <QStandardPaths>
 
-#include <iostream>
-
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
 
@@ -68,6 +66,25 @@ void SettingsWindow::connectUI() {
     connect(
         (Application *)Application::instance(), &Application::successfullyRegisteredHotkey,
         this, &SettingsWindow::successfullyRegisteredHotkey
+    );
+
+    connect(
+        resizeOutputImageCheckbox, &QCheckBox::stateChanged,
+        this, &SettingsWindow::resizeOutputChanged
+    );
+
+    connect(
+        outputImageWidthLineEdit, &QLineEdit::textChanged,
+        this, &SettingsWindow::outputSizeChanged
+    );
+    connect(
+        outputImageHeightLineEdit, &QLineEdit::textChanged,
+        this, &SettingsWindow::outputSizeChanged
+    );
+
+    connect(
+        applyOutputImageResizeSettingsButton, &QAbstractButton::clicked,
+        this, &SettingsWindow::onApplyOutputImageResizeSettingsButton
     );
 }
 
@@ -168,6 +185,53 @@ void SettingsWindow::createUI() {
 
     hotkeyLayout->addLayout(hotkeyBtnLayout);
 
+    auto resizeOutputGroup = new QGridLayout();
+
+    resizeOutputImageCheckbox = new QCheckBox("Limit output image size");
+
+    auto resizeOutputEnabled = settings.value("resize_output_image", false).toBool();
+    auto savedWidth = settings.value("resize_output_image_width", "").toString();
+    auto savedHeight = settings.value("resize_output_image_height", "").toString();
+
+    resizeOutputImageCheckbox->setChecked(resizeOutputEnabled);
+
+    QRegExpValidator* rxv = new QRegExpValidator(QRegExp("\\d*"), this); 
+
+    outputWidthLabel = new QLabel("Max width:");
+    outputHeightLabel = new QLabel("Max height:");
+
+    outputImageWidthLineEdit = new QLineEdit();
+    outputImageHeightLineEdit = new QLineEdit();
+
+    outputImageWidthLineEdit->setText(savedWidth);
+    outputImageHeightLineEdit->setText(savedHeight);
+    outputImageWidthLineEdit->setMaximumWidth(45);
+    outputImageHeightLineEdit->setMaximumWidth(45);
+
+    outputImageWidthLineEdit->setValidator(rxv);
+    outputImageHeightLineEdit->setValidator(rxv);
+
+    applyOutputImageResizeSettingsButton = new QPushButton("Apply");
+    applyOutputImageResizeSettingsButton->setEnabled(false);
+
+    if (!resizeOutputEnabled) {
+        outputWidthLabel->hide();
+        outputHeightLabel->hide();
+
+        outputImageWidthLineEdit->hide();
+        outputImageHeightLineEdit->hide();
+
+        applyOutputImageResizeSettingsButton->hide();
+    }
+
+    resizeOutputGroup->addWidget(outputWidthLabel, 1, 0);
+    resizeOutputGroup->addWidget(outputImageWidthLineEdit, 1, 1, Qt::AlignLeft);
+
+    resizeOutputGroup->addWidget(outputHeightLabel, 1, 2);
+    resizeOutputGroup->addWidget(outputImageHeightLineEdit, 1, 3, Qt::AlignLeft);
+
+    resizeOutputGroup->addWidget(applyOutputImageResizeSettingsButton, 3, 0, 1, 4);
+
     auto mainLayout = new QVBoxLayout();
 
     mainLayout->addLayout(hotkeyLayout);
@@ -179,6 +243,8 @@ void SettingsWindow::createUI() {
     // mainLayout->addWidget(resizeForWhatsappCheckbox);
     mainLayout->addWidget(libraryDirectoryLabel);
     mainLayout->addWidget(changeDirectoryButton);
+    mainLayout->addWidget(resizeOutputImageCheckbox);
+    mainLayout->addLayout(resizeOutputGroup);
     mainLayout->addWidget(startMinimizedCheckbox);
     // mainLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
@@ -301,7 +367,7 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
         auto oldHotkey = settings.value("hotkey_sequence", "meta+x").toString();
 
         if (oldHotkey == hotkeyAccumulator) {
-            hotkeyChangeButton->setEnabled(false);
+            hotkeyChangeButton->setEnabled(true);
             return;
         }
 
@@ -355,4 +421,45 @@ void SettingsWindow::onChangeDirectoryButton() {
         settings.setValue("library_path", newDir);
         libraryDirectoryLabel->setText("Library path: " + newDir);
     }
+}
+
+void SettingsWindow::resizeOutputChanged(int state) {
+    if (state) {
+        outputWidthLabel->show();
+        outputHeightLabel->show();
+
+        outputImageWidthLineEdit->show();
+        outputImageHeightLineEdit->show();
+
+        applyOutputImageResizeSettingsButton->show();
+    } else {
+        outputWidthLabel->hide();
+        outputHeightLabel->hide();
+
+        outputImageWidthLineEdit->hide();
+        outputImageHeightLineEdit->hide();
+
+        applyOutputImageResizeSettingsButton->hide();
+        settings.setValue("resize_output_image", false);
+    }
+}
+
+void SettingsWindow::outputSizeChanged(const QString &text) {
+    auto width = outputImageWidthLineEdit->text().toInt();
+    auto height = outputImageHeightLineEdit->text().toInt();
+
+    applyOutputImageResizeSettingsButton->setEnabled(width > 0 && height > 0);
+}
+
+void SettingsWindow::onApplyOutputImageResizeSettingsButton() {
+    auto width = outputImageWidthLineEdit->text().toInt();
+    auto height = outputImageHeightLineEdit->text().toInt();
+
+    settings.setValue("resize_output_image", true);
+    settings.setValue("resize_output_image_width", width);
+    settings.setValue("resize_output_image_height", height);
+
+    applyOutputImageResizeSettingsButton->setEnabled(false);
+
+    QMessageBox::information(this, "Success", "Resize settings saved successfully!");
 }

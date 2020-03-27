@@ -13,7 +13,7 @@ public:
     explicit MainWindow();
 
 public slots:
-    void display();
+    void display(bool invalidateConfig = false);
 
 signals:
     void displayed(WId windowId);

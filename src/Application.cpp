@@ -44,7 +44,9 @@ void Application::hotkeyBindingChange(QString newBinding) {
     hotkeyConnection = connect(
         hotkey, &QHotkey::activated,
         this, [&]() {
-            mainWindow->display();
+            if(!settingsWindow->isChangingHotkey()) {
+                mainWindow->display(true);
+            }
         }
     );
 

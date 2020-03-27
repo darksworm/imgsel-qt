@@ -253,7 +253,11 @@ void MainWindow::focusInEvent(QFocusEvent *event) {
     this->repaint();
 }
 
-void MainWindow::display() {
+void MainWindow::display(bool invalidateConfig) {
+    if (invalidateConfig) {
+        ConfigManager::invalidateConfig();
+    }
+
     auto config = ConfigManager::getOrLoadConfig();
     auto geo = config.getScreenGeometry();
 

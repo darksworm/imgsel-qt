@@ -15,6 +15,8 @@
 #include "../../Application.h"
 
 void ConfigManager::loadConfig() {
+    QSettings settings("EMOJIGUN", "EMOJIGUN");
+
     std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
 
@@ -29,8 +31,6 @@ void ConfigManager::loadConfig() {
     auto imageFilePaths = cliParams.imageFiles;
 
     if (!oneShotMode) {
-        QSettings settings("EMOJIGUN", "EMOJIGUN");
-
         auto defaultDir = Application::defaultLibraryDirectory();
         auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
 
@@ -180,6 +180,19 @@ void ConfigManager::loadConfig() {
                 .width = (unsigned) sizes.at(0),
                 .height = (unsigned) sizes.at(1)
         });
+    }
+
+    if (!oneShotMode) {
+        auto resizeSettingEnabled = settings.value("resize_output_image", false).toBool();
+        if (resizeSettingEnabled) {
+            auto resizeWidth = settings.value("resize_output_image_width", 32).toInt();
+            auto resizeHeight = settings.value("resize_output_image_height", 32).toInt();
+
+            builder.setResizeOutputToSize(Size{
+                    .width = (unsigned) resizeWidth,
+                    .height = (unsigned) resizeHeight
+            });
+        }
     }
 
 #ifdef WITH_X11
