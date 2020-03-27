@@ -113,8 +113,8 @@ void ConfigManager::loadConfig() {
         }
 
         if (images.empty()) {
-            widths.insert(50);
-            heights.insert(50);
+            widths.insert(128);
+            heights.insert(128);
         }
 
         // get middle elements
@@ -124,8 +124,16 @@ void ConfigManager::loadConfig() {
         auto heightsIterator = heights.begin();
         std::advance(heightsIterator, heights.size() / 2);
 
+        auto maxWidth = *widthsIterator;
+        auto maxHeight = *heightsIterator;
+
+        if (maxWidth > 192 || maxHeight > 192) { 
+            maxWidth = 192;
+            maxHeight = 192;
+        }
+
         // because we want medians
-        cliParams.maxImageSize = std::to_string((unsigned)*widthsIterator) + "x" + std::to_string((unsigned)*heightsIterator);
+        cliParams.maxImageSize = std::to_string((unsigned)maxWidth) + "x" + std::to_string((unsigned)maxHeight);
 
         auto imageSizes = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
 
@@ -136,7 +144,7 @@ void ConfigManager::loadConfig() {
         cliParams.margin = *cliParams.padding;
 
         // we don't want to take up the whole screen
-        double screenUsageModifier = 0.9;
+        double screenUsageModifier = 0.85;
 
         unsigned maxImagesInHeight = geo.height() /
                                      (imageSizes.at(1) + yEmptySpace * 3) * screenUsageModifier;
