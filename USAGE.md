@@ -1,7 +1,7 @@
 ## CLI parameters:
 ```
-IMGSEL - Image selection tool.
-Usage: ./imgsel [OPTIONS]
+EMOJIGUN - EMOJI sharing tool.
+Usage: ./emojigun [OPTIONS]
 
 Options:
   -h,--help                   Print this help message and exit
@@ -33,12 +33,12 @@ Options:
 ## Examples:
 #### Basic 6x10 fullscreen (params are good for 1920x1080)
 ```bash
-imgsel --files ~/.emoji/*.png --rows 6 --cols 10 --max-width 64 --max-height 64 --files ~/.temoji/*.png
+emojigun --files ~/.emoji/*.png --rows 6 --cols 10 --max-width 64 --max-height 64 --files ~/.temoji/*.png
 ```
 
 #### Stitch two emojis together (left-to-right) (requires imagemagcik)
 ```bash
-alias imgsel-default='imgsel --rows 6 --cols 10 --max-width 64 --max-height 64 --files ~/.temoji/*.png --print-path'
-convert -gravity center -background none $(imgsel-default) $(imgsel-default) +append /tmp/last-merged-emoji.png
+alias emojigun-default='emojigun --rows 6 --cols 10 --max-width 64 --max-height 64 --files ~/.temoji/*.png --print-path'
+convert -gravity center -background none $(emojigun-default) $(emojigun-default) +append /tmp/last-merged-emoji.png
 cat /tmp/last-merged-emoji.png | xclip -selection clipboard -target image/png -i
 ```

@@ -7,7 +7,7 @@
 
 
 Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplication(argc, argv, true) {
-    _singular = new QSharedMemory("IMGSEL", this);
+    _singular = new QSharedMemory("EMOJIGUN", this);
 
     this->oneShotMode = oneShotMode;
     setQuitOnLastWindowClosed(oneShotMode);

@@ -28,12 +28,12 @@ int main(int argc, char *argv[]) {
 
     if (oneShotMode) {
         CLIParams params;
-        CLI::App cli_app{"IMGSEL - Image selection tool."};
+        CLI::App cli_app{"EMOJIGUN - emoji sharing tool."};
 
         cli_app.get_option("--help")
                 ->group("Meta");
         cli_app.add_flag("-v,--version", [](auto in) {
-                    std::cout << "IMGSEL v" << PROJECT_VER << "\n";
+                    std::cout << "EMOJIGUN v" << PROJECT_VER << "\n";
                     exit(0);
                 }, "Show application version")
                 ->group("Meta");
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
                 ->group("Visual");
 
         cli_app.add_option("--window-size", params.size,
-                           "IMGSEL window size {width}x{height}")
+                           "EMOJIGUN window size {width}x{height}")
                 ->check(intXIntValidator)
                 ->group("Visual");
 

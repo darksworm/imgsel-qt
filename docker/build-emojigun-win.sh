@@ -3,7 +3,7 @@
 cd $(dirname "$0")
 
 cd ..
-docker run --rm -it -v $(pwd):/app imgsel-builder:latest /bin/bash -c '\
+docker run --rm -it -v $(pwd):/app emojigun-builder:latest /bin/bash -c '\
 cd /app/src && \
 rm -rf build; \
 mkdir build && \

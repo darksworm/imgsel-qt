@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(imgsel VERSION 0.2.0)
+project(emojigun VERSION 0.2.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
-set(CMAKE_MODULE_PATH ${IMGSEL_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -128,12 +128,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
 
 # Do not build QHotkey tests
 set_target_properties(HotkeyTest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
-install(TARGETS ${PROJECT_NAME} EXPORT imgsel DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} EXPORT emojigun DESTINATION bin)
 
 set_target_properties(
         ${PROJECT_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
-        RUNTIME_OUTPUT_NAME imgsel
+        RUNTIME_OUTPUT_NAME emojigun
         COMPILE_FLAGS "${WARNING_FLAGS}"
 )

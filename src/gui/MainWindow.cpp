@@ -310,7 +310,7 @@ void MainWindow::display(bool invalidateConfig) {
 }
 
 MainWindow::MainWindow() : QWidget() {
-    setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
+    setWindowTitle(QApplication::translate("APPLICATION", "EMOJIGUN"));
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
 
     setAttribute(Qt::WA_NoSystemBackground, true);

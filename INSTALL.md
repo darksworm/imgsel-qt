@@ -1,4 +1,4 @@
-Imgsel can currently only be run on linux systems which use the X window system (X11)
+Emojigun can currently only be run on linux systems which use the X window system (X11)
 
 Prerequisites:
 *  QT5
@@ -7,9 +7,9 @@ Prerequisites:
 
 ## Compiling
 ```bash
-git clone https://github.com/darksworm/imgsel-qt.git
-mkdir imgsel-qt/src/build
-cd imgsel-qt/src/build
+git clone https://github.com/darksworm/emojigun-qt.git
+mkdir emojigun-qt/src/build
+cd emojigun-qt/src/build
 cmake ..
 make
 ```
@@ -19,6 +19,6 @@ See compiling, then
 ```bash
 sudo make install
 ```
-and then imgsel should be available in your shell.
+and then emojigun should be available in your shell.
 
 see usage instructions: [USAGE.md](USAGE.md)

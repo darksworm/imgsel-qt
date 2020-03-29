@@ -8,7 +8,7 @@ A tool that can be used to quickly select a stored image and copy it to your cli
 
 ### The workflow
 
-1. Open imgsel (preferably, bind it to a hotkey)
+1. Open emojigun (preferably, bind it to a hotkey)
 2. Search for image by name, by typing it
 3. Select the image with arrow keys
 4. Press return to copy the image to your clipboard
