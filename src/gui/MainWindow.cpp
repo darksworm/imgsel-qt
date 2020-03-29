@@ -256,8 +256,8 @@ void MainWindow::focusInEvent(QFocusEvent *event) {
 
 void MainWindow::display(bool invalidateConfig) {
     if (invalidateConfig) {
-        ConfigManager::invalidateConfig();
-        imagePickerDrawer->reset();
+        bool imageListChanged = ConfigManager::invalidateConfigIfImageListChanged();
+        imagePickerDrawer->reset(imageListChanged);
     }
 
     auto config = ConfigManager::getOrLoadConfig();

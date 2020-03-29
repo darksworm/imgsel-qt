@@ -42,7 +42,7 @@ private:
 public:
     ImagePickerDrawer(QPixmap &pixmap);
 
-    void reset();
+    void reset(bool imageListChanged);
 
     void drawFrame(Image *selectedImage, bool redrawAll = false);
 

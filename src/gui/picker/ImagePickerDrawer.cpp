@@ -10,22 +10,25 @@
 
 ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
     shapeDrawer = new ImageDrawer(pixmap);
-    reset();
+    reset(true);
 }
 
-void ImagePickerDrawer::reset() {
+void ImagePickerDrawer::reset(bool imageListChanged) {
     auto config = ConfigManager::getOrLoadConfig();
 
-    this->page = 0;
-    this->selectedShape = nullptr;
+    if (imageListChanged) {
+        this->page = 0;
+        this->selectedShape = nullptr;
 
-    this->allImages = config.getImages();
-    this->images = config.getImages();
+        this->allImages = config.getImages();
+        this->images = config.getImages();
 
-    shapes.clear();
-    redrawAllInNextFrame = true;
+        shapes.clear();
+        redrawAllInNextFrame = true;
 
-    shapeDrawer->clearPixmap();
+        shapeDrawer->clearPixmap();
+    }
+
     shapeProperties = shapeDrawer->calcShapeProps();
 }
 

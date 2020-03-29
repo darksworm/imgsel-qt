@@ -8,6 +8,7 @@
 
 class Config {
     friend class ConfigBuilder;
+    friend class ConfigManager;
 
 private:
     bool isDebug;

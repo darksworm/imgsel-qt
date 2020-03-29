@@ -17,55 +17,13 @@
 void ConfigManager::loadConfig() {
     QSettings settings("EMOJIGUN", "EMOJIGUN");
 
-    std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
 
     bool autoMode = !cliParams.rowsAndCols.has_value();
-    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
-
-    QStringList allowedExtensions;
-    for (const auto &ext : Config::getImageExtensions()) {
-        allowedExtensions << "*." + QString::fromStdString(ext);
-    }
-
-    auto imageFilePaths = cliParams.imageFiles;
-
-    if (!oneShotMode) {
-        auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
-
-        if (imageDirFromSettings == defaultDir) {
-            QDir().mkdir(imageDirFromSettings);
-        }
-
-        imageFilePaths.emplace_back(imageDirFromSettings.toStdString());
-    }
+    auto imageFilePaths = getImagePaths();
 
     for (auto &path : imageFilePaths) {
-        QDir dir(QString::fromStdString(path));
-
-        if (dir.exists()) {
-            if (dir.isEmpty()) {
-                continue;
-            }
-
-            QStringList dirImages = dir.entryList(allowedExtensions);
-
-            if (dirImages.isEmpty()) {
-                continue;
-            }
-
-            for (const auto& img: dirImages) {
-                images.emplace_back(dir.absoluteFilePath(img).toStdString());
-            }
-        } else {
-            for (const auto &ext:imageExtensions) {
-                if (path.length() >= ext.length() && 0 == path.compare(path.length() - ext.length(), ext.length(), ext)) {
-                    images.emplace_back(path);
-                    break;
-                }
-            }
-        }
+        images.emplace_back(path);
     }
 
     QScreen *screen = nullptr;
@@ -193,19 +151,6 @@ void ConfigManager::loadConfig() {
         });
     }
 
-    if (!oneShotMode) {
-        auto resizeSettingEnabled = settings.value("resize_output_image", false).toBool();
-        if (resizeSettingEnabled) {
-            auto resizeWidth = settings.value("resize_output_image_width", 32).toInt();
-            auto resizeHeight = settings.value("resize_output_image_height", 32).toInt();
-
-            builder.setResizeOutputToSize(Size{
-                    .width = (unsigned) resizeWidth,
-                    .height = (unsigned) resizeHeight
-            });
-        }
-    }
-
 #ifdef WITH_X11
     QProcess process;
     process.setProgram("xdotool");
@@ -223,26 +168,116 @@ void ConfigManager::loadConfig() {
     ConfigManager::configLoaded = true;
 }
 
+std::vector<std::string> ConfigManager::getImagePaths() {
+    std::vector<std::string> imageExtensions = Config::getImageExtensions();
+
+    QStringList allowedExtensions;
+    for (const auto &ext : imageExtensions) {
+        allowedExtensions << "*." + QString::fromStdString(ext);
+    }
+
+    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
+    auto imageFilePaths = cliParams.imageFiles;
+
+    std::vector<std::string> images;
+
+    if (!oneShotMode) {
+        QSettings settings("EMOJIGUN", "EMOJIGUN");
+
+        auto defaultDir = Application::defaultLibraryDirectory();
+        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+
+        if (imageDirFromSettings == defaultDir) {
+            QDir().mkdir(imageDirFromSettings);
+        }
+
+        imageFilePaths.emplace_back(imageDirFromSettings.toStdString());
+    }
+
+    for (auto &path : imageFilePaths) {
+        QDir dir(QString::fromStdString(path));
+
+        if (dir.exists()) {
+            if (dir.isEmpty()) {
+                continue;
+            }
+
+            QStringList dirImages = dir.entryList(allowedExtensions);
+
+            if (dirImages.isEmpty()) {
+                continue;
+            }
+
+            for (const auto& img: dirImages) {
+                images.emplace_back(dir.absoluteFilePath(img).toStdString());
+            }
+        } else {
+            for (const auto &ext:imageExtensions) {
+                if (path.length() >= ext.length() && 0 == path.compare(path.length() - ext.length(), ext.length(), ext)) {
+                    images.emplace_back(path);
+                    break;
+                }
+            }
+        }
+    }
+
+    return images;
+}
+
 Config ConfigManager::getOrLoadConfig() {
+    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
+
     if (!ConfigManager::configLoaded) {
         loadConfig();
+    }
+
+    if (!oneShotMode) {
+       applyConfigFromQSettings();
     }
 
     return *ConfigManager::config;
 }
 
-ConfigManager::ConfigManager() {
-    ConfigManager::configLoaded = false;
+void ConfigManager::applyConfigFromQSettings(){
+    QSettings settings("EMOJIGUN", "EMOJIGUN");
+    auto resizeSettingEnabled = settings.value("resize_output_image", false).toBool();
+
+    if (resizeSettingEnabled) {
+        auto resizeWidth = settings.value("resize_output_image_width", 32).toInt();
+        auto resizeHeight = settings.value("resize_output_image_height", 32).toInt();
+
+        config->resizeOutputToSize = {
+                .width = (unsigned) resizeWidth,
+                .height = (unsigned) resizeHeight
+        };
+    }
 }
 
 void ConfigManager::setCLIParams(CLIParams params) {
     ConfigManager::cliParams = std::move(params);
 }
 
-void ConfigManager::invalidateConfig() {
-    if (ConfigManager::configLoaded) {
-        delete ConfigManager::config;
+bool ConfigManager::invalidateConfigIfImageListChanged() {
+    // return bool - whether image list has changed
+    if (!ConfigManager::configLoaded) {
+        return false;
     }
 
+    auto oldImages = ConfigManager::config->getImages();
+    std::vector<std::string> oldImagePaths;
+
+    for (auto &img : oldImages) {
+        oldImagePaths.emplace_back(img.getPath());
+    }
+
+    auto newImagePaths = getImagePaths();
+
+    if (oldImagePaths == newImagePaths) {
+        return false;
+    }
+
+    delete ConfigManager::config;
     ConfigManager::configLoaded = false;
+
+    return true;
 }
