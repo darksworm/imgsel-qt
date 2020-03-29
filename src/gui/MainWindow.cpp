@@ -14,6 +14,7 @@
 
 void MainWindow::paintEvent(QPaintEvent *event) {
     auto config = ConfigManager::getOrLoadConfig();
+
     QWidget::paintEvent(event);
     QPainter painter(this);
 
@@ -39,33 +40,38 @@ void MainWindow::paintEvent(QPaintEvent *event) {
         painter.drawImage(0, 0, im);
     }
 
+    QString displayName;
+
     if (imagePickerDrawer->getFilterString().length() > 0) {
-        QFont queryFont;
-        queryFont.setFamily(queryFont.defaultFamily());
-        queryFont.setPixelSize(28);
-        QFontMetrics fm(queryFont);
+        displayName = QString::fromUtf8(imagePickerDrawer->getFilterString().c_str());
+    } else {
+        displayName = "Type to search";
+    }
 
-        QString displayName = QString::fromUtf8(imagePickerDrawer->getFilterString().c_str());
-        unsigned int textWidth = 0;
-        auto maxTextWidth = config.getScreenGeometry().width() - 20;
+    QFont queryFont;
+    queryFont.setFamily(queryFont.defaultFamily());
+    queryFont.setPixelSize(28);
+    QFontMetrics fm(queryFont);
 
-        do {
+    unsigned int textWidth = 0;
+    auto maxTextWidth = config.getScreenGeometry().width() - 20;
+
+    do {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
-            textWidth = fm.horizontalAdvance(displayName);
+        textWidth = fm.horizontalAdvance(displayName);
 #else
-            textWidth = fm.width(displayName);
+        textWidth = fm.width(displayName);
 #endif
 
-            if (textWidth >= maxTextWidth) {
-                displayName = displayName.left(displayName.length() - 1);
-            }
-        } while (textWidth >= maxTextWidth);
+        if (textWidth >= maxTextWidth) {
+            displayName = displayName.left(displayName.length() - 1);
+        }
+    } while (textWidth >= maxTextWidth);
 
-        painter.setFont(queryFont);
-        painter.setPen(Qt::white);
+    painter.setFont(queryFont);
+    painter.setPen(Qt::white);
 
-        painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, 36, displayName);
-    }
+    painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, 36, displayName);
 
     QFont inputModeFont;
     inputModeFont.setFamily(inputModeFont.defaultFamily());
