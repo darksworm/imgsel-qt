@@ -4,6 +4,7 @@
 #include <QtWidgets/QApplication>
 #include <iostream>
 #include "MainWindow.h"
+#include "../Application.h"
 #include "../util/config/ConfigManager.h"
 #include "../input/handler/InputHandlerFactory.h"
 #include "../input/handler/instruction/MoveInstruction.h"
@@ -256,9 +257,38 @@ void MainWindow::focusInEvent(QFocusEvent *event) {
 void MainWindow::display(bool invalidateConfig) {
     if (invalidateConfig) {
         ConfigManager::invalidateConfig();
+        imagePickerDrawer->reset();
     }
 
     auto config = ConfigManager::getOrLoadConfig();
+
+    if (config.getImages().empty()) {
+        QSettings settings("EMOJIGUN", "EMOJIGUN");
+        auto defaultDir = Application::defaultLibraryDirectory();
+        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+
+        QMessageBox noImagesMsgBox;
+
+        QPushButton *getEmojisBtn = noImagesMsgBox.addButton("Get emojis", QMessageBox::ActionRole);
+        noImagesMsgBox.addButton("Ok", QMessageBox::ActionRole);
+
+        noImagesMsgBox.setParent(nullptr);
+        noImagesMsgBox.setIcon(QMessageBox::Icon::Critical);
+        noImagesMsgBox.setWindowTitle("No images found!");
+        noImagesMsgBox.setText(
+            "To use EMOJIGUN, you must first add emojis to your library. Please copy your emojis to your library folder at " + imageDirFromSettings + "."
+        );
+
+        noImagesMsgBox.exec();
+
+        if (noImagesMsgBox.clickedButton() == getEmojisBtn) {
+            QString link = "https://emojigun.com/#/loader";
+            QDesktopServices::openUrl(link);
+        }
+
+        return;
+    }
+
     auto geo = config.getScreenGeometry();
 
     setGeometry(geo);

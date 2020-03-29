@@ -10,6 +10,7 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
     _singular = new QSharedMemory("IMGSEL", this);
 
     this->oneShotMode = oneShotMode;
+    setQuitOnLastWindowClosed(oneShotMode);
 }
 
 Application::~Application() {

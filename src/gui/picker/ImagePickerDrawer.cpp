@@ -5,11 +5,15 @@
 
 #include "../drawer/ImageDrawer.h"
 #include "ImagePickerMove.h"
-#include "../../util/config/ConfigManager.h"
 #include "../../util/exceptions/ImageNotLoadable.h"
 #include "../../util/exceptions/OutOfBounds.h"
 
 ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
+    shapeDrawer = new ImageDrawer(pixmap);
+    reset();
+}
+
+void ImagePickerDrawer::reset() {
     auto config = ConfigManager::getOrLoadConfig();
 
     this->page = 0;
@@ -18,7 +22,10 @@ ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
     this->allImages = config.getImages();
     this->images = config.getImages();
 
-    shapeDrawer = new ImageDrawer(pixmap);
+    shapes.clear();
+    redrawAllInNextFrame = true;
+
+    shapeDrawer->clearPixmap();
     shapeProperties = shapeDrawer->calcShapeProps();
 }
 

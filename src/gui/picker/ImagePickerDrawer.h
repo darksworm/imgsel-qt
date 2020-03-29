@@ -42,6 +42,8 @@ private:
 public:
     ImagePickerDrawer(QPixmap &pixmap);
 
+    void reset();
+
     void drawFrame(Image *selectedImage, bool redrawAll = false);
 
     bool move(ImagePickerMove move, unsigned int steps = 1);

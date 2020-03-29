@@ -97,6 +97,11 @@ void ConfigManager::loadConfig() {
         geo = screen->geometry();
     }
 
+    std::vector<int> maxImageSize;
+    std::vector<int> padding;
+    std::vector<int> margin;
+    std::vector<int> rowsAndCols;
+
     if (autoMode) {
         std::multiset<unsigned> widths;
         std::multiset<unsigned> heights;
@@ -133,32 +138,30 @@ void ConfigManager::loadConfig() {
         }
 
         // because we want medians
-        cliParams.maxImageSize = std::to_string((unsigned)maxWidth) + "x" + std::to_string((unsigned)maxHeight);
+        maxImageSize = { (int)maxWidth, (int)maxHeight };
 
-        auto imageSizes = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
+        unsigned xEmptySpace = maxImageSize.at(0) / 2.5;
+        unsigned yEmptySpace = maxImageSize.at(1) / 2.5;
 
-        unsigned xEmptySpace = imageSizes.at(0) / 2.5;
-        unsigned yEmptySpace = imageSizes.at(1) / 2.5;
-
-        cliParams.padding = std::to_string(xEmptySpace) + "x" + std::to_string(yEmptySpace);
-        cliParams.margin = *cliParams.padding;
+        padding = { (int)xEmptySpace, (int) yEmptySpace };
+        margin = padding;
 
         // we don't want to take up the whole screen
         double screenUsageModifier = 0.85;
 
         unsigned maxImagesInHeight = geo.height() /
-                                     (imageSizes.at(1) + yEmptySpace * 3) * screenUsageModifier;
+                                     (maxImageSize.at(1) + yEmptySpace * 3) * screenUsageModifier;
 
         unsigned maxImagesInWidth = geo.width() /
-                                    (imageSizes.at(0) + xEmptySpace * 3) * screenUsageModifier;
+                                    (maxImageSize.at(0) + xEmptySpace * 3) * screenUsageModifier;
 
-        cliParams.rowsAndCols = std::to_string(maxImagesInWidth) + "x" + std::to_string(maxImagesInHeight);
+        rowsAndCols = { (int) maxImagesInWidth, (int) maxImagesInHeight };
+    } else {
+        rowsAndCols = StringTools::splitIntoInts(cliParams.rowsAndCols.value(), "x");
+        maxImageSize = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
+        padding = StringTools::splitIntoInts(cliParams.padding.value(), "x");
+        margin = StringTools::splitIntoInts(cliParams.margin.value(), "x");
     }
-
-    auto rowsAndCols = StringTools::splitIntoInts(cliParams.rowsAndCols.value(), "x");
-    auto maxImageSize = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
-    auto padding = StringTools::splitIntoInts(cliParams.padding.value(), "x");
-    auto margin = StringTools::splitIntoInts(cliParams.margin.value(), "x");
 
     builder.setIsDebug(DEBUG)
             .setDefaultInputMode(cliParams.startInVimMode ? InputMode::VIM : InputMode::DEFAULT)
@@ -237,5 +240,9 @@ void ConfigManager::setCLIParams(CLIParams params) {
 }
 
 void ConfigManager::invalidateConfig() {
+    if (ConfigManager::configLoaded) {
+        delete ConfigManager::config;
+    }
+
     ConfigManager::configLoaded = false;
 }

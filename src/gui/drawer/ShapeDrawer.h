@@ -1,9 +1,11 @@
 #pragma once
 
+#include "../../util/config/ConfigManager.h"
 #include "../util/Shape.h"
 #include <climits>
 #include <numeric>
 #include <optional>
+#include <QPainter>
 
 class ShapeDrawer {
     friend class ImagePickerDrawer;
@@ -25,6 +27,22 @@ protected:
     virtual void clearSelectedShapeIndicator(ShapeProperties shapeProperties, Shape shape) = 0;
 
     virtual void clearShape(ShapeProperties shapeProperties, Shape shape) = 0;
+
+    void clearPixmap() {
+        QPainter painter;
+
+        painter.begin(&pixmap);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+
+        painter.fillRect(
+                0,
+                0,
+                pixmap.width(),
+                pixmap.height(),
+                Qt::transparent);
+
+        painter.end();
+    }
 
 public:
     ShapeDrawer(QPixmap &pixmap) : pixmap(pixmap) {

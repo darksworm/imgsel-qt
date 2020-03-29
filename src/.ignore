@@ -1,0 +1,5 @@
+.clangd/
+build/
+build-lin/
+cmake-build-debug/
+CMakeFiles/
