@@ -9,4 +9,4 @@ rm -rf build; \
 mkdir build && \
 cd build && \
 i686-w64-mingw32.static-cmake .. && \
-make CROSS=i686-w64-mingw32.static -j 4'
+make CROSS=i686-w64-mingw32.static -j8'
