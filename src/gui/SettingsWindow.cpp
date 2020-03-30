@@ -171,7 +171,7 @@ void SettingsWindow::createUI() {
     hotkeyChangeCancelButton->setAutoDefault(false);
     hotkeyChangeCancelButton->hide();
 
-    startMinimizedCheckbox = new QCheckBox("Launch EMOJIGUN minimized");
+    startMinimizedCheckbox = new QCheckBox("Launch minimized");
 
    // resizeForWhatsappCheckbox = new QCheckBox("Resize images to fit better in whatsapp");
 
@@ -244,7 +244,7 @@ void SettingsWindow::createUI() {
 
     mainLayout->addLayout(hotkeyLayout);
 #ifdef WIN32
-    launchOnStartupCheckbox = new QCheckBox("Launch EMOJIGUN on system startup");
+    launchOnStartupCheckbox = new QCheckBox("Launch on system startup");
     launchOnStartupCheckbox->setChecked(settings.value("launch_on_startup").toInt());
     mainLayout->addWidget(launchOnStartupCheckbox);
 #endif
