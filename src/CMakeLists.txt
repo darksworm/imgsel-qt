@@ -8,7 +8,13 @@ set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/picker/ImagePickerDrawer.h
+set(ADD_EXECUTABLE_PRE "")
+
+if (WIN32)
+    set(ADD_EXECUTABLE_PRE WIN32)
+endif ()
+
+add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePickerDrawer.cpp 
         util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
         input/handler/instruction/InputInstructionType.h input/handler/filters/FilteringInputHandler.h
         input/handler/InputHandler.cpp input/handler/filters/FilteringInputHandler.cpp
@@ -23,7 +29,7 @@ add_executable(${PROJECT_NAME} main.cpp gui/picker/ImagePickerDrawer.cpp gui/pic
         Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
         gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp
-        gui/MainWindow.h qtres.qrc)
+        gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h)
 
 find_package(Qt5Widgets REQUIRED)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets)

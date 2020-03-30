@@ -97,3 +97,34 @@ QString Application::defaultLibraryDirectory() {
 bool Application::isOneShotMode() {
     return oneShotMode;
 }
+
+void Application::setPathToExecutable(QString pathToExecutable) {
+    this->pathToExecutable = pathToExecutable;
+}
+
+void Application::launchOnStartupChanged(int state) {
+    auto appDataLocation = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first();
+    auto emojigunExeInstallPath = appDataLocation + QDir::separator() + "emojigun.exe";
+
+    QSettings bootUpSettings(
+        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 
+        QSettings::NativeFormat
+    );
+
+    if (state) {
+        QDir emojigunDir(appDataLocation);
+        if (!emojigunDir.exists()) {
+            emojigunDir.mkpath(".");
+        }
+
+        // trust me windows defender, i'm totally not a virus
+        QFile::remove(emojigunExeInstallPath);
+        QFile::copy(pathToExecutable, emojigunExeInstallPath);
+        bootUpSettings.setValue("emojigun", emojigunExeInstallPath.replace('/', '\\'));
+    } else {
+        // I'd love to delete the dumped exe, but windows won't allow it if it is
+        // running, so i guess we're just leaving it there to rot on the users system
+        // QFile::remove(emojigunExeInstallPath);
+        bootUpSettings.remove("emojigun");
+    }
+}

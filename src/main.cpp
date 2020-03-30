@@ -90,14 +90,17 @@ int main(int argc, char *argv[]) {
     }
 
     Application app(argc, argv, oneShotMode);
-//    if (!app.lock()) {
-//        std::cout << "Another instance of the app is already running!";
-//        return -42;
-//    }
+    if (!app.lock()) {
+        std::cout << "Another instance of the app is already running!";
+        return -42;
+    }
 
     auto window = new MainWindow();
-
     app.setMainWindow(window);
+
+#ifdef WIN32
+    app.setPathToExecutable(argv[0]);
+#endif
 
     if (oneShotMode) {
         window->display();

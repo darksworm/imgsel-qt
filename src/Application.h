@@ -17,6 +17,7 @@ public:
 
     void setMainWindow(MainWindow *window);
     void setSettingsWindow(SettingsWindow *window);
+    void setPathToExecutable(QString pathToExecutable);
 
     static QString defaultLibraryDirectory();
     bool isOneShotMode();
@@ -27,6 +28,7 @@ signals:
 
 public slots:
     void hotkeyBindingChange(QString newBinding);
+    void launchOnStartupChanged(int state);
 
 private:
     QSharedMemory *_singular;
@@ -35,6 +37,7 @@ private:
     SettingsWindow *settingsWindow;
 
     bool oneShotMode = false;
+    QString pathToExecutable = "";
 
     std::optional<QMetaObject::Connection> hotkeyConnection = std::nullopt;
 };

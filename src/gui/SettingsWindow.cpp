@@ -20,6 +20,9 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     window->setWindowIcon(icon);
     trayIcon->setIcon(icon);
 
+    // remove the ? icon
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     trayIcon->show();
 }
 
@@ -55,6 +58,11 @@ void SettingsWindow::connectUI() {
     connect(
         launchOnStartupCheckbox, &QCheckBox::stateChanged,
         this, &SettingsWindow::launchOnStartupChanged
+    );
+
+    connect(
+        launchOnStartupCheckbox, &QCheckBox::stateChanged,
+        (Application *)Application::instance(), &Application::launchOnStartupChanged
     );
 #endif
 
