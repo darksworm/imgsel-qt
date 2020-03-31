@@ -449,6 +449,8 @@ void SettingsWindow::resizeOutputChanged(int state) {
 
         outputImageWidthLineEdit->show();
         outputImageHeightLineEdit->show();
+        outputImageWidthLineEdit->setText("");
+        outputImageHeightLineEdit->setText("");
 
         applyOutputImageResizeSettingsButton->show();
     } else {
