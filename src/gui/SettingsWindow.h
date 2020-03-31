@@ -34,6 +34,8 @@ private slots:
 
     void onChangeDirectoryButton();
 
+    void checkForUpdatesOnStartupChanged(int state);
+
     void failedToRegisterHotkey(QString hotkey);
     void successfullyRegisteredHotkey(QString hotkey);
 
@@ -78,6 +80,8 @@ private:
 
     QLabel* libraryDirectoryLabel;
     QPushButton* changeDirectoryButton;
+
+    QCheckBox* checkForUpdatesOnStartupCheckbox;
 };
 
 

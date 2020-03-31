@@ -4,6 +4,9 @@
 #include <tkPort.h>
 #endif
 #include <QStandardPaths>
+#include <project_config.h>
+
+#include <iostream>
 
 
 Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplication(argc, argv, true) {
@@ -11,6 +14,10 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
 
     this->oneShotMode = oneShotMode;
     setQuitOnLastWindowClosed(oneShotMode);
+
+    networkManager = new QNetworkAccessManager(this);
+    connect(networkManager, &QNetworkAccessManager::finished,
+        this, &Application::versionRequestFinished);
 }
 
 Application::~Application() {
@@ -126,5 +133,48 @@ void Application::launchOnStartupChanged(int state) {
         // running, so i guess we're just leaving it there to rot on the users system
         // QFile::remove(emojigunExeInstallPath);
         bootUpSettings.remove("emojigun");
+    }
+}
+
+void Application::checkForUpdates() {
+    QNetworkRequest request;
+    request.setUrl(QUrl("https://version.emojigun.com"));
+
+    networkManager->get(QNetworkRequest(request));
+}
+
+void Application::versionRequestFinished(QNetworkReply *reply) {
+    QString contents = reply->readAll();
+
+    QJsonDocument doc = QJsonDocument::fromJson(contents.toUtf8());
+    QJsonObject obj = doc.object();
+    
+    auto jsonMap = obj.toVariantMap();
+
+    auto version = jsonMap.take("version").toString();
+    auto downloadURL = jsonMap.take("downloadURL").toString();
+
+    auto responseVersion = QVersionNumber::fromString(version);
+    auto thisAppVersion = QVersionNumber::fromString(PROJECT_VER);
+
+    if (responseVersion > thisAppVersion) {
+        QMessageBox msgBox;
+
+        QPushButton *downloadNewVersionBtn = msgBox.addButton("Download", QMessageBox::ActionRole);
+        msgBox.addButton("Ok", QMessageBox::ActionRole);
+
+        msgBox.setParent(nullptr);
+        msgBox.setIcon(QMessageBox::Icon::Information);
+        msgBox.setWindowTitle("New EMOJIGUN version available!");
+        msgBox.setText(
+            tr("A new version of EMOJIGUN is available!<br>"
+                "Version %1 has been released!").arg(version)
+        );
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == downloadNewVersionBtn) {
+            QDesktopServices::openUrl(downloadURL);
+        }
     }
 }

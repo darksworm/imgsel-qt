@@ -32,7 +32,8 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h)
 
 find_package(Qt5Widgets REQUIRED)
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets)
+find_package(Qt5Network REQUIRED)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)

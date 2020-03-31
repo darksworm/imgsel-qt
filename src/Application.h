@@ -5,6 +5,9 @@
 #include <QtWidgets/QApplication>
 #include <QtCore/QSharedMemory>
 #include <optional>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
 
 class Application : public QApplication {
 Q_OBJECT
@@ -22,6 +25,8 @@ public:
     static QString defaultLibraryDirectory();
     bool isOneShotMode();
 
+    void checkForUpdates();
+
 signals:
     void failedToRegisterHotkey(QString hotkey);
     void successfullyRegisteredHotkey(QString hotkey);
@@ -29,6 +34,7 @@ signals:
 public slots:
     void hotkeyBindingChange(QString newBinding);
     void launchOnStartupChanged(int state);
+    void versionRequestFinished(QNetworkReply *reply);
 
 private:
     QSharedMemory *_singular;
@@ -40,4 +46,5 @@ private:
     QString pathToExecutable = "";
 
     std::optional<QMetaObject::Connection> hotkeyConnection = std::nullopt;
+    QNetworkAccessManager *networkManager;
 };

@@ -115,6 +115,11 @@ int main(int argc, char *argv[]) {
             settingsWindow->show();
         }
 
+        bool checkForUpdates = settings.value("check_for_updates_on_launch", true).toInt();
+        if (checkForUpdates) {
+            app.checkForUpdates();
+        }
+
         app.setSettingsWindow(settingsWindow);
 
         auto hkSequence = settings.value("hotkey_sequence", "meta+z").toString();

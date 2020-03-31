@@ -16,6 +16,7 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
 
     QIcon icon(":/assets/eyes-32x25.png");
 
+    setWindowTitle("EMOJIGUN");
     setWindowIcon(icon);
     window->setWindowIcon(icon);
     trayIcon->setIcon(icon);
@@ -93,6 +94,11 @@ void SettingsWindow::connectUI() {
     connect(
         applyOutputImageResizeSettingsButton, &QAbstractButton::clicked,
         this, &SettingsWindow::onApplyOutputImageResizeSettingsButton
+    );
+
+    connect (
+        checkForUpdatesOnStartupCheckbox, &QCheckBox::stateChanged,
+        this, &SettingsWindow::checkForUpdatesOnStartupChanged
     );
 }
 
@@ -240,6 +246,10 @@ void SettingsWindow::createUI() {
 
     resizeOutputGroup->addWidget(applyOutputImageResizeSettingsButton, 3, 0, 1, 4);
 
+    checkForUpdatesOnStartupCheckbox = new QCheckBox("Check for updates when launched");
+    auto launchOnStartup = settings.value("check_for_updates_on_launch", true).toBool();
+    checkForUpdatesOnStartupCheckbox->setChecked(launchOnStartup);
+
     auto mainLayout = new QVBoxLayout();
 
     mainLayout->addLayout(hotkeyLayout);
@@ -254,6 +264,7 @@ void SettingsWindow::createUI() {
     mainLayout->addWidget(resizeOutputImageCheckbox);
     mainLayout->addLayout(resizeOutputGroup);
     mainLayout->addWidget(startMinimizedCheckbox);
+    mainLayout->addWidget(checkForUpdatesOnStartupCheckbox);
     // mainLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
 
@@ -470,4 +481,8 @@ void SettingsWindow::onApplyOutputImageResizeSettingsButton() {
     applyOutputImageResizeSettingsButton->setEnabled(false);
 
     QMessageBox::information(this, "Success", "Resize settings saved successfully!");
+}
+
+void SettingsWindow::checkForUpdatesOnStartupChanged(int state) {
+    settings.setValue("check_for_updates_on_launch", state);
 }
