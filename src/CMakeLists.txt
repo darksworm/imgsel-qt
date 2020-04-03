@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(emojigun VERSION 0.2.0)
+project(emojigun VERSION 1.0.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
@@ -44,7 +44,7 @@ if (WIN32)
     target_link_libraries(${PROJECT_NAME}
             -lgdi32 -lcomdlg32 -loleaut32 -limm32 -ldwmapi -lwinspool -lopengl32 -lshlwapi -lwtsapi32
             -lmpr -lnetapi32 -luserenv -lversion -lws2_32 -lkernel32 -luser32 -lshell32 -luuid -lole32
-            -ladvapi32 -lwinmm
+            -ladvapi32 -lwinmm -lssl -lcrypto -lcrypt32 -liphlpapi
             /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5EventDispatcherSupport.a
             /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5FontDatabaseSupport.a
             /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5ThemeSupport.a
@@ -85,7 +85,11 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/lib/libpcre2-16.a
             /mxe/usr/i686-w64-mingw32.static/lib/libzstd.a
             /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
-        )
+            /mxe/usr/i686-w64-mingw32.static/lib/libssl.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libcrypto.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libcrypt32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libiphlpapi.a
+            )
 endif ()
 
 include(FetchContent)
