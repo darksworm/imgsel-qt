@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 
         app.setSettingsWindow(settingsWindow);
 
-        auto hkSequence = settings.value("hotkey_sequence", "meta+z").toString();
+        auto hkSequence = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
         app.hotkeyBindingChange(hkSequence);
     }
 

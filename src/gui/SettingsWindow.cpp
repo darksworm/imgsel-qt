@@ -166,7 +166,7 @@ void SettingsWindow::createActions() {
 }
 
 void SettingsWindow::createUI() {
-    auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+    auto hotkey = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
     auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
 
     hotkeyLabel = new QLabel("Hotkey: " + hotkey);
@@ -287,7 +287,7 @@ void SettingsWindow::onHotkeyChangeButton() {
 }
 
 void SettingsWindow::onHotkeyChangeCancelButton() {
-    auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+    auto hotkey = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
 
     changingHotkey = false;
 
@@ -383,7 +383,7 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
     bool onlyKeyIsFKey = keys.length() == 1 && event->key() >= Qt::Key_F1 && event->key() <= Qt::Key_F12;
 
     if (keys.length() >= 2|| onlyKeyIsFKey) {
-        auto oldHotkey = settings.value("hotkey_sequence", "meta+x").toString();
+        auto oldHotkey = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
 
         if (oldHotkey == hotkeyAccumulator) {
             hotkeyChangeButton->setEnabled(true);
