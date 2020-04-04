@@ -224,11 +224,11 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
             }
 
 #ifdef WIN32
-            auto img = QPixmap(QString(path.c_str()));
-            QMimeData* mimeData = new QMimeData();
-
+            auto img = QImage(QString(path.c_str()));
+            auto mirrored = img.mirrored(false, true);
+            
             OpenClipboard(nullptr);
-            HBITMAP hBitmap = qt_pixmapToWinHBITMAP(img, 1);
+            HBITMAP hBitmap = qt_pixmapToWinHBITMAP(QPixmap::fromImage(mirrored), 1);
             DIBSECTION ds;
             ::GetObject(hBitmap, sizeof(DIBSECTION), &ds);
             //make sure compression is BI_RGB
