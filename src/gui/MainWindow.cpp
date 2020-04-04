@@ -5,12 +5,16 @@
 #include <iostream>
 #include "MainWindow.h"
 #include "../Application.h"
-#include "../util/config/ConfigManager.h"
 #include "../input/handler/InputHandlerFactory.h"
 #include "../input/handler/instruction/MoveInstruction.h"
 #include "../input/handler/instruction/ModeChangeInstruction.h"
 #include "../input/handler/instruction/FilterInstruction.h"
 #include "../input/handler/instruction/CopyInstruction.h"
+
+#ifdef WIN32
+QT_BEGIN_NAMESPACE
+Q_GUI_EXPORT HBITMAP qt_pixmapToWinHBITMAP(const QPixmap &p, int hbitmapFormat = 0);
+#endif
 
 void MainWindow::paintEvent(QPaintEvent *event) {
     auto config = ConfigManager::getOrLoadConfig();
@@ -219,18 +223,32 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
                 }
             }
 
-#if defined(Q_OS_LINUX)
+#ifdef WIN32
+            auto img = QPixmap(QString(path.c_str()));
+            QMimeData* mimeData = new QMimeData();
+
+            OpenClipboard(nullptr);
+            HBITMAP hBitmap = qt_pixmapToWinHBITMAP(img, 1);
+            DIBSECTION ds;
+            ::GetObject(hBitmap, sizeof(DIBSECTION), &ds);
+            //make sure compression is BI_RGB
+            ds.dsBmih.biCompression = BI_RGB;
+            HDC hdc = ::GetDC(NULL);
+            HBITMAP hbitmap_ddb = ::CreateDIBitmap(
+                hdc, &ds.dsBmih, CBM_INIT, ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+            ::ReleaseDC(NULL, hdc);
+
+            EmptyClipboard();
+            SetClipboardData(CF_BITMAP, hbitmap_ddb);
+            CloseClipboard();
+            ::DeleteObject(hBitmap);
+#else
             auto ext = selectedImage->getExtension();
             ext = ext == "jpg" ? "jpeg" : ext;
 
             // TODO: handle 's in filenames
             std::string command = "cat '" + path + "' | xclip -selection clipboard -target image/" + ext + " -i";
             system(command.c_str());
-#else
-            auto img = QPixmap(QString(path.c_str()));
-            QApplication::clipboard()->setPixmap(img, QClipboard::Clipboard);
-            QApplication::clipboard()->setPixmap(img, QClipboard::Selection);
-            QApplication::processEvents();
 #endif
         }
 
