@@ -90,9 +90,9 @@ void ConfigManager::loadConfig() {
         auto maxWidth = *widthsIterator;
         auto maxHeight = *heightsIterator;
 
-        if (maxWidth > 192 || maxHeight > 192) { 
-            maxWidth = 192;
-            maxHeight = 192;
+        if (maxWidth > 64 || maxHeight > 64) { 
+            maxWidth = 64;
+            maxHeight = 64;
         }
 
         // because we want medians
