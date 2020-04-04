@@ -240,7 +240,7 @@ Config ConfigManager::getOrLoadConfig() {
 
 void ConfigManager::applyConfigFromQSettings(){
     QSettings settings("EMOJIGUN", "EMOJIGUN");
-    auto resizeSettingEnabled = settings.value("resize_output_image", false).toBool();
+    auto resizeSettingEnabled = settings.value("resize_output_image", true).toBool();
 
     if (resizeSettingEnabled) {
         auto resizeWidth = settings.value("resize_output_image_width", 32).toInt();

@@ -203,9 +203,10 @@ void SettingsWindow::createUI() {
 
     resizeOutputImageCheckbox = new QCheckBox("Limit output image size");
 
-    auto resizeOutputEnabled = settings.value("resize_output_image", false).toBool();
-    auto savedWidth = settings.value("resize_output_image_width", "").toString();
-    auto savedHeight = settings.value("resize_output_image_height", "").toString();
+    auto resizeOutputEnabled = settings.value("resize_output_image", true).toBool();
+    auto defaultResize = resizeOutputEnabled ? "32" : "";
+    auto savedWidth = settings.value("resize_output_image_width", defaultResize).toString();
+    auto savedHeight = settings.value("resize_output_image_height", defaultResize).toString();
 
     resizeOutputImageCheckbox->setChecked(resizeOutputEnabled);
 
