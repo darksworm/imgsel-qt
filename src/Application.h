@@ -26,6 +26,7 @@ public:
     bool isOneShotMode();
 
     void checkForUpdates();
+    void checkSavedExeVersion();
 
 signals:
     void failedToRegisterHotkey(QString hotkey);
@@ -37,6 +38,10 @@ public slots:
     void versionRequestFinished(QNetworkReply *reply);
 
 private:
+    QString getPathToInstalledExe();
+    bool exeIsInstalled();
+    bool installedExeOlderThanLaunchedExe();
+
     QSharedMemory *_singular;
 
     MainWindow *mainWindow;

@@ -111,8 +111,9 @@ void Application::setPathToExecutable(QString pathToExecutable) {
 
 void Application::launchOnStartupChanged(int state) {
     auto appDataLocation = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first();
-    auto emojigunExeInstallPath = appDataLocation + QDir::separator() + "emojigun.exe";
+    auto emojigunExeInstallPath = getPathToInstalledExe();
 
+    QSettings settings("EMOJIGUN", "EMOJIGUN");
     QSettings bootUpSettings(
         "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 
         QSettings::NativeFormat
@@ -128,6 +129,7 @@ void Application::launchOnStartupChanged(int state) {
         QFile::remove(emojigunExeInstallPath);
         QFile::copy(pathToExecutable, emojigunExeInstallPath);
         bootUpSettings.setValue("emojigun", emojigunExeInstallPath.replace('/', '\\'));
+        settings.setValue("installed_exe_version", PROJECT_VER);
     } else {
         // I'd love to delete the dumped exe, but windows won't allow it if it is
         // running, so i guess we're just leaving it there to rot on the users system
@@ -177,4 +179,44 @@ void Application::versionRequestFinished(QNetworkReply *reply) {
             QDesktopServices::openUrl(downloadURL);
         }
     }
+}
+
+QString Application::getPathToInstalledExe() {
+    auto appDataLocation = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first();
+    auto emojigunExeInstallPath = appDataLocation + QDir::separator() + "emojigun.exe";
+
+    return emojigunExeInstallPath;
+}
+
+bool Application::exeIsInstalled() {
+    auto exePath = getPathToInstalledExe();
+
+    return QFile::exists(exePath);
+}
+
+void Application::checkSavedExeVersion() {
+    if (!installedExeOlderThanLaunchedExe()) {
+        return;
+    }
+
+    auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
+    auto exePath = getPathToInstalledExe();
+
+    QFile::remove(exePath);
+    QFile::copy(pathToExecutable, exePath);
+    settings.setValue("installed_exe_version", PROJECT_VER);
+}
+
+bool Application::installedExeOlderThanLaunchedExe() {
+    if (!exeIsInstalled()) {
+        return true;
+    }
+
+    auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
+    auto installedVersionString = settings.value("installed_exe_version", "1.0.0").toString();
+
+    auto installedVersion = QVersionNumber::fromString(installedVersionString);
+    auto thisAppVersion = QVersionNumber::fromString(PROJECT_VER);
+
+    return thisAppVersion > installedVersion;
 }

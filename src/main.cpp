@@ -122,6 +122,13 @@ int main(int argc, char *argv[]) {
 
         app.setSettingsWindow(settingsWindow);
 
+#ifdef WIN32
+        bool launchOnStartup = settings.value("launch_on_startup", false).toBool();
+        if (launchOnStartup) {
+            app.checkSavedExeVersion();
+        }
+#endif
+
         auto hkSequence = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
         app.hotkeyBindingChange(hkSequence);
     }
