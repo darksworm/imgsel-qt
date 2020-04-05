@@ -250,6 +250,8 @@ void ConfigManager::applyConfigFromQSettings(){
                 .width = (unsigned) resizeWidth,
                 .height = (unsigned) resizeHeight
         };
+    } else {
+        config->resizeOutputToSize.reset();
     }
 }
 
