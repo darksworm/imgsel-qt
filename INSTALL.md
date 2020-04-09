@@ -7,9 +7,9 @@ Prerequisites:
 
 ## Compiling
 ```bash
-git clone https://github.com/darksworm/emojigun-qt.git
-mkdir emojigun-qt/src/build
-cd emojigun-qt/src/build
+git clone https://github.com/darksworm/emojigun.git
+mkdir emojigun/src/build
+cd emojigun/src/build
 cmake ..
 make
 ```
