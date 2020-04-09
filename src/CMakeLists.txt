@@ -11,7 +11,7 @@ set(CMAKE_AUTORCC ON)
 set(ADD_EXECUTABLE_PRE "")
 
 if (WIN32)
-    set(ADD_EXECUTABLE_PRE WIN32)
+    set(ADD_EXECUTABLE_PRE WIN32 ${PROJECT_BINARY_DIR}/config/version.rc)
 endif ()
 
 add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePickerDrawer.cpp 
@@ -36,6 +36,8 @@ find_package(Qt5Network REQUIRED)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
+configure_file(util/config/version.rc.in ${PROJECT_BINARY_DIR}/config/version.rc)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
 
 if (WIN32)
@@ -136,6 +138,7 @@ endif ()
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes.ico config/eyes.ico COPYONLY)
 
 # Do not build QHotkey tests
 set_target_properties(HotkeyTest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
