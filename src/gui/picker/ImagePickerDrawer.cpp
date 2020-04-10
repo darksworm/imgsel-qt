@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <memory>
+#include <math.h>
 
 #include "../drawer/ImageDrawer.h"
 #include "ImagePickerMove.h"
@@ -299,4 +300,51 @@ void ImagePickerDrawer::clearFilter() {
     selectedShape = nullptr;
 
     redrawAllInNextFrame = true;
+}
+
+Image* ImagePickerDrawer::getImageAtPos(unsigned int x, unsigned int y) {
+    auto config = ConfigManager::getOrLoadConfig();
+    auto geo = config.getScreenGeometry();
+
+    int oneRowWidth = shapeProperties.dimensions.x * shapeProperties.itemCounts.x +
+                               (shapeProperties.margins.x * shapeProperties.itemCounts.x - 1);
+
+    int oneColumnHeight = shapeProperties.dimensions.y * shapeProperties.itemCounts.y +
+                                   (shapeProperties.margins.y * shapeProperties.itemCounts.y - 1);
+
+    int oneColumnWidth = shapeProperties.dimensions.x + shapeProperties.margins.x;
+    int oneRowHeight = shapeProperties.dimensions.y + shapeProperties.margins.y;
+
+    int xMargin = ((int)geo.width() - oneRowWidth) / 2;
+    int yMargin = ((int)geo.height() - oneColumnHeight) / 2;
+
+    // margins are dead zones
+    if (x < xMargin || y < yMargin) {
+        return nullptr;
+    }
+
+    if (x > geo.width() - xMargin || y > geo.height() - yMargin) {
+        return nullptr;
+    }
+
+    int xRelativeToStartingPosition = x - xMargin;
+    int yRelativeToStartingPosition = y - yMargin;
+
+    int clickedRow = ceil((double)xRelativeToStartingPosition / oneColumnWidth);
+    int clickedColumn = ceil((double)yRelativeToStartingPosition / oneRowHeight);
+
+    int xRelativeToImageBox = xRelativeToStartingPosition - (clickedRow - 1) * oneColumnWidth;
+    int yRelativeToImageBox = yRelativeToStartingPosition - (clickedColumn - 1) * oneRowHeight;
+
+    if (xRelativeToImageBox > shapeProperties.dimensions.x) {
+        return nullptr;
+    }
+
+    if (yRelativeToImageBox > shapeProperties.dimensions.y) {
+        return nullptr;
+    }
+
+    int imageIndex = (clickedColumn - 1) * shapeProperties.itemCounts.x + clickedRow - 1;
+
+    return shapes[imageIndex].image;
 }

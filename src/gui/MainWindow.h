@@ -33,6 +33,12 @@ protected:
 
     void focusInEvent(QFocusEvent *event) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+
+    void mouseMoveEvent(QMouseEvent *event) override;
+
+    void copyImage(Image* image, PreprocessorFlags preprocessFlags = PreprocessorFlags::None);
+
 private:
     InputMode inputMode;
     QPixmap screenBuffer;
