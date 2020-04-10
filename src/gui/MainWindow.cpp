@@ -23,10 +23,6 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    painter.fillRect(0, 0, config.getScreenGeometry().width(), config.getScreenGeometry().height(),
-                     QColor(QRgba64::fromRgba(0, 0, 0, 200)));
-
-    painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
     if (focused) {
         painter.drawPixmap(0, 0, screenBuffer);
     } else {
@@ -339,6 +335,7 @@ MainWindow::MainWindow() : QWidget() {
 
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
+    setAutoFillBackground(false);
 
     auto config = ConfigManager::getOrLoadConfig();
     auto geo = config.getScreenGeometry();
