@@ -210,21 +210,16 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             break;
         case ImagePickerMove::RIGHT:
             preloadToIndex(selectedShape->index + steps);
-            canMove = selectedShape->index + steps < images.size();
+            canMove = (selectedShape->index + steps) < images.size();
             newSelectedShapeIdx = selectedShape->index + steps;
             break;
         case ImagePickerMove::UP:
-            canMove = selectedShape->index - (steps * shapeProperties.itemCounts.x) >= 0;
-            if (canMove) {
-                newSelectedShapeIdx = selectedShape->index - (steps * shapeProperties.itemCounts.x);
-            } else {
-                newSelectedShapeIdx = selectedShape->index % shapeProperties.itemCounts.x;
-                canMove = true;
-            }
+            newSelectedShapeIdx = selectedShape->index - (steps * shapeProperties.itemCounts.x);
+            canMove = newSelectedShapeIdx >= 0;
             break;
         case ImagePickerMove::DOWN:
             preloadToIndex(selectedShape->index + (steps * shapeProperties.itemCounts.x));
-            canMove = selectedShape->index + (steps * shapeProperties.itemCounts.x) < images.size();
+            canMove = (selectedShape->index + (steps * shapeProperties.itemCounts.x)) < images.size();
             if (canMove) {
                 newSelectedShapeIdx = selectedShape->index + (steps * shapeProperties.itemCounts.x);
             } else {
@@ -236,7 +231,7 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             break;
         case ImagePickerMove::END:
             preloadToIndex(INT_MAX);
-            canMove = selectedShape->index != images.size() - 1;
+            canMove = selectedShape->index != (images.size() - 1);
             newSelectedShapeIdx = images.size() - 1;
             break;
         case ImagePickerMove::HOME:
@@ -245,7 +240,7 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             break;
         case ImagePickerMove::LINE:
             preloadToIndex(steps > 0 && shapeProperties.itemCounts.x * steps);
-            canMove = steps > 0 && shapeProperties.itemCounts.x * steps < images.size();
+            canMove = steps > 0 && (shapeProperties.itemCounts.x * steps) < images.size();
             if (canMove) {
                 newSelectedShapeIdx = shapeProperties.itemCounts.x * (steps - 1);
             } else {
@@ -268,7 +263,6 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             canMove = selectedShape->index != newSelectedShapeIdx;
             break;
     }
-
 
     if (canMove) {
         goToImage(newSelectedShapeIdx);
