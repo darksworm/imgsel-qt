@@ -85,6 +85,26 @@ void Application::setMainWindow(MainWindow *window) {
             }
         }
     );
+
+    connect(
+        mainWindow, &MainWindow::imageCopied,
+        this, [&]() {
+            if (oneShotMode) {
+                return;
+            }         
+
+            QSettings settings("EMOJIGUN", "EMOJIGUN");
+            bool hasCopiedOnce = settings.value("has_copied_once", false).toBool();
+
+            if (!hasCopiedOnce) {
+                QMessageBox::information(mainWindow, tr("Image copied to clipboard"),
+                                         tr("The selected image has been copied to the clipboard, "
+                                            "you can now paste it with CTRL + V."));
+
+                settings.setValue("has_copied_once", true);
+            }
+        }
+    );
 }
 
 void Application::setSettingsWindow(SettingsWindow *window) {

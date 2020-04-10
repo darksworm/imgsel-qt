@@ -257,6 +257,7 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
         this->imagePickerDrawer->move(ImagePickerMove::HOME);
 
         emit exitInstructionReceived();
+        emit imageCopied();
     }
 
     this->repaint();
