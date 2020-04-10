@@ -29,19 +29,11 @@ protected:
     virtual void clearShape(ShapeProperties shapeProperties, Shape shape) = 0;
 
     void clearPixmap() {
-        QPainter painter;
+        pixmap.fill(getBackgroundColor());
+    }
 
-        painter.begin(&pixmap);
-        painter.setCompositionMode(QPainter::CompositionMode_Source);
-
-        painter.fillRect(
-                0,
-                0,
-                pixmap.width(),
-                pixmap.height(),
-                Qt::transparent);
-
-        painter.end();
+    QColor getBackgroundColor() {
+        return QColor(QRgba64::fromRgba(0, 0, 0, 200));
     }
 
 public:

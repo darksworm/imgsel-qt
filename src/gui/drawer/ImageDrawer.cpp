@@ -173,28 +173,28 @@ void ImageDrawer::clearSelectedShapeIndicator(ShapeProperties shapeProperties, S
             pos.y() - selectedShapeLineWidth,
             shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
             selectedShapeLineWidth * 2,
-            Qt::transparent);
+            getBackgroundColor());
 
     painter.fillRect(
             pos.x() - selectedShapeLineWidth,
             pos.y() - selectedShapeLineWidth + shapeProperties.dimensions.y,
             shapeProperties.dimensions.x + (2 * selectedShapeLineWidth),
             selectedShapeLineWidth * 2,
-            Qt::transparent);
+            getBackgroundColor());
 
     painter.fillRect(
             pos.x() - selectedShapeLineWidth,
             pos.y() - selectedShapeLineWidth,
             (2 * selectedShapeLineWidth),
             shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
-            Qt::transparent);
+            getBackgroundColor());
 
     painter.fillRect(
             pos.x() - selectedShapeLineWidth + shapeProperties.dimensions.x,
             pos.y() - selectedShapeLineWidth,
             (2 * selectedShapeLineWidth),
             shapeProperties.dimensions.y + selectedShapeLineWidth * 2,
-            Qt::transparent);
+            getBackgroundColor());
 
     painter.end();
 }
@@ -210,7 +210,7 @@ void ImageDrawer::clearShape(ShapeProperties shapeProperties, Shape shape) {
             shape.position.y() - 2,
             shapeProperties.dimensions.x + 4,
             shapeProperties.dimensions.y + 4,
-            Qt::transparent);
+            getBackgroundColor());
 
     painter.end();
 }
