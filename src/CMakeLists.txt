@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(emojigun VERSION 1.1.0)
+project(emojigun VERSION 1.2.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
