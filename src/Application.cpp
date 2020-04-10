@@ -100,9 +100,7 @@ void Application::setMainWindow(MainWindow *window) {
                 QMessageBox::information(mainWindow, tr("Image copied to clipboard"),
                                          tr("The selected image has been copied to the clipboard, "
                                             "you can now paste it with CTRL + V."));
-            }
 
-            if (!hasCopiedOnce) {
                 settings.setValue("has_copied_once", true);
             }
         }
