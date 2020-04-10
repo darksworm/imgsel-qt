@@ -18,6 +18,7 @@ public slots:
 signals:
     void displayed(WId windowId);
     void exitInstructionReceived();
+    void imageCopied();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
