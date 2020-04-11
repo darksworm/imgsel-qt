@@ -29,6 +29,10 @@ void ImagePickerDrawer::reset(bool imageListChanged) {
         shapeDrawer->clearPixmap();
     }
 
+    if (dynamic_cast<ImageDrawer*>(shapeDrawer)) {
+        ((ImageDrawer *) shapeDrawer)->clearCache();
+    }
+
     shapeProperties = shapeDrawer->calcShapeProps();
 }
 

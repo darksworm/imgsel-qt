@@ -28,6 +28,7 @@ protected:
 
 public:
     void cacheImages(std::vector<Image> images);
+    void clearCache();
 
     ImageDrawer(QPixmap &pixmap) : ShapeDrawer(pixmap) {};
 };

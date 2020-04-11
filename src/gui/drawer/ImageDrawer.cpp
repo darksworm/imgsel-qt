@@ -216,6 +216,10 @@ void ImageDrawer::clearShape(ShapeProperties shapeProperties, Shape shape) {
 }
 
 void ImageDrawer::cacheImages(std::vector<Image> images) {
+    if (imageCache.size() > 1000) {
+        imageCache.clear();
+    }
+
     QList<Image> imagesToLoad;
 
     for (auto &img : images) {
@@ -233,3 +237,6 @@ void ImageDrawer::cacheImages(std::vector<Image> images) {
     }
 }
 
+void ImageDrawer::clearCache() {
+    imageCache.clear();
+}
