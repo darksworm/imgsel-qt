@@ -51,10 +51,27 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
     unsigned int shapeCnt = shapeProperties.itemCounts.x * shapeProperties.itemCounts.y;
     int drawnShapeCnt = 0;
 
-    auto it = start;
     redrawAll = redrawAll || redrawAllInNextFrame;
 
-    for (; it != images.end(); ++it) {
+    if (dynamic_cast<ImageDrawer*>(shapeDrawer)) {
+        std::vector<Image> onScreenImages;
+
+        for (auto it = start; it != images.end(); ++it) {
+            if (filter.has_value() && !filter.operator*()(&*it)) {
+                continue;
+            }
+
+            onScreenImages.emplace_back(*it);
+
+            if (it - start >= shapeCnt) {
+                break;
+            }
+        }
+
+        ((ImageDrawer*) shapeDrawer)->cacheImages(onScreenImages);
+    }
+
+    for (auto it = start; it != images.end(); ++it) {
         if (filter.has_value() && !filter.operator*()(&*it)) {
             continue;
         }

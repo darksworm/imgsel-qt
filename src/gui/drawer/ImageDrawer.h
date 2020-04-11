@@ -1,11 +1,17 @@
 #pragma once
 
 #include <QPainter>
+#include <QtConcurrent>
 #include <QtGui/QImage>
 #include <string>
 #include "ShapeDrawer.h"
 
 class ImageDrawer : public ShapeDrawer {
+Q_OBJECT
+
+private:
+    std::map<std::string, std::optional<QImage>> imageCache;
+
 protected:
     Shape drawNextShape(ShapeProperties shapeProperties, Shape shape) override;
 
@@ -21,6 +27,8 @@ protected:
     void clearShape(ShapeProperties shapeProperties, Shape shape) override;
 
 public:
+    void cacheImages(std::vector<Image> images);
+
     ImageDrawer(QPixmap &pixmap) : ShapeDrawer(pixmap) {};
 };
 

@@ -33,7 +33,8 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
 
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network)
+find_package(Qt5Concurrent REQUIRED)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Concurrent)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 configure_file(util/config/version.rc.in ${PROJECT_BINARY_DIR}/config/version.rc)
