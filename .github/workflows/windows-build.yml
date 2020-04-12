@@ -28,11 +28,14 @@ jobs:
     - name: pull docker image
       run: docker pull docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
       
-    - name: tag docker image
-      run: docker tag docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest emojigun-builder:latest
-  
+    - name: test1
+      run: ls
+      
+    - name: test2
+      run: docker run --rm -it docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest ls
+      
     - name: build
-      run: docker run --rm -it -v $(pwd):/app emojigun-builder:latest /bin/bash -c '\
+      run: docker run --rm -it -v $(pwd):/app docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest /bin/bash -c '\
            cd /app/src && \
            rm -rf build; \
            mkdir build && \
