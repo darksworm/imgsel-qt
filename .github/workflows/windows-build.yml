@@ -1,6 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
+name: Windows build
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -33,5 +31,13 @@ jobs:
     - name: tag docker image
       run: docker tag docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest emojigun-builder:latest
       
+    - name: chmod build script
+      run: sudo chmod +x docker/build-emojigun-win.sh
+      
     - name: build
-      run: cd docker && bash build-emojigun-win.sh
+      run: cd docker && sh build-emojigun-win.sh
+    
+    - uses: actions/upload-artifact@master
+      with:
+        name: src/build/emojigun.exe
+        path: output/
