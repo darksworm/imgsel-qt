@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QTimer>
 #include <QtWidgets/QWidget>
 #include <QKeyEvent>
 #include "../input/handler/InputHandler.h"
@@ -14,6 +15,9 @@ public:
 
 public slots:
     void display(bool invalidateConfig = false);
+
+private slots:
+    void scrollEnd();
 
 signals:
     void displayed(WId windowId);
@@ -37,12 +41,23 @@ protected:
 
     void mouseMoveEvent(QMouseEvent *event) override;
 
+    void wheelEvent(QWheelEvent *event) override;
+
     void copyImage(Image* image, PreprocessorFlags preprocessFlags = PreprocessorFlags::None);
 
 private:
+    bool focused = false;
+
+    const unsigned scrollTreshold = 20;
+    const unsigned scrollEndMilis = 500;
+
+    int xScrollAccumulator;
+    int yScrollAccumulator;
+
+    QTimer scrollingEndTimer;
+
     InputMode inputMode;
     QPixmap screenBuffer;
     ImagePickerDrawer *imagePickerDrawer;
-    bool focused = false;
 };
 

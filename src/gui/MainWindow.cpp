@@ -97,6 +97,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void MainWindow::handleInstruction(InputInstruction *instruction) {
+    xScrollAccumulator = 0;
+    yScrollAccumulator = 0;
+
     auto config = ConfigManager::getOrLoadConfig();
 
     bool shouldExit = this->imagePickerDrawer->getFilterString().empty() &&
@@ -334,14 +337,28 @@ void MainWindow::display(bool invalidateConfig) {
 void MainWindow::mousePressEvent (QMouseEvent *event) {
     QWidget::mousePressEvent(event);
 
-    auto mousePos = event->localPos();
-    auto imageUnderCursor = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+    if (event->button() != Qt::LeftButton) {
+        return;
+    }
 
-    copyImage(imageUnderCursor);
+    if (scrollingEndTimer.isActive()) {
+        return;
+    }
+
+    auto mousePos = event->localPos();
+    auto imageToCopy = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+
+    if (imageToCopy != nullptr) {
+        copyImage(imageToCopy);
+    }
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     QWidget::mouseMoveEvent(event);
+
+    if (scrollingEndTimer.isActive()) {
+        return;
+    }
 
     auto mousePos = event->localPos();
     auto imageUnderCursor = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
@@ -356,6 +373,46 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     } else {
         setCursor(Qt::ArrowCursor);
     }
+}
+
+void MainWindow::wheelEvent(QWheelEvent *event) {
+    QWidget::wheelEvent(event);
+    event->accept();
+        
+    setCursor(Qt::SizeVerCursor);
+    scrollingEndTimer.start((int)scrollEndMilis);
+
+    auto numDegrees = event->angleDelta() / 8;
+
+    xScrollAccumulator += numDegrees.x();
+    yScrollAccumulator += numDegrees.y();
+    
+    bool moved = false;
+
+    if (abs(yScrollAccumulator) >= scrollTreshold) {
+        auto direction = yScrollAccumulator < 0 ? ImagePickerMove::DOWN : ImagePickerMove::UP;
+        moved = this->imagePickerDrawer->move(direction);
+        yScrollAccumulator = 0;
+    }
+
+    if (abs(xScrollAccumulator) >= scrollTreshold) {
+        auto direction = xScrollAccumulator < 0 ? ImagePickerMove::RIGHT : ImagePickerMove::LEFT;
+        if(!moved) {
+            moved = this->imagePickerDrawer->move(direction);
+        }
+        xScrollAccumulator = 0;
+    }
+
+    if (moved) {
+        this->repaint();
+    }
+}
+
+void MainWindow::scrollEnd() {
+    yScrollAccumulator = 0;
+    xScrollAccumulator = 0;
+
+    setCursor(Qt::ArrowCursor);
 }
 
 MainWindow::MainWindow() : QWidget() {
@@ -374,4 +431,12 @@ MainWindow::MainWindow() : QWidget() {
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
 
     setMouseTracking(true);
+
+    scrollingEndTimer.setSingleShot(true);
+    scrollingEndTimer.setInterval(scrollEndMilis);
+
+    connect(
+        &scrollingEndTimer, &QTimer::timeout,
+        this, &MainWindow::scrollEnd
+    );
 }

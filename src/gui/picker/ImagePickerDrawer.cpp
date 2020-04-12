@@ -201,18 +201,38 @@ void ImagePickerDrawer::goToImage(long hotkeyIdx) {
 }
 
 bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
+    if (selectedShape == nullptr) {
+        return false;
+    }
+
     bool canMove = false;
     long newSelectedShapeIdx = 0;
 
+    auto positionInRow = selectedShape->index % shapeProperties.itemCounts.x;
+    auto positionInColumn = selectedShape->index / shapeProperties.itemCounts.x;
+
     switch (move) {
-        case ImagePickerMove::LEFT:
+        case ImagePickerMove::PREVIOUS:
             canMove = selectedShape->index >= steps;
             newSelectedShapeIdx = selectedShape->index - steps;
             break;
-        case ImagePickerMove::RIGHT:
+        case ImagePickerMove::NEXT:
             preloadToIndex(selectedShape->index + steps);
             canMove = (selectedShape->index + steps) < images.size();
             newSelectedShapeIdx = selectedShape->index + steps;
+            break;
+        case ImagePickerMove::LEFT:
+            canMove = positionInRow >= steps;
+            newSelectedShapeIdx = selectedShape->index - steps;
+            break;
+        case ImagePickerMove::RIGHT:
+            canMove = (positionInRow != shapeProperties.itemCounts.x - 1)
+                && (selectedShape->index + steps) < images.size();
+
+            newSelectedShapeIdx = std::min(
+                (unsigned)selectedShape->index + steps, 
+                (unsigned)positionInColumn * shapeProperties.itemCounts.x + shapeProperties.itemCounts.x - 1
+            );
             break;
         case ImagePickerMove::UP:
             newSelectedShapeIdx = selectedShape->index - (steps * shapeProperties.itemCounts.x);
