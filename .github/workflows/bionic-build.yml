@@ -16,12 +16,8 @@ jobs:
       run: sudo apt-get install -y qt5-default libqt5x11extras5 cmake libx11-dev xclip g++ tk-dev libqt5x11extras5-dev
     - uses: actions/checkout@v2
     - name: cd
-      run: cd src
-    - name: mkbuilddir
-      run: mkdir build
-    - name: cd
-      run: cd build
+      run: mkdir -p src/build
     - name: cmake
-      run: cmake ..
+      run: cd src/build && cmake ..
     - name: build
-      run: make -j8
+      run: cd src/build && make -j8
