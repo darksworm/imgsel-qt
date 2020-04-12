@@ -30,13 +30,16 @@ jobs:
       
     - name: tag docker image
       run: docker tag docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest emojigun-builder:latest
-      
-    - name: chmod build script
-      run: sudo chmod +x docker/build-emojigun-win.sh
-      
+  
     - name: build
-      run: cd docker && sh build-emojigun-win.sh
-    
+      run: docker run --rm -it -v $(pwd):/app emojigun-builder:latest /bin/bash -c '\
+           cd /app/src && \
+           rm -rf build; \
+           mkdir build && \
+           cd build && \
+           i686-w64-mingw32.static-cmake .. && \
+           make CROSS=i686-w64-mingw32.static -j8'
+
     - uses: actions/upload-artifact@master
       with:
         name: src/build/emojigun.exe
