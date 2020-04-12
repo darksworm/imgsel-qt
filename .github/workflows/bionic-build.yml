@@ -1,5 +1,4 @@
-name: build on ubuntu
-
+name: Ubuntu bionic build
 on:
   push:
     branches: [ master ]
