@@ -1,0 +1,29 @@
+name: build on ubuntu
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: update
+      run: apt-get update
+    - name: install deps
+      run: apt-get install -y qt5-default libqt5x11extras5 cmake libx11-dev xclip g++ tk-dev libqt5x11extras5-dev
+    - uses: actions/checkout@v2
+    - name: cd
+      run: cd src
+    - name: mkbuilddir
+      run: mkdir build
+    - name: cd
+      run: cd build
+    - name: cmake
+      run: cmake ..
+    - name: build
+      run: make -j8
