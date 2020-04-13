@@ -23,4 +23,4 @@ jobs:
     - name: cmake
       run: cd src/build && cmake ..
     - name: build
-      run: cd src/build && make -j8
+      run: cd src/build && make -j2
