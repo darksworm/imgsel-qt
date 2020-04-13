@@ -24,29 +24,23 @@ jobs:
     
     - name: pull docker image
       run: docker pull docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
-      
-  checkoutproject:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
     
-  build:
-    runs-on: ubuntu-latest
-    needs: [setupimage, checkoutproject]
-    
-    container:
-      image: docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
-      volumes:
-        - /app:$GITHUB_WORKSPACE
+    - uses: actions/checkout@v2
       
-    steps:      
+    - name: test
+      uses: docker://docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
+      with: 
+        args: ls
+           
     - name: build
-      run: cd /app/src && \
+      uses: docker://docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
+      with: 
+        args: -v $GITHUB_WORKSPACE:/app /bin/bash -c 'cd /app/src && \
            rm -rf build; \
            mkdir build && \
            cd build && \
            i686-w64-mingw32.static-cmake .. && \
-           make CROSS=i686-w64-mingw32.static -j8
+           make CROSS=i686-w64-mingw32.static -j8'
 
     - uses: actions/upload-artifact@master
       with:
