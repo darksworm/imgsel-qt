@@ -413,9 +413,8 @@ void MainWindow::scrollEnd() {
     xScrollAccumulator = 0;
 
     QPoint mousePos = mapFromGlobal(QCursor::pos());
-    auto imageUnderCursor = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
-
-    setCursor(imageUnderCursor == nullptr ? Qt::ArrowCursor : Qt::PointingHandCursor);
+    QMouseEvent fakeEvent(QEvent::MouseMove, mousePos, Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    qApp->sendEvent(this, &fakeEvent);
 }
 
 MainWindow::MainWindow() : QWidget() {
