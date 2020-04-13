@@ -182,7 +182,9 @@ void Application::versionRequestFinished(QNetworkReply *reply) {
     if (responseVersion > thisAppVersion) {
         QMessageBox msgBox;
 
+#if WIN32
         QPushButton *downloadNewVersionBtn = msgBox.addButton("Download", QMessageBox::ActionRole);
+#endif
         msgBox.addButton("Ok", QMessageBox::ActionRole);
 
         msgBox.setParent(nullptr);
@@ -195,9 +197,11 @@ void Application::versionRequestFinished(QNetworkReply *reply) {
 
         msgBox.exec();
 
+#if WIN32
         if (msgBox.clickedButton() == downloadNewVersionBtn) {
             QDesktopServices::openUrl(downloadURL);
         }
+#endif
     }
 }
 
