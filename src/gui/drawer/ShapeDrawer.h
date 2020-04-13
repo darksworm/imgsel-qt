@@ -8,6 +8,7 @@
 #include <QPainter>
 
 class ShapeDrawer : public QObject {
+Q_OBJECT
     friend class ImagePickerDrawer;
 
 protected:

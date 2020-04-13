@@ -7,8 +7,6 @@
 #include "ShapeDrawer.h"
 
 class ImageDrawer : public ShapeDrawer {
-Q_OBJECT
-
 private:
     std::map<std::string, std::optional<QImage>> imageCache;
 
