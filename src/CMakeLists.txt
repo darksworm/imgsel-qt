@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.8)
 
 project(emojigun VERSION 1.2.0)
 
@@ -8,13 +8,45 @@ set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/util/lib/QHotkey/QHotkey)
+    message(STATUS "not exists")
+    find_package(Git)
+
+    if(NOT GIT_FOUND)
+        message(FATAL_ERROR "git not found, you might have to initialize modules manually")
+    endif()
+
+    execute_process(COMMAND git submodule update --init --recursive
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            RESULT_VARIABLE GIT_SUBMOD_RESULT)
+    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+        message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+    else()
+        message(STATUS "initialized modules")
+    endif()
+endif()
+
 set(ADD_EXECUTABLE_PRE "")
 
 if (WIN32)
     set(ADD_EXECUTABLE_PRE WIN32 ${PROJECT_BINARY_DIR}/config/version.rc)
 endif ()
 
-add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePickerDrawer.cpp 
+set(hotkey_SRCS util/lib/QHotkey/QHotkey/qhotkey.cpp)
+
+if (WIN32)
+    list(APPEND hotkey_SRCS util/lib/QHotkey/QHotkey/qhotkey_win.cpp)
+endif()
+
+if (APPLE)
+    list(APPEND hotkey_SRCS util/lib/QHotkey/QHotkey/qhotkey_mac.cpp)
+endif()
+
+IF (UNIX AND NOT APPLE)
+    list(APPEND hotkey_SRCS util/lib/QHotkey/QHotkey/qhotkey_x11.cpp)
+endif()
+
+add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePickerDrawer.cpp
         util/exceptions/OutOfBounds.h gui/drawer/ShapeDrawer.h gui/util/Shape.h gui/util/Dimensions.h
         input/handler/instruction/InputInstructionType.h input/handler/filters/FilteringInputHandler.h
         input/handler/InputHandler.cpp input/handler/filters/FilteringInputHandler.cpp
@@ -29,11 +61,13 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
         gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp
-        gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h)
+        gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h ${hotkey_SRCS})
 
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network)
+
+target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 configure_file(util/config/version.rc.in ${PROJECT_BINARY_DIR}/config/version.rc)
@@ -94,17 +128,6 @@ if (WIN32)
             )
 endif ()
 
-include(FetchContent)
-FetchContent_Declare(
-        qhotkey
-        GIT_REPOSITORY https://github.com/Skycoder42/QHotkey.git
-        GIT_TAG        master
-)
-FetchContent_MakeAvailable(qhotkey)
-
-target_link_libraries(${PROJECT_NAME} QHotkey::QHotkey)
-target_include_directories(${PROJECT_NAME} PUBLIC ${qhotkey_SOURCE_DIR}/QHotkey)
-
 IF (UNIX AND NOT APPLE)
     find_package(X11)
     if (X11_FOUND)
@@ -140,8 +163,6 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes.ico config/eyes.ico COPYONLY)
 
-# Do not build QHotkey tests
-set_target_properties(HotkeyTest PROPERTIES EXCLUDE_FROM_ALL 1 EXCLUDE_FROM_DEFAULT_BUILD 1)
 install(TARGETS ${PROJECT_NAME} EXPORT emojigun DESTINATION bin)
 
 set_target_properties(
