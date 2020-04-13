@@ -59,6 +59,8 @@ public:
     };
 
     void preloadToIndex(unsigned int targetIndex);
+
+    Image* getImageAtPos(unsigned int x, unsigned int y);
 };
 
 

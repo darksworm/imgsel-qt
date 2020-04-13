@@ -3,7 +3,6 @@
 #include "instruction/ModeChangeInstruction.h"
 #include "instruction/CopyInstruction.h"
 #include "instruction/MoveInstruction.h"
-#include "../../gui/picker/ImagePickerMove.h"
 
 InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
     if (keyCode == Qt::Key_Escape) {
@@ -38,10 +37,10 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
 
     switch (keyCode) {
         case Qt::Key_Left:
-            move = ImagePickerMove::LEFT;
+            move = ImagePickerMove::PREVIOUS;
             break;
         case Qt::Key_Right:
-            move = ImagePickerMove::RIGHT;
+            move = ImagePickerMove::NEXT;
             break;
         case Qt::Key_Down:
             move = ImagePickerMove::DOWN;
@@ -60,9 +59,6 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
             break;
         case Qt::Key_End:
             move = ImagePickerMove::END;
-            break;
-        default:
-            move = ImagePickerMove::NONE;
             break;
     }
 

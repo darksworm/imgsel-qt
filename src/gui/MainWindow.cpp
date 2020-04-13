@@ -97,6 +97,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void MainWindow::handleInstruction(InputInstruction *instruction) {
+    xScrollAccumulator = 0;
+    yScrollAccumulator = 0;
+
     auto config = ConfigManager::getOrLoadConfig();
 
     bool shouldExit = this->imagePickerDrawer->getFilterString().empty() &&
@@ -144,123 +147,124 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
 
         this->imagePickerDrawer->drawFrame(nullptr);
     } else if (dynamic_cast<CopyInstruction *>(instruction)) {
-        auto selectedImage = this->imagePickerDrawer->getSelectedImage();
+        copyImage(this->imagePickerDrawer->getSelectedImage());
+    }
 
-        if (selectedImage == nullptr) {
-            return;
+    this->repaint();
+}
+
+void MainWindow::copyImage(Image* image, PreprocessorFlags preprocessFlags) {
+    if (image == nullptr) {
+        return;
+    }
+    
+    auto config = ConfigManager::getOrLoadConfig();
+    auto path = image->getPath();
+
+    if (config.shouldPrintFilePath()) {
+        std::cout << path;
+    } else {
+        bool whatsappResize = preprocessFlags & PreprocessorFlags::WhatsAppWhitespace ||
+                              config.getPreprocessorFlags() & PreprocessorFlags::WhatsAppWhitespace;
+
+        if (whatsappResize) {
+            QPixmap result(320, 320);
+            result.fill(Qt::transparent);
+            QPixmap imgPixmap(image->getPath().c_str());
+            QPainter painter(&result);
+
+            painter.drawPixmap(
+                    result.width() / 2 - imgPixmap.width() / 2,
+                    result.height() / 2 - imgPixmap.height() / 2,
+                    imgPixmap
+            );
+
+            auto tempImage = new QTemporaryFile;
+            tempImage->open();
+            result.toImage().save(tempImage, QString::fromStdString(
+                    image->getExtension()).toUpper().toStdString().c_str());
+            tempImage->close();
+
+            path = tempImage->fileName().toStdString();
         }
 
-        auto path = selectedImage->getPath();
+        if (config.shouldResizeOutputImage()) {
+            auto targetSize = config.getResizeOutputToSize().value();
+            QImage outputImg(image->getPath().c_str());
 
-        if (config.shouldPrintFilePath()) {
-            std::cout << path;
-        } else {
-            auto preprocessFlags = dynamic_cast<CopyInstruction *>(instruction)->getPreprocessFlags();
+            auto width = outputImg.width();
+            auto height = outputImg.height();
 
-            bool whatsappResize = preprocessFlags & PreprocessorFlags::WhatsAppWhitespace ||
-                                  config.getPreprocessorFlags() & PreprocessorFlags::WhatsAppWhitespace;
+            if (!whatsappResize || width > 320 || height > 320) {
+                if (whatsappResize) {
+                    targetSize.width = 300;
+                    targetSize.height = 300;
+                }
 
-            if (whatsappResize) {
-                QPixmap result(320, 320);
-                result.fill(Qt::transparent);
-                QPixmap imgPixmap(selectedImage->getPath().c_str());
-                QPainter painter(&result);
+                if (targetSize.width > 0 && width > targetSize.width) {
+                    auto scale = (double) targetSize.width / width;
+                    int new_height = height * scale;
+                    outputImg = outputImg.scaledToHeight(new_height, Qt::SmoothTransformation);
 
-                painter.drawPixmap(
-                        result.width() / 2 - imgPixmap.width() / 2,
-                        result.height() / 2 - imgPixmap.height() / 2,
-                        imgPixmap
-                );
+                    height = new_height;
+                    width = width * scale;
+                }
+
+                if (targetSize.height > 0 && height > targetSize.height) {
+                    auto scale = (double) targetSize.height / height;
+                    int new_width = width * scale;
+                    outputImg = outputImg.scaledToWidth(new_width, Qt::SmoothTransformation);                    
+                }
 
                 auto tempImage = new QTemporaryFile;
                 tempImage->open();
-                result.toImage().save(tempImage, QString::fromStdString(
-                        selectedImage->getExtension()).toUpper().toStdString().c_str());
+                outputImg.save(tempImage,
+                           QString::fromStdString(image->getExtension()).toUpper().toStdString().c_str());
                 tempImage->close();
 
                 path = tempImage->fileName().toStdString();
             }
-
-            if (config.shouldResizeOutputImage()) {
-                auto targetSize = config.getResizeOutputToSize().value();
-                QImage image(selectedImage->getPath().c_str());
-
-                auto width = image.width();
-                auto height = image.height();
-
-                if (!whatsappResize || width > 320 || height > 320) {
-                    if (whatsappResize) {
-                        targetSize.width = 300;
-                        targetSize.height = 300;
-                    }
-
-                    if (targetSize.width > 0 && width > targetSize.width) {
-                        auto scale = (double) targetSize.width / width;
-                        int new_height = height * scale;
-                        image = image.scaledToHeight(new_height, Qt::SmoothTransformation);
-
-                        height = new_height;
-                        width = width * scale;
-                    }
-
-                    if (targetSize.height > 0 && height > targetSize.height) {
-                        auto scale = (double) targetSize.height / height;
-                        int new_width = width * scale;
-                        image = image.scaledToWidth(new_width, Qt::SmoothTransformation);                    
-                    }
-
-                    auto tempImage = new QTemporaryFile;
-                    tempImage->open();
-                    image.save(tempImage,
-                               QString::fromStdString(selectedImage->getExtension()).toUpper().toStdString().c_str());
-                    tempImage->close();
-
-                    path = tempImage->fileName().toStdString();
-                }
-            }
+        }
 
 #ifdef WIN32
-            auto img = QImage(QString(path.c_str()));
-            auto mirrored = img.mirrored(false, true);
-            
-            OpenClipboard(nullptr);
-            HBITMAP hBitmap = qt_pixmapToWinHBITMAP(QPixmap::fromImage(mirrored), 1);
-            DIBSECTION ds;
-            ::GetObject(hBitmap, sizeof(DIBSECTION), &ds);
-            //make sure compression is BI_RGB
-            ds.dsBmih.biCompression = BI_RGB;
-            HDC hdc = ::GetDC(NULL);
-            HBITMAP hbitmap_ddb = ::CreateDIBitmap(
-                hdc, &ds.dsBmih, CBM_INIT, ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
-            ::ReleaseDC(NULL, hdc);
+        auto img = QImage(QString(path.c_str()));
+        auto mirrored = img.mirrored(false, true);
+        
+        OpenClipboard(nullptr);
+        HBITMAP hBitmap = qt_pixmapToWinHBITMAP(QPixmap::fromImage(mirrored), 1);
+        DIBSECTION ds;
+        ::GetObject(hBitmap, sizeof(DIBSECTION), &ds);
+        //make sure compression is BI_RGB
+        ds.dsBmih.biCompression = BI_RGB;
+        HDC hdc = ::GetDC(NULL);
+        HBITMAP hbitmap_ddb = ::CreateDIBitmap(
+            hdc, &ds.dsBmih, CBM_INIT, ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+        ::ReleaseDC(NULL, hdc);
 
-            EmptyClipboard();
-            SetClipboardData(CF_BITMAP, hbitmap_ddb);
-            CloseClipboard();
-            ::DeleteObject(hBitmap);
+        EmptyClipboard();
+        SetClipboardData(CF_BITMAP, hbitmap_ddb);
+        CloseClipboard();
+        ::DeleteObject(hBitmap);
 #else
-            auto ext = selectedImage->getExtension();
-            ext = ext == "jpg" ? "jpeg" : ext;
+        auto ext = image->getExtension();
+        ext = ext == "jpg" ? "jpeg" : ext;
 
-            // TODO: handle 's in filenames
-            std::string command = "cat '" + path + "' | xclip -selection clipboard -target image/" + ext + " -i";
-            system(command.c_str());
+        // TODO: handle 's in filenames
+        std::string command = "cat '" + path + "' | xclip -selection clipboard -target image/" + ext + " -i";
+        system(command.c_str());
 #endif
-        }
-
-        if (config.shouldResizeOutputImage()) {
-            QFile file(QString::fromStdString(path));
-            file.remove();
-        }
-
-        this->imagePickerDrawer->clearFilter();
-        this->imagePickerDrawer->move(ImagePickerMove::HOME);
-
-        emit exitInstructionReceived();
-        emit imageCopied();
     }
 
-    this->repaint();
+    if (config.shouldResizeOutputImage()) {
+        QFile file(QString::fromStdString(path));
+        file.remove();
+    }
+
+    this->imagePickerDrawer->clearFilter();
+    this->imagePickerDrawer->move(ImagePickerMove::HOME);
+
+    emit exitInstructionReceived();
+    emit imageCopied();
 }
 
 void MainWindow::focusOutEvent(QFocusEvent *event) {
@@ -330,6 +334,89 @@ void MainWindow::display(bool invalidateConfig) {
     emit displayed(WId());
 }
 
+void MainWindow::mousePressEvent (QMouseEvent *event) {
+    QWidget::mousePressEvent(event);
+
+    if (event->button() != Qt::LeftButton) {
+        return;
+    }
+
+    if (scrollingEndTimer.isActive()) {
+        return;
+    }
+
+    auto mousePos = event->localPos();
+    auto imageToCopy = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+
+    if (imageToCopy != nullptr) {
+        copyImage(imageToCopy);
+    }
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event) {
+    QWidget::mouseMoveEvent(event);
+
+    if (scrollingEndTimer.isActive()) {
+        return;
+    }
+
+    auto mousePos = event->localPos();
+    auto imageUnderCursor = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+
+    if (imageUnderCursor != nullptr) {
+        if (imageUnderCursor != imagePickerDrawer->getSelectedImage()) {
+            imagePickerDrawer->drawFrame(imageUnderCursor);
+            repaint();
+        }
+
+        setCursor(Qt::PointingHandCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
+    }
+}
+
+void MainWindow::wheelEvent(QWheelEvent *event) {
+    QWidget::wheelEvent(event);
+    event->accept();
+        
+    setCursor(Qt::SizeVerCursor);
+    scrollingEndTimer.start((int)scrollEndMilis);
+
+    auto numDegrees = event->angleDelta() / 8;
+
+    xScrollAccumulator += numDegrees.x();
+    yScrollAccumulator += numDegrees.y();
+    
+    bool moved = false;
+
+    if (abs(yScrollAccumulator) >= scrollTreshold) {
+        auto direction = yScrollAccumulator < 0 ? ImagePickerMove::DOWN : ImagePickerMove::UP;
+        moved = this->imagePickerDrawer->move(direction);
+        yScrollAccumulator = 0;
+    }
+
+    if (abs(xScrollAccumulator) >= scrollTreshold) {
+        auto direction = xScrollAccumulator < 0 ? ImagePickerMove::RIGHT : ImagePickerMove::LEFT;
+        if(!moved) {
+            moved = this->imagePickerDrawer->move(direction);
+        }
+        xScrollAccumulator = 0;
+    }
+
+    if (moved) {
+        this->repaint();
+    }
+}
+
+void MainWindow::scrollEnd() {
+    yScrollAccumulator = 0;
+    xScrollAccumulator = 0;
+
+    QPoint mousePos = mapFromGlobal(QCursor::pos());
+    QMouseEvent fakeEvent(QEvent::MouseMove, mousePos, Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    qApp->sendEvent(this, &fakeEvent);
+}
+
 MainWindow::MainWindow() : QWidget() {
     setWindowTitle("EMOJIGUN");
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
@@ -344,4 +431,14 @@ MainWindow::MainWindow() : QWidget() {
 
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
+
+    setMouseTracking(true);
+
+    scrollingEndTimer.setSingleShot(true);
+    scrollingEndTimer.setInterval(scrollEndMilis);
+
+    connect(
+        &scrollingEndTimer, &QTimer::timeout,
+        this, &MainWindow::scrollEnd
+    );
 }

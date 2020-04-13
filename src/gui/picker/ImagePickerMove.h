@@ -2,6 +2,8 @@
 
 enum class ImagePickerMove {
     NONE,
+    PREVIOUS,
+    NEXT,
     LEFT,
     RIGHT,
     UP,
