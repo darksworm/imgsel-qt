@@ -1,10 +1,14 @@
 name: Ubuntu bionic build
 on:
   push:
+    paths-ignore:
+      - ".github/workflows/windows-build.yml"
     branches: [ master ]
   pull_request:
+    paths-ignore:
+      - ".github/workflows/windows-build.yml"
     branches: [ master ]
-
+    
 jobs:
   build:
     runs-on: ubuntu-18.04
