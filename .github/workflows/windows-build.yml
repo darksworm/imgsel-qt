@@ -24,12 +24,12 @@ jobs:
     - uses: actions/checkout@v2
       
     - name: test
-      uses: docker://docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
+      uses: docker://emojigun-win-builder:latest
       with: 
         args: ls
            
     - name: build
-      uses: docker://docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
+      uses: docker://emojigun-win-builder:latest
       with: 
         args: -v $GITHUB_WORKSPACE:/app /bin/bash -c 'cd /app/src && \
            rm -rf build; \
