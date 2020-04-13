@@ -23,25 +23,19 @@ jobs:
     
     - uses: actions/checkout@v2
       
-    - name: Run image
+    - name: run builder container
       run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/app docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
-      
-#     - name: test
-#       uses: docker://docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
-#       with: 
-#         args: ls
+    
+    - name: build
+      run: docker exec builder bash -c 'cd /app/src && \
+           rm -rf build; \
+           mkdir build && \
+           cd build && \
+           i686-w64-mingw32.static-cmake .. && \
+           make CROSS=i686-w64-mingw32.static -j8'
            
-#     - name: build
-#       uses: docker://docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
-#       with: 
-#         args: -v $GITHUB_WORKSPACE:/app /bin/bash -c 'cd /app/src && \
-#            rm -rf build; \
-#            mkdir build && \
-#            cd build && \
-#            i686-w64-mingw32.static-cmake .. && \
-#            make CROSS=i686-w64-mingw32.static -j8'
-
-#     - uses: actions/upload-artifact@master
-#       with:
-#         name: src/build/emojigun.exe
-#         path: output/
+    - name: upload artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: src/build/emojigun.exe
+        path: output/
