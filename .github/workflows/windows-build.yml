@@ -1,11 +1,13 @@
-name: Windows build
+name: windows build
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
+    paths-ignore:
+      - ".github/workflows/bionic-build.yml"
     branches: [ master ]
   pull_request:
+    paths-ignore:
+      - ".github/workflows/bionic-build.yml"
     branches: [ master ]
 
 jobs:
@@ -27,7 +29,7 @@ jobs:
       run: docker run -it -d --name builder -v $GITHUB_WORKSPACE:/app docker.pkg.github.com/darksworm/emojigun/emojigun-win-builder:latest
     
     - name: build
-      run: docker exec builder bash -c 'cd /app/src && \
+      run: docker exec builder /bin/bash -c 'cd /app/src && \
            rm -rf build; \
            mkdir build && \
            cd build && \
