@@ -412,7 +412,10 @@ void MainWindow::scrollEnd() {
     yScrollAccumulator = 0;
     xScrollAccumulator = 0;
 
-    setCursor(Qt::ArrowCursor);
+    QPoint mousePos = mapFromGlobal(QCursor::pos());
+    auto imageUnderCursor = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+
+    setCursor(imageUnderCursor == nullptr ? Qt::ArrowCursor : Qt::PointingHandCursor);
 }
 
 MainWindow::MainWindow() : QWidget() {
