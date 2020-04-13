@@ -1,18 +1,17 @@
 #include "ImageDrawer.h"
 #include "../../util/config/ConfigManager.h"
 #include "../../util/exceptions/ImageNotLoadable.h"
-#include <iostream>
 
-std::optional<QImage> loadImage(std::string path) {
+std::pair<std::string, std::optional<QImage>> loadImage(Image img) {
     std::optional<QImage> result;
     result.reset();
 
     auto config = ConfigManager::getOrLoadConfig();
 
-    QImage image(path.c_str());
+    QImage image(img.getPath().c_str());
 
     if (image.isNull()) {
-        return result;
+        return std::make_pair(img.getPath(), result);
     }
 
     auto width = image.width();
@@ -36,13 +35,14 @@ std::optional<QImage> loadImage(std::string path) {
     }
 
     result = image;
-    return result;
+
+    return std::make_pair(img.getPath(), result);
 }
 
 Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     auto config = ConfigManager::getOrLoadConfig();
 
-    auto img = loadImage(shape.image->getPath());
+    auto img = imageCache.at(shape.image->getPath());
 
     if (!img.has_value()) {
         throw ImageNotLoadable();
@@ -213,4 +213,30 @@ void ImageDrawer::clearShape(ShapeProperties shapeProperties, Shape shape) {
             getBackgroundColor());
 
     painter.end();
+}
+
+void ImageDrawer::cacheImages(std::vector<Image> images) {
+    if (imageCache.size() > 1000) {
+        imageCache.clear();
+    }
+
+    QList<Image> imagesToLoad;
+
+    for (auto &img : images) {
+        auto currentCachedImage = imageCache.find(img.getPath());
+
+        if (currentCachedImage == imageCache.end()) {
+            imagesToLoad.append(img);
+        }
+    }
+
+    auto qimgs = QtConcurrent::blockingMapped(imagesToLoad, loadImage);
+
+    for (auto i = qimgs.begin(); i != qimgs.end(); ++i) {
+        imageCache[i->first] = i->second;
+    }
+}
+
+void ImageDrawer::clearCache() {
+    imageCache.clear();
 }

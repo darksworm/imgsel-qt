@@ -65,7 +65,8 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
 
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network)
+find_package(Qt5Concurrent REQUIRED)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Concurrent)
 
 target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
 

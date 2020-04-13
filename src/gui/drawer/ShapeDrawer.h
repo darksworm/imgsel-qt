@@ -7,7 +7,8 @@
 #include <optional>
 #include <QPainter>
 
-class ShapeDrawer {
+class ShapeDrawer : public QObject {
+Q_OBJECT
     friend class ImagePickerDrawer;
 
 protected:
@@ -37,6 +38,6 @@ protected:
     }
 
 public:
-    ShapeDrawer(QPixmap &pixmap) : pixmap(pixmap) {
+    ShapeDrawer(QPixmap &pixmap) : pixmap(pixmap), QObject() {
     }
 };
