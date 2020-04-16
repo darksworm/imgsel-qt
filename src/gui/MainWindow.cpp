@@ -71,7 +71,10 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     painter.setFont(queryFont);
     painter.setPen(Qt::white);
 
-    painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, 36, displayName);
+    int oneColumnHeight = imagePickerDrawer->getShapeProperties().getOneColumnHeight();
+    int emptyHeight = (config.getScreenGeometry().height() - oneColumnHeight) / 2;
+
+    painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, emptyHeight / 2  + 6, displayName);
 
     QFont inputModeFont;
     inputModeFont.setFamily(inputModeFont.defaultFamily());

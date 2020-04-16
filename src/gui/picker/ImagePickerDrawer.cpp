@@ -351,14 +351,11 @@ Image* ImagePickerDrawer::getImageAtPos(unsigned int x, unsigned int y) {
     auto config = ConfigManager::getOrLoadConfig();
     auto geo = config.getScreenGeometry();
 
-    int oneRowWidth = shapeProperties.dimensions.x * shapeProperties.itemCounts.x +
-                               (shapeProperties.margins.x * shapeProperties.itemCounts.x - 1);
+    int oneRowWidth = shapeProperties.getOneRowWidth();
+    int oneColumnHeight = shapeProperties.getOneColumnHeight();
 
-    int oneColumnHeight = shapeProperties.dimensions.y * shapeProperties.itemCounts.y +
-                                   (shapeProperties.margins.y * shapeProperties.itemCounts.y - 1);
-
-    int oneColumnWidth = shapeProperties.dimensions.x + shapeProperties.margins.x;
-    int oneRowHeight = shapeProperties.dimensions.y + shapeProperties.margins.y;
+    int oneColumnWidth = shapeProperties.getOneColumnWidth();
+    int oneRowHeight = shapeProperties.getOneRowHeight();
 
     int xMargin = ((int)geo.width() - oneRowWidth) / 2;
     int yMargin = ((int)geo.height() - oneColumnHeight) / 2;
