@@ -160,8 +160,12 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
     if (drawnShapeCnt < shapeCnt && oldShapes.size() > drawnShapeCnt) {
         unsigned i = drawnShapeCnt;
         do {
-            auto oldShape = oldShapes.at(i);
-            shapeDrawer->clearShape(shapeProperties, oldShape);
+            try {
+                auto oldShape = oldShapes.at(i);
+                shapeDrawer->clearShape(shapeProperties, oldShape);
+            } catch (std::out_of_range &e) {
+                // nothing to do here
+            }
         } while (++i < oldShapes.size());
     }
 
