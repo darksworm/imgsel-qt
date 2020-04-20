@@ -1,4 +1,10 @@
-## CLI parameters:
+## GUI Mode
+If you launch emojigun with no parameters, it will launch in GUI mode with a background process and tray icon. You can then use the configurator to customize your experience.
+
+## CLI mode
+If you pass at least one parameter to emojigun, it will launch in CLI "one shot" mode. This means that the process will exit after an emoji has been copied.
+
+### CLI parameters
 ```
 EMOJIGUN - EMOJI sharing tool.
 Usage: ./emojigun [OPTIONS]
@@ -30,13 +36,13 @@ Options:
   --print-path                Write file path to stdout instead of copying it's contents to the clipboard.
 ```
 
-## Examples:
-#### Basic 6x10 fullscreen (params are good for 1920x1080)
+#### CLI mode examples:
+##### Basic 6x10 fullscreen (params are good for 1920x1080)
 ```bash
 emojigun --files ~/.emoji/*.png --rows 6 --cols 10 --max-width 64 --max-height 64 --files ~/.temoji/*.png
 ```
 
-#### Stitch two emojis together (left-to-right) (requires imagemagcik)
+##### Stitch two emojis together (left-to-right) (requires imagemagcik)
 ```bash
 alias emojigun-default='emojigun --rows 6 --cols 10 --max-width 64 --max-height 64 --files ~/.temoji/*.png --print-path'
 convert -gravity center -background none $(emojigun-default) $(emojigun-default) +append /tmp/last-merged-emoji.png
