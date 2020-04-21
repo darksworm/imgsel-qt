@@ -292,7 +292,7 @@ void MainWindow::display(bool invalidateConfig) {
 
     if (config.getImages().empty()) {
         auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = emojigunApp->getSettings().value("library_path", defaultDir).toString();
+        auto imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
 
         QMessageBox noImagesMsgBox;
 

@@ -10,6 +10,7 @@
 #include <QtNetwork/QNetworkRequest>
 
 #define emojigunApp ((Application*) qApp)
+#define emojigunSettings (emojigunApp->getSettings())
 
 class Application : public QApplication {
 Q_OBJECT

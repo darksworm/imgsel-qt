@@ -181,7 +181,7 @@ std::vector<std::string> ConfigManager::getImagePaths() {
 
     if (!oneShotMode) {
         auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = emojigunApp->getSettings().value("library_path", defaultDir).toString();
+        auto imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
 
         if (imageDirFromSettings == defaultDir) {
             QDir().mkdir(imageDirFromSettings);
@@ -233,11 +233,11 @@ Config& ConfigManager::getOrLoadConfig() {
 }
 
 void ConfigManager::applyConfigFromQSettings(){
-    auto resizeSettingEnabled = emojigunApp->getSettings().value("resize_output_image", true).toBool();
+    auto resizeSettingEnabled = emojigunSettings.value("resize_output_image", true).toBool();
 
     if (resizeSettingEnabled) {
-        auto resizeWidth = emojigunApp->getSettings().value("resize_output_image_width", 32).toInt();
-        auto resizeHeight = emojigunApp->getSettings().value("resize_output_image_height", 32).toInt();
+        auto resizeWidth = emojigunSettings.value("resize_output_image_width", 32).toInt();
+        auto resizeHeight = emojigunSettings.value("resize_output_image_height", 32).toInt();
 
         config->resizeOutputToSize = {
                 .width = (unsigned) resizeWidth,
