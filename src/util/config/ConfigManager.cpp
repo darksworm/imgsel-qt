@@ -15,8 +15,6 @@
 #include "../../Application.h"
 
 void ConfigManager::loadConfig() {
-    QSettings settings("EMOJIGUN", "EMOJIGUN");
-
     std::vector<Image> images;
 
     bool autoMode = !cliParams.rowsAndCols.has_value();
@@ -66,18 +64,18 @@ void ConfigManager::loadConfig() {
 
         QImage image;
 
-        for (auto &img:images) {
-            image.load(QString::fromStdString(img.getPath()));
+        if (images.empty() || images.size() >= 1000) {
+            widths.insert(64);
+            heights.insert(64);
+        } else {
+            for (auto &img:images) {
+                image.load(QString::fromStdString(img.getPath()));
 
-            widths.insert(image.width());
-            heights.insert(image.height());
+                widths.insert(image.width());
+                heights.insert(image.height());
 
-            image.detach();
-        }
-
-        if (images.empty()) {
-            widths.insert(128);
-            heights.insert(128);
+                image.detach();
+            }
         }
 
         // get middle elements
@@ -182,10 +180,8 @@ std::vector<std::string> ConfigManager::getImagePaths() {
     std::vector<std::string> images;
 
     if (!oneShotMode) {
-        QSettings settings("EMOJIGUN", "EMOJIGUN");
-
         auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+        auto imageDirFromSettings = emojigunApp->getSettings().value("library_path", defaultDir).toString();
 
         if (imageDirFromSettings == defaultDir) {
             QDir().mkdir(imageDirFromSettings);
@@ -224,27 +220,24 @@ std::vector<std::string> ConfigManager::getImagePaths() {
     return images;
 }
 
-Config ConfigManager::getOrLoadConfig() {
-    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
-
+Config& ConfigManager::getOrLoadConfig() {
     if (!ConfigManager::configLoaded) {
         loadConfig();
-    }
 
-    if (!oneShotMode) {
-       applyConfigFromQSettings();
+        if (!emojigunApp->isOneShotMode()) {
+            applyConfigFromQSettings();
+        }
     }
 
     return *ConfigManager::config;
 }
 
 void ConfigManager::applyConfigFromQSettings(){
-    QSettings settings("EMOJIGUN", "EMOJIGUN");
-    auto resizeSettingEnabled = settings.value("resize_output_image", true).toBool();
+    auto resizeSettingEnabled = emojigunApp->getSettings().value("resize_output_image", true).toBool();
 
     if (resizeSettingEnabled) {
-        auto resizeWidth = settings.value("resize_output_image_width", 32).toInt();
-        auto resizeHeight = settings.value("resize_output_image_height", 32).toInt();
+        auto resizeWidth = emojigunApp->getSettings().value("resize_output_image_width", 32).toInt();
+        auto resizeHeight = emojigunApp->getSettings().value("resize_output_image_height", 32).toInt();
 
         config->resizeOutputToSize = {
                 .width = (unsigned) resizeWidth,
@@ -278,6 +271,7 @@ bool ConfigManager::invalidateConfigIfImageListChanged() {
         return false;
     }
 
+    delete ConfigManager::config->images;
     delete ConfigManager::config;
     ConfigManager::configLoaded = false;
 

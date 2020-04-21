@@ -291,9 +291,8 @@ void MainWindow::display(bool invalidateConfig) {
     auto config = ConfigManager::getOrLoadConfig();
 
     if (config.getImages().empty()) {
-        QSettings settings("EMOJIGUN", "EMOJIGUN");
         auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+        auto imageDirFromSettings = emojigunApp->getSettings().value("library_path", defaultDir).toString();
 
         QMessageBox noImagesMsgBox;
 

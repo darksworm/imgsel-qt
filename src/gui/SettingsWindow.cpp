@@ -484,6 +484,8 @@ void SettingsWindow::onApplyOutputImageResizeSettingsButton() {
     applyOutputImageResizeSettingsButton->setEnabled(false);
 
     QMessageBox::information(this, "Success", "Resize settings saved successfully!");
+
+    ConfigManager::applyConfigFromQSettings();
 }
 
 void SettingsWindow::checkForUpdatesOnStartupChanged(int state) {

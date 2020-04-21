@@ -9,6 +9,8 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 
+#define emojigunApp ((Application*) qApp)
+
 class Application : public QApplication {
 Q_OBJECT
 public:
@@ -28,6 +30,8 @@ public:
     void checkForUpdates();
     void checkSavedExeVersion();
 
+    QSettings& getSettings() { return *settings; }
+
 signals:
     void failedToRegisterHotkey(QString hotkey);
     void successfullyRegisteredHotkey(QString hotkey);
@@ -41,6 +45,8 @@ private:
     QString getPathToInstalledExe();
     bool exeIsInstalled();
     bool installedExeOlderThanLaunchedExe();
+
+    QSettings* settings;
 
     QSharedMemory *_singular;
 

@@ -15,6 +15,8 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
     this->oneShotMode = oneShotMode;
     setQuitOnLastWindowClosed(oneShotMode);
 
+    settings = new QSettings("EMOJIGUN", "EMOJIGUN");
+
     networkManager = new QNetworkAccessManager(this);
     connect(networkManager, &QNetworkAccessManager::finished,
         this, &Application::versionRequestFinished);
@@ -93,15 +95,14 @@ void Application::setMainWindow(MainWindow *window) {
                 return;
             }         
 
-            QSettings settings("EMOJIGUN", "EMOJIGUN");
-            bool hasCopiedOnce = settings.value("has_copied_once", false).toBool();
+            bool hasCopiedOnce = getSettings().value("has_copied_once", false).toBool();
 
             if (!hasCopiedOnce) {
                 QMessageBox::information(mainWindow, tr("Image copied to clipboard"),
                                          tr("The selected image has been copied to the clipboard, "
                                             "you can now paste it with CTRL + V."));
 
-                settings.setValue("has_copied_once", true);
+                getSettings().setValue("has_copied_once", true);
             }
         }
     );
@@ -133,7 +134,6 @@ void Application::launchOnStartupChanged(int state) {
     auto appDataLocation = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first();
     auto emojigunExeInstallPath = getPathToInstalledExe();
 
-    QSettings settings("EMOJIGUN", "EMOJIGUN");
     QSettings bootUpSettings(
         "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 
         QSettings::NativeFormat
@@ -149,7 +149,7 @@ void Application::launchOnStartupChanged(int state) {
         QFile::remove(emojigunExeInstallPath);
         QFile::copy(pathToExecutable, emojigunExeInstallPath);
         bootUpSettings.setValue("emojigun", emojigunExeInstallPath.replace('/', '\\'));
-        settings.setValue("installed_exe_version", PROJECT_VER);
+        getSettings().setValue("installed_exe_version", PROJECT_VER);
     } else {
         // I'd love to delete the dumped exe, but windows won't allow it if it is
         // running, so i guess we're just leaving it there to rot on the users system
@@ -223,12 +223,11 @@ void Application::checkSavedExeVersion() {
         return;
     }
 
-    auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
     auto exePath = getPathToInstalledExe();
 
     QFile::remove(exePath);
     QFile::copy(pathToExecutable, exePath);
-    settings.setValue("installed_exe_version", PROJECT_VER);
+    getSettings().setValue("installed_exe_version", PROJECT_VER);
 }
 
 bool Application::installedExeOlderThanLaunchedExe() {
@@ -236,8 +235,7 @@ bool Application::installedExeOlderThanLaunchedExe() {
         return true;
     }
 
-    auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
-    auto installedVersionString = settings.value("installed_exe_version", "1.0.0").toString();
+    auto installedVersionString = getSettings().value("installed_exe_version", "1.0.0").toString();
 
     auto installedVersion = QVersionNumber::fromString(installedVersionString);
     auto thisAppVersion = QVersionNumber::fromString(PROJECT_VER);

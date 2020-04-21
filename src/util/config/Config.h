@@ -35,7 +35,7 @@ private:
 
     QRect screenGeometry;
 
-    std::vector<Image> images;
+    std::vector<Image>* images = nullptr;
 
     PreprocessorFlags preprocessorFlags = PreprocessorFlags::None;
 
@@ -49,10 +49,6 @@ public:
                 "png",
                 "gif"
         };
-    }
-
-    bool isIsDebug() const {
-        return isDebug;
     }
 
     InputMode getDefaultInputMode() {
@@ -95,8 +91,8 @@ public:
         return xMargin;
     }
 
-    std::vector<Image> getImages() const {
-        return images;
+    std::vector<Image>& getImages() const {
+        return *images;
     }
 
     QRect getScreenGeometry() const {

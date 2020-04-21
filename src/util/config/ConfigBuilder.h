@@ -74,7 +74,7 @@ public:
     }
 
     ConfigBuilder &setImages(std::vector<Image> images) {
-        config->images = std::move(images);
+        config->images = new std::vector<Image>(images);
         return *this;
     }
 

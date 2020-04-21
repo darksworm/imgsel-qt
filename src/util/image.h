@@ -52,4 +52,6 @@ public:
     bool operator==(Image &other) {
         return other.path == this->path;
     }
+
+    ~Image() {}
 };
