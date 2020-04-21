@@ -13,6 +13,13 @@
 #include <cmath>
 #include <QtCore/QProcess>
 #include "../../Application.h"
+#include <QtConcurrent>
+#include <iostream>
+
+QPair<unsigned, unsigned> loadImageSize(Image image) {
+    QImage qImg(QString::fromStdString(image.getPath()));
+    return QPair(qImg.width(), qImg.height());
+}
 
 void ConfigManager::loadConfig() {
     std::vector<Image> images;
@@ -62,19 +69,16 @@ void ConfigManager::loadConfig() {
         std::multiset<unsigned> widths;
         std::multiset<unsigned> heights;
 
-        QImage image;
 
         if (images.empty() || images.size() >= 1000) {
             widths.insert(64);
             heights.insert(64);
         } else {
-            for (auto &img:images) {
-                image.load(QString::fromStdString(img.getPath()));
+            auto sizes = QtConcurrent::blockingMapped(images, loadImageSize);
 
-                widths.insert(image.width());
-                heights.insert(image.height());
-
-                image.detach();
+            for (auto i = sizes.begin(); i != sizes.end(); ++i) {
+                widths.insert(i->first);
+                heights.insert(i->second);
             }
         }
 
