@@ -9,12 +9,11 @@
 #include "util/validators/DirectoriesContainImages.h"
 #include <project_config.h>
 #include <iostream>
+#include "util/FileDownloader.h"
 
 #ifdef WITH_X11
-
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
-
 #endif
 
 #ifdef WIN32

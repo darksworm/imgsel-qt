@@ -5,6 +5,8 @@
 #endif
 #include <QStandardPaths>
 #include <project_config.h>
+#include "util/FileDownloader.h"
+#include "util/Unzipper.h"
 
 #include <iostream>
 
@@ -176,6 +178,63 @@ void Application::versionRequestFinished(QNetworkReply *reply) {
     auto version = jsonMap.take("version").toString();
     auto downloadURL = jsonMap.take("downloadURL").toString();
 
+
+    auto appDataLocation = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first();
+
+    QDir appDataDir(appDataLocation);
+    appDataDir.mkdir("temp");
+    QDir newVersionDir(appDataDir.filePath("temp"));
+
+    auto newZip = newVersionDir.filePath("emojigun.zip");
+
+    FileDownloader downloader(downloadURL, newZip);
+
+    QObject::connect(
+        &downloader, &FileDownloader::finished,
+        this, [&]() {
+        std::cout <<"f" << "\n";
+            Unzipper unzipper(newZip);
+            unzipper.unzipAllFilesToPath(newVersionDir.absolutePath());
+
+            auto exeFilePath = newVersionDir.filePath("emojigun.exe");
+
+            if (exeIsInstalled()) {
+                QFile installedFile(getPathToInstalledExe());
+                auto destFilePath = getPathToInstalledExe();
+
+                QFile oldFile(destFilePath);
+                oldFile.rename(destFilePath + ".old");
+
+                QFile newFile(exeFilePath);
+                newFile.rename(destFilePath);
+            }
+        }
+    );
+
+    QObject::connect(
+        &downloader, &FileDownloader::error,
+        this, [&]() {
+        std::cout <<"Yes" << "\n";
+        }
+    );
+    QObject::connect(
+            &downloader, &FileDownloader::IOError,
+            this, [&]() {
+                std::cout <<"Yes" << "\n";
+            }
+    );
+
+    QObject::connect(
+        &downloader, &FileDownloader::progress,
+        this, [](qint64 bytesDownloaded, qint64 bytesTotal) {
+            std::cout << QString::number((float)bytesDownloaded/bytesTotal).toStdString() <<  "\n";
+        }
+    );
+
+    downloader.start();
+
+    return;
+
     auto responseVersion = QVersionNumber::fromString(version);
     auto thisAppVersion = QVersionNumber::fromString(PROJECT_VER);
 
@@ -199,7 +258,53 @@ void Application::versionRequestFinished(QNetworkReply *reply) {
 
 #if WIN32
         if (msgBox.clickedButton() == downloadNewVersionBtn) {
-            QDesktopServices::openUrl(downloadURL);
+            auto appDataLocation = QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first();
+
+            QDir appDataDir(appDataLocation);
+            appDataDir.mkdir("temp");
+            QDir newVersionDir(appDataDir.filePath("temp"));
+
+            auto newZip = newVersionDir.filePath("emojigun.zip");
+
+            FileDownloader downloader(downloadURL, newZip);
+
+            QObject::connect(
+                &downloader, &FileDownloader::finished,
+                this, [&]() {
+                msgBox.exec();
+                    Unzipper unzipper(newZip);
+                    unzipper.unzipAllFilesToPath(newVersionDir.absolutePath());
+
+                    auto exeFilePath = newVersionDir.filePath("emojigun.exe");
+
+                    if (exeIsInstalled()) {
+                        QFile installedFile(getPathToInstalledExe());
+                        auto destFilePath = getPathToInstalledExe();
+
+                        QFile oldFile(destFilePath);
+                        oldFile.rename(destFilePath + ".old");
+
+                        QFile newFile(exeFilePath);
+                        newFile.rename(destFilePath);
+                    }
+                }
+            );
+
+            QObject::connect(
+                &downloader, &FileDownloader::error,
+                this, [&]() {
+                    msgBox.exec();
+                }
+            );
+
+            QObject::connect(
+                &downloader, &FileDownloader::progress,
+                this, [](qint64 bytesDownloaded, qint64 bytesTotal) {
+                    std::cout << QString::number((float)bytesDownloaded/bytesTotal).toStdString() <<  "\n";
+                }
+            );
+
+            downloader.start();
         }
 #endif
     }

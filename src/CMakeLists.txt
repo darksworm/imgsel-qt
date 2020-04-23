@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(emojigun VERSION 1.3.1)
+project(emojigun VERSION 1.2.0) # DONT COMMIT ME TODO
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
@@ -61,14 +61,30 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
         gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp
-        gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h ${hotkey_SRCS})
+        gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h ${hotkey_SRCS}
+        util/Unzipper.h util/Unzipper.cpp util/FileDownloader.h
+        util/FileDownloader.cpp)
+
+target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
+
+find_package(QuaZip5 QUIET)
+if (QUAZIP_FOUND)
+    message(STATUS "Found quazip") 
+    target_link_libraries(${PROJECT_NAME} ${QUAZIP_LIBRARIES})
+else()
+    message(STATUS "Couldn't find quazip")
+    add_subdirectory(util/lib/quazip)
+    if (WIN32)
+        target_link_libraries(${PROJECT_NAME} quazip5)
+    else()
+        target_link_libraries(${PROJECT_NAME} quazip_static)
+    endif()
+endif()
 
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Concurrent)
-
-target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 configure_file(util/config/version.rc.in ${PROJECT_BINARY_DIR}/config/version.rc)
