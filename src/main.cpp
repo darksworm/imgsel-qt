@@ -4,7 +4,7 @@
 #include "gui/MainWindow.h"
 #include "util/lib/CLI11.hpp"
 #include "util/config/ConfigManager.h"
-#include "Application.h"
+#include "app/Application.h"
 #include "util/validators/IntXIntValidator.h"
 #include "util/validators/DirectoriesContainImages.h"
 #include <project_config.h>
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     app.setMainWindow(window);
 
 #ifdef WIN32
-    app.setPathToExecutable(argv[0]);
+    emojigunUpdater.setPathToExecutable(argv[0]);
 #endif
 
     if (oneShotMode) {
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 
         bool checkForUpdates = app.getSettings().value("check_for_updates_on_launch", true).toInt();
         if (checkForUpdates) {
-            app.checkForUpdates();
+            emojigunUpdater.checkForUpdates();
         }
 
         app.setSettingsWindow(settingsWindow);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 #ifdef WIN32
         bool launchOnStartup = app.getSettings().value("launch_on_startup", false).toBool();
         if (launchOnStartup) {
-            app.checkSavedExeVersion();
+            emojigunUpdater.checkSavedExeVersion();
         }
 #endif
 

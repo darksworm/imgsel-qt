@@ -26,6 +26,10 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/util/lib/QHotkey/QHotkey)
     endif()
 endif()
 
+if (WIN32)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
+
 set(ADD_EXECUTABLE_PRE "")
 
 if (WIN32)
@@ -57,13 +61,15 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         input/handler/instruction/ModeChangeInstruction.h input/handler/instruction/FilterInstruction.h
         util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
         gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h
-        util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h util/lib/CLI11.hpp Application.cpp
-        Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
+        util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h
+        util/lib/CLI11.hpp app/Application.cpp
+        app/Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
         gui/SettingsWindow.cpp gui/SettingsWindow.h gui/MainWindow.cpp
         gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h ${hotkey_SRCS}
         util/Unzipper.h util/Unzipper.cpp util/FileDownloader.h
-        util/FileDownloader.cpp)
+        util/FileDownloader.cpp app/ApplicationUpdater.h
+        app/ApplicationUpdater.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
 
@@ -84,12 +90,14 @@ endif()
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Concurrent REQUIRED)
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Concurrent)
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network
+    Qt5::Concurrent)
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 configure_file(util/config/version.rc.in ${PROJECT_BINARY_DIR}/config/version.rc)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config
+    ${ZLIB_INCLUDE_DIRS})
 
 if (WIN32)
     target_link_libraries(${PROJECT_NAME} Qt5::QWindowsIntegrationPlugin)
@@ -108,40 +116,40 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/lib/libdwrite.a
             /mxe/usr/i686-w64-mingw32.static/lib/libd2d1.a
             /mxe/usr/i686-w64-mingw32.static/lib/libpng16.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libharfbuzz.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libcairo.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libgobject-2.0.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libfontconfig.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libfreetype.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libm.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libusp10.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libmsimg32.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libgdi32.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libpixman-1.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libffi.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libexpat.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libbz2.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libpng16.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libz.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libharfbuzz_too.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libfreetype_too.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libglib-2.0.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libws2_32.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libole32.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libwinmm.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libshlwapi.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libpcre.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libintl.a
-            /mxe/usr/i686-w64-mingw32.static/lib/../lib/libiconv.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libharfbuzz.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libcairo.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libgobject-2.0.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libfontconfig.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libfreetype.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libm.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libusp10.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libmsimg32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libgdi32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libpixman-1.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libffi.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libexpat.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libbz2.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libpng16.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libharfbuzz_too.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libfreetype_too.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libglib-2.0.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libws2_32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libole32.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libwinmm.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libshlwapi.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libpcre.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libintl.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libiconv.a
             /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
             /mxe/usr/i686-w64-mingw32.static/lib/libz.a
-            /mxe/usr/i686-w64-mingw32.static/lib/libpcre2-16.a
             /mxe/usr/i686-w64-mingw32.static/lib/libzstd.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libpcre2-16.a
             /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
             /mxe/usr/i686-w64-mingw32.static/lib/libssl.a
             /mxe/usr/i686-w64-mingw32.static/lib/libcrypto.a
             /mxe/usr/i686-w64-mingw32.static/lib/libcrypt32.a
             /mxe/usr/i686-w64-mingw32.static/lib/libiphlpapi.a
+            /mxe/usr/i686-w64-mingw32.static/lib/libminizip.a
             )
 endif ()
 
@@ -189,3 +197,35 @@ set_target_properties(
         RUNTIME_OUTPUT_NAME emojigun
         COMPILE_FLAGS "${WARNING_FLAGS}"
 )
+
+#option(USE_NSIS "Use NSIS generator to produce installer" ON)
+#
+#if(USE_NSIS)
+#  set(CPACK_GENERATOR "NSIS")
+#else(USE_NSIS)
+#  set(CPACK_GENERATOR "ZIP")
+#endif(USE_NSIS)
+#
+#set(CPACK_PACKAGE_NAME "emojigun")
+#set(CPACK_PACKAGE_VERSION "fillme")
+#set(CPACK_PACKAGE_VERSION_PATCH "0")
+#set(CPACK_PACKAGE_VENDOR "Ilmars")
+#set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "emojigun")
+#set(CPACK_IGNORE_FILES "\\.psd$;/CVS/;/\\.svn/;/\\.git/;\\.swp$;/CMakeLists.txt.user;\\.#;/#;\\.tar.gz$;/CMakeFiles/;CMakeCache.txt;\\.qm$;/build/;\\.diff$;.DS_Store'")
+#set(CPACK_SOURCE_GENERATOR "TGZ")
+#set(CPACK_SOURCE_PACKAGE_FILE_NAME "emojigun-package")
+#set(CPACK_SOURCE_IGNORE_FILES ${CPACK_IGNORE_FILES})
+#
+#set(CPACK_NSIS_INSTALLED_ICON_NAME "eyes.ico")
+#set(CPACK_NSIS_HELP_LINK "https://emojigun.com")
+#set(CPACK_NSIS_URL_INFO_ABOUT  "https://emojigun.com")
+#set(CPACK_NSIS_CONTACT "emojigun@emojigun.com")
+#
+## Load packaging facilities.
+#include(CPack)
+#
+## Configure file with custom definitions for NSIS.
+#configure_file(
+#  ${PROJECT_SOURCE_DIR}/util/config/NSIS.definitions.nsh.in
+#  ${CMAKE_CURRENT_BINARY_DIR}/resources/nsis/NSIS.definitions.nsh
+#)

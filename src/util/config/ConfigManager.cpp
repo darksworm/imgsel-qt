@@ -12,7 +12,7 @@
 #include <set>
 #include <cmath>
 #include <QtCore/QProcess>
-#include "../../Application.h"
+#include "../../app/Application.h"
 #include <QtConcurrent>
 #include <iostream>
 
@@ -178,7 +178,7 @@ std::vector<std::string> ConfigManager::getImagePaths() {
         allowedExtensions << "*." + QString::fromStdString(ext);
     }
 
-    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
+    bool oneShotMode = emojigunApp->isOneShotMode();
     auto imageFilePaths = cliParams.imageFiles;
 
     std::vector<std::string> images;

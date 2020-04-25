@@ -15,17 +15,18 @@ public slots:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void downloadError(QNetworkReply::NetworkError code);
 public:
-    FileDownloader(QString downloadUrl, QString targetFilePath);
+    FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath);
     ~FileDownloader();
     void start();
     void pause();
     void cancel();
+    QString getTargetFilePath() { return targetFilePath; };
 private:
     bool used = false;
     QString downloadUrl;
+    QString targetFilePath;
 
     QFile* file = nullptr;
-    QNetworkReply * reply = nullptr;
-
-    QNetworkAccessManager manager;
+    QNetworkReply* reply = nullptr;
+    QNetworkAccessManager* manager = nullptr;
 };

@@ -4,7 +4,7 @@
 #include <QtWidgets/QApplication>
 #include <iostream>
 #include "MainWindow.h"
-#include "../Application.h"
+#include "../app/Application.h"
 #include "../input/handler/InputHandlerFactory.h"
 #include "../input/handler/instruction/MoveInstruction.h"
 #include "../input/handler/instruction/ModeChangeInstruction.h"

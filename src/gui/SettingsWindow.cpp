@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
-#include "../Application.h"
+#include "../app/Application.h"
 #include <QHotkey>
 #include <QStandardPaths>
 
