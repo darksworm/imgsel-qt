@@ -17,11 +17,9 @@ public slots:
     void downloadError(QNetworkReply::NetworkError code);
 public:
     FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath);
-    ~FileDownloader();
+    ~FileDownloader() override;
     void start();
-    void pause();
     void cancel();
-    QString getTargetFilePath() { return targetFilePath; };
 private:
     void setupGUI();
 
