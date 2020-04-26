@@ -31,14 +31,8 @@ jobs:
     - name: build
       run: docker exec builder /bin/bash -c 'cd /app/src && rm -rf build; mkdir build && cd build && i686-w64-mingw32.static-cmake .. && make CROSS=i686-w64-mingw32.static -j2'
            
-    - name: upload exe
+    - name: upload built app
       uses: actions/upload-artifact@master
       with:
-        name: emojigun.exe
-        path: src/build/emojigun.exe
-  
-    - name: upload lib
-      uses: actions/upload-artifact@master
-      with:
-        name: emojigun.exe
-        path: src/build/libquazip5.dll
+        name: build
+        path: src/build
