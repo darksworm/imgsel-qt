@@ -144,20 +144,8 @@ void Application::launchOnStartupChanged(int state) {
     );
 
     if (state) {
-        QDir emojigunDir(appDataLocation);
-        if (!emojigunDir.exists()) {
-            emojigunDir.mkpath(".");
-        }
-
-        // trust me windows defender, i'm totally not a virus
-        QFile::remove(emojigunExeInstallPath);
-        QFile::copy(updater->getPathToExecutable(), emojigunExeInstallPath);
         bootUpSettings.setValue("emojigun", emojigunExeInstallPath.replace('/', '\\'));
-        getSettings().setValue("installed_exe_version", PROJECT_VER);
     } else {
-        // I'd love to delete the dumped exe, but windows won't allow it if it is
-        // running, so i guess we're just leaving it there to rot on the users system
-        // QFile::remove(emojigunExeInstallPath);
         bootUpSettings.remove("emojigun");
     }
 }

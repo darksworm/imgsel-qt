@@ -90,31 +90,6 @@ bool ApplicationUpdater::exeIsInstalled() {
     return QFile::exists(exePath);
 }
 
-void ApplicationUpdater::checkSavedExeVersion() {
-    if (!installedExeOlderThanLaunchedExe()) {
-        return;
-    }
-
-    auto exePath = getPathToInstalledExe();
-
-    QFile::remove(exePath);
-    QFile::copy(pathToExecutable, exePath);
-    emojigunSettings.setValue("installed_exe_version", PROJECT_VER);
-}
-
-bool ApplicationUpdater::installedExeOlderThanLaunchedExe() {
-    if (!exeIsInstalled()) {
-        return true;
-    }
-
-    auto installedVersionString = emojigunSettings.value("installed_exe_version", "1.0.0").toString();
-
-    auto installedVersion = QVersionNumber::fromString(installedVersionString);
-    auto thisAppVersion = QVersionNumber::fromString(PROJECT_VER);
-
-    return thisAppVersion > installedVersion;
-}
-
 void ApplicationUpdater::setPathToExecutable(QString pathToExecutable) {
     this->pathToExecutable = pathToExecutable;
 }

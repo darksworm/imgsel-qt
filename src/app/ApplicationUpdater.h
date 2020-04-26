@@ -18,8 +18,6 @@ public:
     void checkForUpdates();
     void updateToVersion(ApplicationVersionDetails details);
 
-    void checkSavedExeVersion();
-
     bool exeIsInstalled();
     QString getPathToInstalledExe();
 
@@ -34,7 +32,6 @@ private slots:
     void checkForUpdatesFinished();
     void updateDownloaded();
 private:
-    bool installedExeOlderThanLaunchedExe();
     QString getPathToUpdater();
     void showErrorMsg();
 
