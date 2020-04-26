@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-project(emojigun VERSION 1.2.0) # DONT COMMIT ME TODO
+project(emojigun VERSION 1.4.0)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_MODULE_PATH ${EMOJIGUN_SOURCE_DIR}/cmake)
@@ -24,10 +24,6 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/util/lib/QHotkey/QHotkey)
     else()
         message(STATUS "initialized modules")
     endif()
-endif()
-
-if (WIN32)
-    set(BUILD_SHARED_LIBS OFF)
 endif()
 
 set(ADD_EXECUTABLE_PRE "")
@@ -81,11 +77,7 @@ if (QUAZIP_FOUND)
 else()
     message(STATUS "Couldn't find quazip")
     add_subdirectory(util/lib/quazip)
-    if (WIN32)
-        target_link_libraries(${PROJECT_NAME} quazip5)
-    else()
-        target_link_libraries(${PROJECT_NAME} quazip_static)
-    endif()
+    target_link_libraries(${PROJECT_NAME} quazip5)
 endif()
 
 find_package(Qt5Widgets REQUIRED)
@@ -120,7 +112,6 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/qt5/lib/libQt5Gui.a
             /mxe/usr/i686-w64-mingw32.static/lib/libdwrite.a
             /mxe/usr/i686-w64-mingw32.static/lib/libd2d1.a
-            /mxe/usr/i686-w64-mingw32.static/lib/libpng16.a
             /mxe/usr/i686-w64-mingw32.static/lib/libharfbuzz.a
             /mxe/usr/i686-w64-mingw32.static/lib/libcairo.a
             /mxe/usr/i686-w64-mingw32.static/lib/libgobject-2.0.a
@@ -145,7 +136,6 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/lib/libpcre.a
             /mxe/usr/i686-w64-mingw32.static/lib/libintl.a
             /mxe/usr/i686-w64-mingw32.static/lib/libiconv.a
-            /mxe/usr/i686-w64-mingw32.static/lib/libopengl32.a
             /mxe/usr/i686-w64-mingw32.static/lib/libz.a
             /mxe/usr/i686-w64-mingw32.static/lib/libzstd.a
             /mxe/usr/i686-w64-mingw32.static/lib/libpcre2-16.a
@@ -154,7 +144,6 @@ if (WIN32)
             /mxe/usr/i686-w64-mingw32.static/lib/libcrypto.a
             /mxe/usr/i686-w64-mingw32.static/lib/libcrypt32.a
             /mxe/usr/i686-w64-mingw32.static/lib/libiphlpapi.a
-            /mxe/usr/i686-w64-mingw32.static/lib/libminizip.a
             )
 endif ()
 
