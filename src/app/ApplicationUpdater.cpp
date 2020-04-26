@@ -80,13 +80,11 @@ void ApplicationUpdater::updateToVersion(ApplicationVersionDetails details) {
 
 QString ApplicationUpdater::getPathToInstalledExe() {
     QDir appDataDir(emojigunApp->installDirectory());
-
     return appDataDir.filePath("emojigun.exe");
 }
 
 bool ApplicationUpdater::exeIsInstalled() {
     auto exePath = getPathToInstalledExe();
-
     return QFile::exists(exePath);
 }
 

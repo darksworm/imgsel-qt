@@ -21,8 +21,6 @@
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
 #endif
 
-#define emojigunApp ((Application*) qApp)
-
 int main(int argc, char *argv[]) {
     bool oneShotMode = argc > 1;
 

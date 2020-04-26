@@ -60,6 +60,4 @@ private:
 
     std::optional<QMetaObject::Connection> hotkeyConnection = std::nullopt;
     QNetworkAccessManager *networkManager;
-
-    FileDownloader *downloader;
 };
