@@ -41,9 +41,6 @@ void ApplicationUpdater::checkForUpdatesFinished() {
         versionDetails.version = version;
         versionDetails.downloadUrl = downloadURL;
 
-        // TODO REMOVEME
-        versionDetails.downloadUrl = "https://s3-eu-west-1.amazonaws.com/version.emojigun.com/latest/emojigun-setup.exe";
-        
         emit updateAvailable(versionDetails);
     }
 }
