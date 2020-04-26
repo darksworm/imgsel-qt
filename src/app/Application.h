@@ -44,6 +44,7 @@ public slots:
     void hotkeyBindingChange(QString newBinding);
     void launchOnStartupChanged(int state);
     void updateAvailable(ApplicationVersionDetails details);
+    void updateReady(QString updaterPath);
 
 private:
     QSettings* settings;

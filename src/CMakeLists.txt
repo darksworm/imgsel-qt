@@ -95,6 +95,10 @@ target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network
 
 configure_file(util/config/project_config.h.in ${PROJECT_BINARY_DIR}/config/project_config.h)
 configure_file(util/config/version.rc.in ${PROJECT_BINARY_DIR}/config/version.rc)
+if (WIN32)
+    configure_file(util/config/emojigun.nsi.in
+        ${PROJECT_BINARY_DIR}/emojigun.nsi @ONLY)
+endif (WIN32)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/config
     ${ZLIB_INCLUDE_DIRS})
@@ -197,35 +201,3 @@ set_target_properties(
         RUNTIME_OUTPUT_NAME emojigun
         COMPILE_FLAGS "${WARNING_FLAGS}"
 )
-
-#option(USE_NSIS "Use NSIS generator to produce installer" ON)
-#
-#if(USE_NSIS)
-#  set(CPACK_GENERATOR "NSIS")
-#else(USE_NSIS)
-#  set(CPACK_GENERATOR "ZIP")
-#endif(USE_NSIS)
-#
-#set(CPACK_PACKAGE_NAME "emojigun")
-#set(CPACK_PACKAGE_VERSION "fillme")
-#set(CPACK_PACKAGE_VERSION_PATCH "0")
-#set(CPACK_PACKAGE_VENDOR "Ilmars")
-#set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "emojigun")
-#set(CPACK_IGNORE_FILES "\\.psd$;/CVS/;/\\.svn/;/\\.git/;\\.swp$;/CMakeLists.txt.user;\\.#;/#;\\.tar.gz$;/CMakeFiles/;CMakeCache.txt;\\.qm$;/build/;\\.diff$;.DS_Store'")
-#set(CPACK_SOURCE_GENERATOR "TGZ")
-#set(CPACK_SOURCE_PACKAGE_FILE_NAME "emojigun-package")
-#set(CPACK_SOURCE_IGNORE_FILES ${CPACK_IGNORE_FILES})
-#
-#set(CPACK_NSIS_INSTALLED_ICON_NAME "eyes.ico")
-#set(CPACK_NSIS_HELP_LINK "https://emojigun.com")
-#set(CPACK_NSIS_URL_INFO_ABOUT  "https://emojigun.com")
-#set(CPACK_NSIS_CONTACT "emojigun@emojigun.com")
-#
-## Load packaging facilities.
-#include(CPack)
-#
-## Configure file with custom definitions for NSIS.
-#configure_file(
-#  ${PROJECT_SOURCE_DIR}/util/config/NSIS.definitions.nsh.in
-#  ${CMAKE_CURRENT_BINARY_DIR}/resources/nsis/NSIS.definitions.nsh
-#)

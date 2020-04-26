@@ -29,7 +29,7 @@ public:
     ~ApplicationUpdater();
 signals:
     void updateAvailable(ApplicationVersionDetails details);
-    void updateInstalled(QString newExePath);
+    void updateReady(QString updaterPath);
     void updateFailed();
 private slots:
     void checkForUpdatesFinished();
@@ -37,10 +37,10 @@ private slots:
     void updateDownloadFailed();
 private:
     bool installedExeOlderThanLaunchedExe();
+    QString getPathToUpdater();
 
     QString pathToExecutable;
 
-    QTemporaryFile newVersionTempFile;
     QTemporaryDir newVersionTempDir;
     FileDownloader *downloader = nullptr;
     Unzipper *unzipper = nullptr;

@@ -3,7 +3,6 @@
 
 ApplicationUpdater::~ApplicationUpdater() {
     newVersionTempDir.remove();
-    newVersionTempFile.remove();
 
     delete downloader;
     delete unzipper;
@@ -43,21 +42,21 @@ void ApplicationUpdater::checkForUpdatesFinished() {
         versionDetails.downloadUrl = downloadURL;
 
         // TODO REMOVEME
-        // versionDetails.downloadUrl = "https://s3-eu-west-1.amazonaws.com/version.emojigun.com/emojiguntest.zip";
+        versionDetails.downloadUrl = "https://s3-eu-west-1.amazonaws.com/version.emojigun.com/latest/emojigun-setup.exe";
         
         emit updateAvailable(versionDetails);
     }
 }
 
+QString ApplicationUpdater::getPathToUpdater() {
+    return newVersionTempDir.filePath("emojigun-updater.exe");
+}
+
 void ApplicationUpdater::updateToVersion(ApplicationVersionDetails details) {
     delete downloader;
 
-    // this should create the temp file
-    newVersionTempFile.open();
-    newVersionTempFile.close();
-
     downloader = new FileDownloader(
-        emojigunNetworkManager, details.downloadUrl, newVersionTempFile.fileName()
+        emojigunNetworkManager, details.downloadUrl, getPathToUpdater()
     );
 
     QObject::connect(
@@ -136,32 +135,7 @@ void ApplicationUpdater::setPathToExecutable(QString pathToExecutable) {
 }
 
 void ApplicationUpdater::updateDownloaded() {
-    Unzipper unzipper(newVersionTempFile.fileName());
-    unzipper.unzipAllFilesToPath(newVersionTempDir.path());
-
-    QDir installDir(emojigunApp->installDirectory());
-    QStringList oldFileList = installDir.entryList(QStringList("*"), QDir::Files);
-
-    foreach (auto oldFileName, oldFileList) {
-        qDebug() << "old file" << oldFileName;
-        QFile oldFile(installDir.filePath(oldFileName));
-        oldFile.rename(oldFile.fileName() + ".old");
-    }
-
-    QDir newVersionDir(newVersionTempDir.path());
-    QStringList newFileList = newVersionDir.entryList(QStringList("*"), QDir::Files);
-
-    foreach (auto newFileName, newFileList) {
-        QFile newFile(newVersionDir.filePath(newFileName));
-
-        qDebug() << "new file" << newFileName;
-
-        QFileInfo fileInfo(newFile.fileName());
-
-        newFile.rename(installDir.filePath(fileInfo.fileName()));
-    }
-
-    emit updateInstalled(getPathToInstalledExe());
+    emit updateReady(getPathToUpdater());
 }
 
 void ApplicationUpdater::updateDownloadFailed() {

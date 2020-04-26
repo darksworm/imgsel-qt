@@ -21,18 +21,8 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
     );
 
     connect(
-        updater, &ApplicationUpdater::updateInstalled,
-        this, [&](QString newExePath){
-            if (_singular->isAttached()) {
-                _singular->detach();
-            }
-
-            qDebug() << "launching new exe" << newExePath;
-
-            bool success = QProcess::startDetached(newExePath, QStringList());
-            qDebug() << "launch result" << success;
-            Application::quit();
-        }
+        updater, &ApplicationUpdater::updateReady,
+        this, &Application::updateReady
     );
 }
 
@@ -200,3 +190,15 @@ void Application::updateAvailable(ApplicationVersionDetails details) {
     }
 #endif
 }
+
+void Application::updateReady(QString updaterPath) {
+    bool success = QProcess::startDetached(updaterPath, QStringList("/S"));
+
+    if (success) {
+        Application::quit();
+        return;
+    }
+
+    QMessageBox::critical(mainWindow, "Update failed!", "Couldn't update. Please try to update manually.");
+}
+
