@@ -24,7 +24,7 @@ A tool that can be used to quickly select a stored image and copy it to your cli
 For usage instructions see: [INSTALL.md](INSTALL.md), [USAGE.md](USAGE.md)
 
 ### Licensing
-Copyright (C) 2020 Ilmars Janis Bluzmanis
+Copyright (C) 2020 Ilmars Janis Bluzmanis.
 This software is licensed under the GNU General Public License v3.0. [license](LICENSE.txt)
 
 This software uses the following external libraries:
