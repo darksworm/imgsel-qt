@@ -111,8 +111,9 @@ Section -MainProgram
 ${INSTALL_TYPE}
 SetOverwrite ifnewer
 SetOutPath "$INSTDIR"
-File "C:\Users\juris\Desktop\b\emojigun.exe"
-File "C:\Users\juris\Desktop\b\libquazip5.dll"
+File "emojigun.exe"
+File "libquazip5.dll"
+File "licenses.txt"
 SectionEnd
 
 ######################################################################
@@ -158,6 +159,7 @@ ${INSTALL_TYPE}
 Delete "$INSTDIR\emojigun.exe"
 Delete "$INSTDIR\libquazip5.dll"
 Delete "$INSTDIR\uninstall.exe"
+Delete "$INSTDIR\licenses.txt"
 !ifdef WEB_SITE
 Delete "$INSTDIR\${APP_NAME} website.url"
 !endif
