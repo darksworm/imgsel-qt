@@ -1,7 +1,7 @@
 #include <windows.h>
 #define        VER_STR  "@PROJECT_VERSION@.0"
 
-1 ICON "eyes.ico"
+1 ICON "assets/eyes.ico"
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION    @PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@, 0

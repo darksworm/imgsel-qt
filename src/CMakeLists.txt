@@ -179,7 +179,9 @@ endif ()
 # export compile commands for YCM
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes.ico config/eyes.ico COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes.ico assets/eyes.ico COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/installer-sidebar.bmp
+    assets/installer-sidebar.bmp COPYONLY)
 
 install(TARGETS ${PROJECT_NAME} EXPORT emojigun DESTINATION bin)
 
