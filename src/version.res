@@ -10,7 +10,7 @@ BEGIN
         BLOCK "040904E4"
         BEGIN
             VALUE "CompanyName", "EMOJIGUN"
-            VALUE "FileDescription", "Custom emoji sharing tool"
+            VALUE "FileDescription", "emojigun - custom emoji sharing tool"
             VALUE "FileVersion", VER_STR
             VALUE "OriginalFilename", "emojigun.exe"
             VALUE "ProductName", "EMOJIGUN"

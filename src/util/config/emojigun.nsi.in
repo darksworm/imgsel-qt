@@ -9,7 +9,7 @@
 !define WEB_SITE "https://emojigun.com"
 !define VERSION "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.0"
 !define COPYRIGHT ""
-!define DESCRIPTION "Custom emoji sharing tool"
+!define DESCRIPTION "emojigun - custom emoji sharing tool"
 !define LICENSE_TXT "licenses.txt"
 !define INSTALLER_NAME "emojigun-setup.exe"
 !define MAIN_APP_EXE "emojigun.exe"
