@@ -66,19 +66,17 @@ void ApplicationUpdater::updateToVersion(ApplicationVersionDetails details) {
 
     QObject::connect(
         downloader, &FileDownloader::error,
-        this, &ApplicationUpdater::updateDownloadFailed
+        this, [&](QNetworkReply::NetworkError error) {
+            if (error != QNetworkReply::OperationCanceledError) {
+                showErrorMsg();
+            }
+        }
     );
 
     QObject::connect(
         downloader, &FileDownloader::IOError,
-        this, &ApplicationUpdater::updateDownloadFailed
+        this, &ApplicationUpdater::showErrorMsg
     );
-
-   // QObject::connect(
-   //     downloader, &FileDownloader::progress,
-   //     this, [](qint64 bytesDownloaded, qint64 bytesTotal) {
-   //     }
-   // );
 
     downloader->start();
 }
@@ -96,16 +94,6 @@ bool ApplicationUpdater::exeIsInstalled() {
 }
 
 void ApplicationUpdater::checkSavedExeVersion() {
-    QDir installDir(emojigunApp->installDirectory());
-    auto oldFiles = installDir.entryList(QStringList("*.old"));
-
-    if (oldFiles.count() > 0) {
-        foreach (auto oldFileName, oldFiles) {
-            QFile oldFile(installDir.filePath(oldFileName));
-            oldFile.remove();
-        }
-    }
-
     if (!installedExeOlderThanLaunchedExe()) {
         return;
     }
@@ -138,6 +126,14 @@ void ApplicationUpdater::updateDownloaded() {
     emit updateReady(getPathToUpdater());
 }
 
-void ApplicationUpdater::updateDownloadFailed() {
+void ApplicationUpdater::showErrorMsg() {
+    QIcon icon(":/assets/eyes-32x25.png");
+    QMessageBox errorBox;
 
+    errorBox.setText("Update download failed!");
+    errorBox.setWindowTitle("Update failed!");
+    errorBox.setIcon(QMessageBox::Critical);
+    errorBox.setWindowIcon(icon);
+
+    errorBox.open();
 }

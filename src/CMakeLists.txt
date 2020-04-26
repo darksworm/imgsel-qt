@@ -69,7 +69,8 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         gui/MainWindow.h qtres.qrc gui/picker/ImagePickerDrawer.h ${hotkey_SRCS}
         util/Unzipper.h util/Unzipper.cpp util/FileDownloader.h
         util/FileDownloader.cpp app/ApplicationUpdater.h
-        app/ApplicationUpdater.cpp)
+        app/ApplicationUpdater.cpp gui/util/FileDownloaderProgressWindow.cpp
+        gui/util/FileDownloaderProgressWindow.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
 

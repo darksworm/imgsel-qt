@@ -2,6 +2,7 @@
 #include <QObject>
 #include <QtNetwork/QNetworkReply>
 #include <QFile>
+#include "../gui/util/FileDownloaderProgressWindow.h"
 
 class FileDownloader : public QObject {
 Q_OBJECT;
@@ -22,6 +23,8 @@ public:
     void cancel();
     QString getTargetFilePath() { return targetFilePath; };
 private:
+    void setupGUI();
+
     bool used = false;
     QString downloadUrl;
     QString targetFilePath;
@@ -29,4 +32,5 @@ private:
     QFile* file = nullptr;
     QNetworkReply* reply = nullptr;
     QNetworkAccessManager* manager = nullptr;
+    FileDownloaderProgressWindow* progressWindow = nullptr;
 };

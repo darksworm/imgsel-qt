@@ -19,6 +19,8 @@ void FileDownloader::start() {
         return;
     }
 
+    setupGUI();
+
     QNetworkRequest request(downloadUrl);
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
@@ -42,8 +44,43 @@ void FileDownloader::start() {
     used = true;
 }
 
+void FileDownloader::setupGUI() {
+    progressWindow = new FileDownloaderProgressWindow();
+
+    connect(
+        this, &FileDownloader::IOError,
+        progressWindow, &FileDownloaderProgressWindow::onDownloadFail
+    );
+
+    connect(
+        this, &FileDownloader::error,
+        progressWindow, &FileDownloaderProgressWindow::onDownloadFail
+    );
+
+    connect(
+        this, &FileDownloader::progress,
+        progressWindow, &FileDownloaderProgressWindow::onDownloadProgress
+    );
+
+    connect(
+        this, &FileDownloader::finished,
+        progressWindow, &FileDownloaderProgressWindow::onDownloadFinish
+    );
+
+    connect(
+        progressWindow, &FileDownloaderProgressWindow::cancelRequested,
+        this, [&]() { cancel(); }
+    );
+
+    progressWindow->show();
+}
 
 void FileDownloader::downloadFinished() {
+    if (reply->error()) {
+        downloadError(reply->error());
+        return;
+    }
+
     file->write(reply->readAll());
     file->close();
 
@@ -61,4 +98,8 @@ void FileDownloader::downloadError(QNetworkReply::NetworkError code) {
 FileDownloader::~FileDownloader() {
     delete file;
     delete reply;
+}
+
+void FileDownloader::cancel() {
+    reply->abort();
 }

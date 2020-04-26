@@ -163,7 +163,9 @@ void Application::launchOnStartupChanged(int state) {
 }
 
 void Application::updateAvailable(ApplicationVersionDetails details) {
+    QIcon icon(":/assets/eyes-32x25.png");
     QMessageBox msgBox;
+    msgBox.setWindowIcon(icon);
 
 #if WIN32
     QPushButton *downloadNewVersionBtn = msgBox.addButton("Download", QMessageBox::ActionRole);

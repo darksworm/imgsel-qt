@@ -30,14 +30,13 @@ public:
 signals:
     void updateAvailable(ApplicationVersionDetails details);
     void updateReady(QString updaterPath);
-    void updateFailed();
 private slots:
     void checkForUpdatesFinished();
     void updateDownloaded();
-    void updateDownloadFailed();
 private:
     bool installedExeOlderThanLaunchedExe();
     QString getPathToUpdater();
+    void showErrorMsg();
 
     QString pathToExecutable;
 
