@@ -179,7 +179,6 @@ endif ()
 # export compile commands for YCM
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../LICENSE.txt LICENSE.txt COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/assets/eyes.ico config/eyes.ico COPYONLY)
 
 install(TARGETS ${PROJECT_NAME} EXPORT emojigun DESTINATION bin)
@@ -191,3 +190,30 @@ set_target_properties(
         RUNTIME_OUTPUT_NAME emojigun
         COMPILE_FLAGS "${WARNING_FLAGS}"
 )
+
+function(cat IN_FILE OUT_FILE)
+  file(READ ${IN_FILE} CONTENTS)
+  file(APPEND ${OUT_FILE} "${CONTENTS}")
+endfunction()
+
+SET(LICENSE_OUT ${CMAKE_BINARY_DIR}/licenses.txt)
+SET(DIVIDER
+    "---------------------------------------------------------------------------\n\n")
+
+file(REMOVE ${LICENSE_OUT})
+
+file(APPEND ${LICENSE_OUT} "emojigun Copyright(c) Ilmars Janis Bluzmanis 2020.\n")
+file(APPEND ${LICENSE_OUT} "emojigun is available under the GNU General Public License v3.0.\n\n")
+cat(../LICENSE.txt ${LICENSE_OUT})
+
+file(APPEND ${LICENSE_OUT} "${DIVIDER}")
+file(APPEND ${LICENSE_OUT} "Qt is available under the GNU Lesser General Public License version 3.\n\n")
+cat(../QTLICENSE.txt ${LICENSE_OUT})
+
+file(APPEND ${LICENSE_OUT} ${DIVIDER})
+# quazip already has a header
+cat(util/lib/quazip/COPYING ${LICENSE_OUT})
+
+file(APPEND ${LICENSE_OUT} ${DIVIDER})
+file(APPEND ${LICENSE_OUT} "QHotkey is available under the BSD 3-Clause \"New\" or \"Revised\" License\n\n")
+cat(util/lib/QHotkey/LICENSE ${LICENSE_OUT})
