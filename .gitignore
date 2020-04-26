@@ -6,3 +6,4 @@ cmake-build-debug/
 CMakeFiles
 src/build
 src/build-lin
+src/win-debug-build

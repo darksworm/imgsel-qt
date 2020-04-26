@@ -12,11 +12,16 @@
 #include <set>
 #include <cmath>
 #include <QtCore/QProcess>
-#include "../../Application.h"
+#include "../../app/Application.h"
+#include <QtConcurrent>
+#include <iostream>
+
+QPair<unsigned, unsigned> loadImageSize(Image image) {
+    QImage qImg(QString::fromStdString(image.getPath()));
+    return QPair(qImg.width(), qImg.height());
+}
 
 void ConfigManager::loadConfig() {
-    QSettings settings("EMOJIGUN", "EMOJIGUN");
-
     std::vector<Image> images;
 
     bool autoMode = !cliParams.rowsAndCols.has_value();
@@ -64,20 +69,17 @@ void ConfigManager::loadConfig() {
         std::multiset<unsigned> widths;
         std::multiset<unsigned> heights;
 
-        QImage image;
 
-        for (auto &img:images) {
-            image.load(QString::fromStdString(img.getPath()));
+        if (images.empty() || images.size() >= 1000) {
+            widths.insert(64);
+            heights.insert(64);
+        } else {
+            auto sizes = QtConcurrent::blockingMapped(images, loadImageSize);
 
-            widths.insert(image.width());
-            heights.insert(image.height());
-
-            image.detach();
-        }
-
-        if (images.empty()) {
-            widths.insert(128);
-            heights.insert(128);
+            for (auto i = sizes.begin(); i != sizes.end(); ++i) {
+                widths.insert(i->first);
+                heights.insert(i->second);
+            }
         }
 
         // get middle elements
@@ -176,16 +178,14 @@ std::vector<std::string> ConfigManager::getImagePaths() {
         allowedExtensions << "*." + QString::fromStdString(ext);
     }
 
-    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
+    bool oneShotMode = emojigunApp->isOneShotMode();
     auto imageFilePaths = cliParams.imageFiles;
 
     std::vector<std::string> images;
 
     if (!oneShotMode) {
-        QSettings settings("EMOJIGUN", "EMOJIGUN");
-
         auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
+        auto imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
 
         if (imageDirFromSettings == defaultDir) {
             QDir().mkdir(imageDirFromSettings);
@@ -224,27 +224,24 @@ std::vector<std::string> ConfigManager::getImagePaths() {
     return images;
 }
 
-Config ConfigManager::getOrLoadConfig() {
-    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
-
+Config& ConfigManager::getOrLoadConfig() {
     if (!ConfigManager::configLoaded) {
         loadConfig();
-    }
 
-    if (!oneShotMode) {
-       applyConfigFromQSettings();
+        if (!emojigunApp->isOneShotMode()) {
+            applyConfigFromQSettings();
+        }
     }
 
     return *ConfigManager::config;
 }
 
 void ConfigManager::applyConfigFromQSettings(){
-    QSettings settings("EMOJIGUN", "EMOJIGUN");
-    auto resizeSettingEnabled = settings.value("resize_output_image", true).toBool();
+    auto resizeSettingEnabled = emojigunSettings.value("resize_output_image", true).toBool();
 
     if (resizeSettingEnabled) {
-        auto resizeWidth = settings.value("resize_output_image_width", 32).toInt();
-        auto resizeHeight = settings.value("resize_output_image_height", 32).toInt();
+        auto resizeWidth = emojigunSettings.value("resize_output_image_width", 32).toInt();
+        auto resizeHeight = emojigunSettings.value("resize_output_image_height", 32).toInt();
 
         config->resizeOutputToSize = {
                 .width = (unsigned) resizeWidth,
@@ -278,6 +275,7 @@ bool ConfigManager::invalidateConfigIfImageListChanged() {
         return false;
     }
 
+    delete ConfigManager::config->images;
     delete ConfigManager::config;
     ConfigManager::configLoaded = false;
 

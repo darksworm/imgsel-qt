@@ -1,6 +1,7 @@
 #include "ImageDrawer.h"
 #include "../../util/config/ConfigManager.h"
 #include "../../util/exceptions/ImageNotLoadable.h"
+#include <qnamespace.h>
 
 std::pair<std::string, std::optional<QImage>> loadImage(Image img) {
     std::optional<QImage> result;
@@ -21,7 +22,7 @@ std::pair<std::string, std::optional<QImage>> loadImage(Image img) {
         if (config.getMaxImageWidth() > 0 && width > config.getMaxImageWidth()) {
             auto scale = (double) config.getMaxImageWidth() / width;
             int new_height = height * scale;
-            image = image.scaledToHeight(new_height);
+            image = image.scaledToHeight(new_height, Qt::SmoothTransformation);
 
             height = new_height;
             width = width * scale;
@@ -30,7 +31,7 @@ std::pair<std::string, std::optional<QImage>> loadImage(Image img) {
         if (config.getMaxImageHeight() > 0 && height > config.getMaxImageHeight()) {
             auto scale = (double) config.getMaxImageHeight() / height;
             int new_width = width * scale;
-            image = image.scaledToWidth(new_width);
+            image = image.scaledToWidth(new_width, Qt::SmoothTransformation);
         }
     }
 

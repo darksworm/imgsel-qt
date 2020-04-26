@@ -1,13 +1,20 @@
 #pragma once
 
-#include "gui/SettingsWindow.h"
-#include "gui/MainWindow.h"
 #include <QtWidgets/QApplication>
 #include <QtCore/QSharedMemory>
 #include <optional>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
+#include "../util/FileDownloader.h"
+#include "../gui/SettingsWindow.h"
+#include "../gui/MainWindow.h"
+#include "ApplicationUpdater.h"
+
+#define emojigunApp ((Application*) qApp)
+#define emojigunSettings (emojigunApp->getSettings())
+#define emojigunNetworkManager (emojigunApp->getNetworkManager())
+#define emojigunUpdater (emojigunApp->getUpdater())
 
 class Application : public QApplication {
 Q_OBJECT
@@ -20,13 +27,14 @@ public:
 
     void setMainWindow(MainWindow *window);
     void setSettingsWindow(SettingsWindow *window);
-    void setPathToExecutable(QString pathToExecutable);
 
     static QString defaultLibraryDirectory();
     bool isOneShotMode();
 
-    void checkForUpdates();
-    void checkSavedExeVersion();
+    QString installDirectory();
+    QSettings& getSettings() { return *settings; }
+    QNetworkAccessManager* getNetworkManager() { return networkManager; }
+    ApplicationUpdater& getUpdater() { return *updater; };
 
 signals:
     void failedToRegisterHotkey(QString hotkey);
@@ -35,12 +43,12 @@ signals:
 public slots:
     void hotkeyBindingChange(QString newBinding);
     void launchOnStartupChanged(int state);
-    void versionRequestFinished(QNetworkReply *reply);
+    void updateAvailable(ApplicationVersionDetails details);
+    void updateReady(QString updaterPath);
 
 private:
-    QString getPathToInstalledExe();
-    bool exeIsInstalled();
-    bool installedExeOlderThanLaunchedExe();
+    QSettings* settings;
+    ApplicationUpdater* updater;
 
     QSharedMemory *_singular;
 

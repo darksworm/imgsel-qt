@@ -4,19 +4,17 @@
 #include "gui/MainWindow.h"
 #include "util/lib/CLI11.hpp"
 #include "util/config/ConfigManager.h"
-#include "Application.h"
+#include "app/Application.h"
 #include "util/validators/IntXIntValidator.h"
 #include "util/validators/DirectoriesContainImages.h"
 #include <project_config.h>
+#include <iostream>
+#include "util/FileDownloader.h"
 
 #ifdef WITH_X11
-
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
-
 #endif
-
-#include <iostream>
 
 #ifdef WIN32
 #include <QtPlugin>
@@ -99,7 +97,7 @@ int main(int argc, char *argv[]) {
     app.setMainWindow(window);
 
 #ifdef WIN32
-    app.setPathToExecutable(argv[0]);
+    emojigunUpdater.setPathToExecutable(argv[0]);
 #endif
 
     if (oneShotMode) {
@@ -107,29 +105,21 @@ int main(int argc, char *argv[]) {
     } else {
         Q_INIT_RESOURCE(qtres);
 
-        auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
         auto settingsWindow = new SettingsWindow(window);
 
-        bool startMinimized = settings.value("start_minimized", false).toInt();
+        bool startMinimized = app.getSettings().value("start_minimized", false).toInt();
         if (!startMinimized) {
             settingsWindow->show();
         }
 
-        bool checkForUpdates = settings.value("check_for_updates_on_launch", true).toInt();
+        bool checkForUpdates = app.getSettings().value("check_for_updates_on_launch", true).toInt();
         if (checkForUpdates) {
-            app.checkForUpdates();
+            emojigunUpdater.checkForUpdates();
         }
 
         app.setSettingsWindow(settingsWindow);
 
-#ifdef WIN32
-        bool launchOnStartup = settings.value("launch_on_startup", false).toBool();
-        if (launchOnStartup) {
-            app.checkSavedExeVersion();
-        }
-#endif
-
-        auto hkSequence = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
+        auto hkSequence = app.getSettings().value("hotkey_sequence", "ctrl+shift+x").toString();
         app.hotkeyBindingChange(hkSequence);
     }
 

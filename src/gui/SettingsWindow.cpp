@@ -2,7 +2,7 @@
 #include "MainWindow.h"
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
-#include "../Application.h"
+#include "../app/Application.h"
 #include <QHotkey>
 #include <QStandardPaths>
 
@@ -484,6 +484,8 @@ void SettingsWindow::onApplyOutputImageResizeSettingsButton() {
     applyOutputImageResizeSettingsButton->setEnabled(false);
 
     QMessageBox::information(this, "Success", "Resize settings saved successfully!");
+
+    ConfigManager::applyConfigFromQSettings();
 }
 
 void SettingsWindow::checkForUpdatesOnStartupChanged(int state) {
