@@ -47,6 +47,10 @@ void FileDownloader::start() {
 void FileDownloader::setupGUI() {
     progressWindow = new FileDownloaderProgressWindow();
 
+    if (noErrorMessages) {
+        progressWindow->dontDisplayErrorMessages();
+    }
+
     connect(
         this, &FileDownloader::IOError,
         progressWindow, &FileDownloaderProgressWindow::onDownloadFail
@@ -102,4 +106,8 @@ FileDownloader::~FileDownloader() {
 
 void FileDownloader::cancel() {
     reply->abort();
+}
+
+void FileDownloader::dontDisplayErrorMessages() {
+    noErrorMessages = true;
 }

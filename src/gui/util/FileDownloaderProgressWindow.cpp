@@ -15,7 +15,7 @@ void FileDownloaderProgressWindow::show() {
 }
 
 void FileDownloaderProgressWindow::onDownloadFail() {
-    if (toasted) {
+    if (toasted || noErrorMessages) {
         return;
     }
 
@@ -54,4 +54,8 @@ void FileDownloaderProgressWindow::cancelDownload() {
 
     toasted = true;
     emit cancelRequested();
+}
+
+void FileDownloaderProgressWindow::dontDisplayErrorMessages() {
+    noErrorMessages = true;
 }

@@ -5,6 +5,12 @@
 #include "Unzipper.h"
 #include <QTemporaryFile>
 
+enum class EmojiZipError {
+    IOError,
+    NetworkError,
+    UnarchivingError
+};
+
 class EmojiZipDownloader : public QObject {
 Q_OBJECT;
 public:
@@ -13,9 +19,9 @@ public:
     void downloadAndExtract();
 public slots:
     void downloaded();
-    void downloadError(QNetworkReply::NetworkError error);
 signals:
     void done();
+    void failed();
 private:
     QTemporaryFile zipFile;
     FileDownloader *downloader = nullptr;
@@ -23,5 +29,5 @@ private:
 
     QString outputPath;
 
-    void showErrorMessage();
+    void showErrorMessage(EmojiZipError cause);
 };

@@ -18,12 +18,15 @@ public slots:
 public:
     FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath);
     ~FileDownloader() override;
+    void dontDisplayErrorMessages();
     void start();
     void cancel();
 private:
     void setupGUI();
 
     bool used = false;
+    bool noErrorMessages = false;
+
     QString downloadUrl;
     QString targetFilePath;
 

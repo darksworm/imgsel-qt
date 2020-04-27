@@ -1,4 +1,5 @@
 #include "EmojiZipDownloader.h"
+#include <QMessageBox>
 
 EmojiZipDownloader::EmojiZipDownloader(QNetworkAccessManager* manager, QString downloadUrl, QString outputPath) {
     this->outputPath = outputPath;
@@ -9,6 +10,7 @@ EmojiZipDownloader::EmojiZipDownloader(QNetworkAccessManager* manager, QString d
     zipFile.close();
 
     downloader = new FileDownloader(manager, downloadUrl, zipFile.fileName());
+    downloader->dontDisplayErrorMessages();
 
     connect(
         downloader, &FileDownloader::finished,
@@ -17,12 +19,12 @@ EmojiZipDownloader::EmojiZipDownloader(QNetworkAccessManager* manager, QString d
 
     connect(
         downloader, &FileDownloader::IOError,
-        this, &EmojiZipDownloader::showErrorMessage
+        this, [&]() { showErrorMessage(EmojiZipError::IOError); emit failed(); }
     );
 
     connect(
         downloader, &FileDownloader::error,
-        this, &EmojiZipDownloader::downloadError
+        this, [&](QNetworkReply::NetworkError error) { showErrorMessage(EmojiZipError::NetworkError); emit failed(); }
     );
 }
 
@@ -42,16 +44,26 @@ void EmojiZipDownloader::downloaded() {
     bool result = unzipper->unzipAllFilesToPath(outputPath);
 
     if (!result) {
-        showErrorMessage();
+        showErrorMessage(EmojiZipError::UnarchivingError);
     } else {
         emit done();
     }
 }
 
-void EmojiZipDownloader::showErrorMessage() {
+void EmojiZipDownloader::showErrorMessage(EmojiZipError cause) {
+    QString message = "Encountered error while ";
 
-}
+    switch (cause) {
+        case EmojiZipError::IOError:
+            message += "creating files.";
+            break;
+        case EmojiZipError::NetworkError:
+            message += "downloading the emoji pack.";
+            break;
+        case EmojiZipError::UnarchivingError:
+            message += "decompressing the emojis.";
+            break;
+    }
 
-void EmojiZipDownloader::downloadError(QNetworkReply::NetworkError error) {
-
+    QMessageBox::critical(nullptr, "Failed to download emojis!", message);
 }

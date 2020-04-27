@@ -9,6 +9,7 @@ public:
     FileDownloaderProgressWindow();
     void show();
     void cancelDownload();
+    void dontDisplayErrorMessages();
 public slots:
     void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void onDownloadFail();
@@ -18,5 +19,6 @@ signals:
 private:
     bool rangeSet = false;
     bool toasted = false;
+    bool noErrorMessages = false;
     QProgressDialog progressDialog;
 };
