@@ -29,5 +29,5 @@ private:
 
     QString outputPath;
 
-    void showErrorMessage(EmojiZipError cause);
+    void onError(EmojiZipError cause);
 };

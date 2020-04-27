@@ -204,7 +204,7 @@ void Application::noImagesToDisplay() {
 
     QMessageBox noImagesMsgBox(
         QMessageBox::Icon::Critical,
-        "No images found!",
+        "No emojis found!",
         "To use EMOJIGUN, you must first add emojis to your library. Please copy your emojis to your library folder at " + imageDirFromSettings + ".",
         QMessageBox::Close
     );
@@ -226,6 +226,11 @@ void Application::noImagesToDisplay() {
         connect(
             zipDownloader, &EmojiZipDownloader::done,
             this, [&]() { mainWindow->display(true); delete zipDownloader; }
+        );
+        
+        connect (
+            zipDownloader, &EmojiZipDownloader::failed,
+            this, [&]() { delete zipDownloader; }
         );
 
         zipDownloader->downloadAndExtract();

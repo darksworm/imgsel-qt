@@ -19,12 +19,12 @@ EmojiZipDownloader::EmojiZipDownloader(QNetworkAccessManager* manager, QString d
 
     connect(
         downloader, &FileDownloader::IOError,
-        this, [&]() { showErrorMessage(EmojiZipError::IOError); emit failed(); }
+        this, [&]() { onError(EmojiZipError::IOError); }
     );
 
     connect(
         downloader, &FileDownloader::error,
-        this, [&](QNetworkReply::NetworkError error) { showErrorMessage(EmojiZipError::NetworkError); emit failed(); }
+        this, [&](QNetworkReply::NetworkError error) { onError(EmojiZipError::NetworkError); }
     );
 }
 
@@ -44,13 +44,15 @@ void EmojiZipDownloader::downloaded() {
     bool result = unzipper->unzipAllFilesToPath(outputPath);
 
     if (!result) {
-        showErrorMessage(EmojiZipError::UnarchivingError);
+        onError(EmojiZipError::UnarchivingError);
     } else {
         emit done();
     }
 }
 
-void EmojiZipDownloader::showErrorMessage(EmojiZipError cause) {
+void EmojiZipDownloader::onError(EmojiZipError cause) {
+    emit failed();
+
     QString message = "Encountered error while ";
 
     switch (cause) {
