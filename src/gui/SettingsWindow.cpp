@@ -14,12 +14,8 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     createTrayIcon();
     connectUI();
 
-    QIcon icon(":/assets/eyes-32x25.png");
-
     setWindowTitle("EMOJIGUN");
-    setWindowIcon(icon);
-    window->setWindowIcon(icon);
-    trayIcon->setIcon(icon);
+    trayIcon->setIcon(emojigunApp->windowIcon());
 
     // remove the ? icon
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);

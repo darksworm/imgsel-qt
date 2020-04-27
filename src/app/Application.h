@@ -45,6 +45,7 @@ public slots:
     void launchOnStartupChanged(int state);
     void updateAvailable(ApplicationVersionDetails details);
     void updateReady(QString updaterPath);
+    void noImagesToDisplay();
 
 private:
     QSettings* settings;
@@ -60,4 +61,6 @@ private:
 
     std::optional<QMetaObject::Connection> hotkeyConnection = std::nullopt;
     QNetworkAccessManager *networkManager;
+
+    EmojiZipDownloader *zipDownloader;
 };

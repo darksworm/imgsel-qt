@@ -24,6 +24,7 @@ signals:
     void displayed(WId windowId);
     void exitInstructionReceived();
     void imageCopied();
+    void noImagesToDisplay();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -60,7 +61,5 @@ private:
     InputMode inputMode;
     QPixmap screenBuffer;
     ImagePickerDrawer *imagePickerDrawer;
-
-    EmojiZipDownloader* zipDownloader;
 };
 

@@ -15,6 +15,9 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
     this->oneShotMode = oneShotMode;
     setQuitOnLastWindowClosed(oneShotMode);
 
+    const QIcon eyesIcon(":/assets/eyes-32x25.png");
+    setWindowIcon(eyesIcon);
+
     connect(
         updater, &ApplicationUpdater::updateAvailable,
         this, &Application::updateAvailable
@@ -110,6 +113,11 @@ void Application::setMainWindow(MainWindow *window) {
             }
         }
     );
+
+    connect(
+        mainWindow, &MainWindow::noImagesToDisplay,
+        this, &Application::noImagesToDisplay
+    );
 }
 
 void Application::setSettingsWindow(SettingsWindow *window) {
@@ -151,12 +159,10 @@ void Application::launchOnStartupChanged(int state) {
 }
 
 void Application::updateAvailable(ApplicationVersionDetails details) {
-    QIcon icon(":/assets/eyes-32x25.png");
     QMessageBox msgBox;
-    msgBox.setWindowIcon(icon);
 
 #if WIN32
-    QPushButton *downloadNewVersionBtn = msgBox.addButton("Download", QMessageBox::ActionRole);
+    std::unique_ptr<QPushButton>downloadNewVersionBtn(msgBox.addButton("Download", QMessageBox::ActionRole));
 #endif
     msgBox.addButton("Ok", QMessageBox::ActionRole);
 
@@ -171,7 +177,7 @@ void Application::updateAvailable(ApplicationVersionDetails details) {
     msgBox.exec();
 
 #if WIN32
-    if (msgBox.clickedButton() == downloadNewVersionBtn) {
+    if (msgBox.clickedButton() == downloadNewVersionBtn.get()) {
         if (!updater->exeIsInstalled()) {
             QDesktopServices::openUrl(details.downloadUrl);
         } else {
@@ -192,3 +198,41 @@ void Application::updateReady(QString updaterPath) {
     QMessageBox::critical(mainWindow, "Update failed!", "Couldn't update. Please try to update manually.");
 }
 
+void Application::noImagesToDisplay() {
+    auto defaultDir = Application::defaultLibraryDirectory();
+    QString imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
+
+    QMessageBox noImagesMsgBox(
+        QMessageBox::Icon::Critical,
+        "No images found!",
+        "To use EMOJIGUN, you must first add emojis to your library. Please copy your emojis to your library folder at " + imageDirFromSettings + ".",
+        QMessageBox::Close
+    );
+
+    std::unique_ptr<QPushButton> getEmojisBtn(noImagesMsgBox.addButton("Download top emojis pack", QMessageBox::ActionRole));
+    std::unique_ptr<QPushButton> selectEmojisBtn(noImagesMsgBox.addButton("Create custom emoji pack", QMessageBox::ActionRole));
+
+    noImagesMsgBox.setParent(nullptr);
+
+    noImagesMsgBox.exec();
+    noImagesMsgBox.raise();
+
+    noImagesMsgBox.setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | noImagesMsgBox.windowFlags());
+
+    if (noImagesMsgBox.clickedButton() == getEmojisBtn.get()) {
+        QString url = "https://s3-eu-west-1.amazonaws.com/emojigun.com/top-emojis.zip";
+        zipDownloader = new EmojiZipDownloader(emojigunNetworkManager, url, imageDirFromSettings);
+
+        connect(
+            zipDownloader, &EmojiZipDownloader::done,
+            this, [&]() { mainWindow->display(true); delete zipDownloader; }
+        );
+
+        zipDownloader->downloadAndExtract();
+    }
+
+    if (noImagesMsgBox.clickedButton() == selectEmojisBtn.get()) {
+        QString link = "https://emojigun.com/#/custom";
+        QDesktopServices::openUrl(link);
+    }
+}

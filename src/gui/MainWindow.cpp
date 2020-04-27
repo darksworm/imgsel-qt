@@ -291,40 +291,7 @@ void MainWindow::display(bool invalidateConfig) {
     auto config = ConfigManager::getOrLoadConfig();
 
     if (config.getImages().empty()) {
-        auto defaultDir = Application::defaultLibraryDirectory();
-        QString imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
-
-        QMessageBox noImagesMsgBox;
-
-        QPushButton *getEmojisBtn = noImagesMsgBox.addButton("Get top emojis", QMessageBox::ActionRole);
-        QPushButton *selectEmojisBtn = noImagesMsgBox.addButton("Select emojis", QMessageBox::ActionRole);
-
-        noImagesMsgBox.setParent(nullptr);
-        noImagesMsgBox.setIcon(QMessageBox::Icon::Critical);
-        noImagesMsgBox.setWindowTitle("No images found!");
-        noImagesMsgBox.setText(
-            "To use EMOJIGUN, you must first add emojis to your library. Please copy your emojis to your library folder at " + imageDirFromSettings + "."
-        );
-
-        noImagesMsgBox.exec();
-
-        if (noImagesMsgBox.clickedButton() == getEmojisBtn) {
-            QString url = "https://s3-eu-west-1.amazonaws.com/emojigun.com/top-emojis.zip";
-            zipDownloader = new EmojiZipDownloader(emojigunNetworkManager, url, imageDirFromSettings);
-
-            connect(
-                zipDownloader, &EmojiZipDownloader::done,
-                this, [&]() { display(true); }
-            );
-
-            zipDownloader->downloadAndExtract();
-        }
-
-        if (noImagesMsgBox.clickedButton() == selectEmojisBtn) {
-            QString link = "https://emojigun.com/#/custom";
-            QDesktopServices::openUrl(link);
-        }
-
+        emit noImagesToDisplay();
         return;
     }
 

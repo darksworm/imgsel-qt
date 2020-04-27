@@ -1,12 +1,8 @@
 #include "FileDownloaderProgressWindow.h"
-#include <QIcon>
 
 FileDownloaderProgressWindow::FileDownloaderProgressWindow() {
-    QIcon icon(":/assets/eyes-32x25.png");
-
     progressDialog.setWindowTitle("Downloading file...");
     progressDialog.setMinimumWidth(300);
-    progressDialog.setWindowIcon(icon);
 
     connect(
         &progressDialog, &QProgressDialog::canceled,
