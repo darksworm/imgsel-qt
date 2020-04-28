@@ -17,10 +17,11 @@ struct CLIParams {
 };
 
 class ConfigManager {
+friend class SettingsWindow;
 public:
-    static Config getOrLoadConfig();
-    static void invalidateConfig();
     ConfigManager();
+    static Config& getOrLoadConfig();
+    static bool invalidateConfigIfImageListChanged();
     static void setCLIParams(CLIParams params);
 
 private:
@@ -29,4 +30,6 @@ private:
     inline static bool configLoaded;
 
     inline static void loadConfig();
+    static std::vector<std::string> getImagePaths();
+    static void applyConfigFromQSettings();
 };

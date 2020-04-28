@@ -1,0 +1,8 @@
+.clangd/
+build/
+build-lin/
+cmake-build-debug/
+CMakeFiles/
+win-debug-build/
+quazip/
+QHotkey/

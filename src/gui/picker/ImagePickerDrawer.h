@@ -42,6 +42,8 @@ private:
 public:
     ImagePickerDrawer(QPixmap &pixmap);
 
+    void reset(bool imageListChanged);
+
     void drawFrame(Image *selectedImage, bool redrawAll = false);
 
     bool move(ImagePickerMove move, unsigned int steps = 1);
@@ -57,6 +59,10 @@ public:
     };
 
     void preloadToIndex(unsigned int targetIndex);
+
+    Image* getImageAtPos(unsigned int x, unsigned int y);
+
+    ShapeProperties getShapeProperties() { return shapeProperties; }
 };
 
 

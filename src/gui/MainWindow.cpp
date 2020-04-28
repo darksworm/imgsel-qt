@@ -4,23 +4,25 @@
 #include <QtWidgets/QApplication>
 #include <iostream>
 #include "MainWindow.h"
-#include "../util/config/ConfigManager.h"
+#include "../app/Application.h"
 #include "../input/handler/InputHandlerFactory.h"
 #include "../input/handler/instruction/MoveInstruction.h"
 #include "../input/handler/instruction/ModeChangeInstruction.h"
 #include "../input/handler/instruction/FilterInstruction.h"
 #include "../input/handler/instruction/CopyInstruction.h"
 
+#ifdef WIN32
+QT_BEGIN_NAMESPACE
+Q_GUI_EXPORT HBITMAP qt_pixmapToWinHBITMAP(const QPixmap &p, int hbitmapFormat = 0);
+#endif
+
 void MainWindow::paintEvent(QPaintEvent *event) {
     auto config = ConfigManager::getOrLoadConfig();
+
     QWidget::paintEvent(event);
     QPainter painter(this);
 
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    painter.fillRect(0, 0, config.getScreenGeometry().width(), config.getScreenGeometry().height(),
-                     QColor(QRgba64::fromRgba(0, 0, 0, 200)));
-
-    painter.setCompositionMode(QPainter::CompositionMode_SourceAtop);
     if (focused) {
         painter.drawPixmap(0, 0, screenBuffer);
     } else {
@@ -38,33 +40,41 @@ void MainWindow::paintEvent(QPaintEvent *event) {
         painter.drawImage(0, 0, im);
     }
 
+    QString displayName;
+
     if (imagePickerDrawer->getFilterString().length() > 0) {
-        QFont queryFont;
-        queryFont.setFamily(queryFont.defaultFamily());
-        queryFont.setPixelSize(28);
-        QFontMetrics fm(queryFont);
+        displayName = QString::fromUtf8(imagePickerDrawer->getFilterString().c_str());
+    } else {
+        displayName = "Type to search";
+    }
 
-        QString displayName = QString::fromUtf8(imagePickerDrawer->getFilterString().c_str());
-        unsigned int textWidth = 0;
-        auto maxTextWidth = config.getScreenGeometry().width() - 20;
+    QFont queryFont;
+    queryFont.setFamily(queryFont.defaultFamily());
+    queryFont.setPixelSize(28);
+    QFontMetrics fm(queryFont);
 
-        do {
+    unsigned int textWidth = 0;
+    auto maxTextWidth = config.getScreenGeometry().width() - 20;
+
+    do {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
-            textWidth = fm.horizontalAdvance(displayName);
+        textWidth = fm.horizontalAdvance(displayName);
 #else
-            textWidth = fm.width(displayName);
+        textWidth = fm.width(displayName);
 #endif
 
-            if (textWidth >= maxTextWidth) {
-                displayName = displayName.left(displayName.length() - 1);
-            }
-        } while (textWidth >= maxTextWidth);
+        if (textWidth >= maxTextWidth) {
+            displayName = displayName.left(displayName.length() - 1);
+        }
+    } while (textWidth >= maxTextWidth);
 
-        painter.setFont(queryFont);
-        painter.setPen(Qt::white);
+    painter.setFont(queryFont);
+    painter.setPen(Qt::white);
 
-        painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, 36, displayName);
-    }
+    int oneColumnHeight = imagePickerDrawer->getShapeProperties().getOneColumnHeight();
+    int emptyHeight = (config.getScreenGeometry().height() - oneColumnHeight) / 2;
+
+    painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, emptyHeight / 2  + 6, displayName);
 
     QFont inputModeFont;
     inputModeFont.setFamily(inputModeFont.defaultFamily());
@@ -90,6 +100,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void MainWindow::handleInstruction(InputInstruction *instruction) {
+    xScrollAccumulator = 0;
+    yScrollAccumulator = 0;
+
     auto config = ConfigManager::getOrLoadConfig();
 
     bool shouldExit = this->imagePickerDrawer->getFilterString().empty() &&
@@ -137,105 +150,124 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
 
         this->imagePickerDrawer->drawFrame(nullptr);
     } else if (dynamic_cast<CopyInstruction *>(instruction)) {
-        auto selectedImage = this->imagePickerDrawer->getSelectedImage();
+        copyImage(this->imagePickerDrawer->getSelectedImage());
+    }
 
-        if (selectedImage == nullptr) {
-            return;
+    this->repaint();
+}
+
+void MainWindow::copyImage(Image* image, PreprocessorFlags preprocessFlags) {
+    if (image == nullptr) {
+        return;
+    }
+    
+    auto config = ConfigManager::getOrLoadConfig();
+    auto path = image->getPath();
+
+    if (config.shouldPrintFilePath()) {
+        std::cout << path;
+    } else {
+        bool whatsappResize = preprocessFlags & PreprocessorFlags::WhatsAppWhitespace ||
+                              config.getPreprocessorFlags() & PreprocessorFlags::WhatsAppWhitespace;
+
+        if (whatsappResize) {
+            QPixmap result(320, 320);
+            result.fill(Qt::transparent);
+            QPixmap imgPixmap(image->getPath().c_str());
+            QPainter painter(&result);
+
+            painter.drawPixmap(
+                    result.width() / 2 - imgPixmap.width() / 2,
+                    result.height() / 2 - imgPixmap.height() / 2,
+                    imgPixmap
+            );
+
+            auto tempImage = new QTemporaryFile;
+            tempImage->open();
+            result.toImage().save(tempImage, QString::fromStdString(
+                    image->getExtension()).toUpper().toStdString().c_str());
+            tempImage->close();
+
+            path = tempImage->fileName().toStdString();
         }
 
-        auto path = selectedImage->getPath();
+        if (config.shouldResizeOutputImage()) {
+            auto targetSize = config.getResizeOutputToSize().value();
+            QImage outputImg(image->getPath().c_str());
 
-        if (config.shouldPrintFilePath()) {
-            std::cout << path;
-        } else {
-            auto preprocessFlags = dynamic_cast<CopyInstruction *>(instruction)->getPreprocessFlags();
+            auto width = outputImg.width();
+            auto height = outputImg.height();
 
-            bool whatsappResize = preprocessFlags & PreprocessorFlags::WhatsAppWhitespace ||
-                                  config.getPreprocessorFlags() & PreprocessorFlags::WhatsAppWhitespace;
+            if (!whatsappResize || width > 320 || height > 320) {
+                if (whatsappResize) {
+                    targetSize.width = 300;
+                    targetSize.height = 300;
+                }
 
-            if (whatsappResize) {
-                QPixmap result(320, 320);
-                result.fill(Qt::transparent);
-                QPixmap imgPixmap(selectedImage->getPath().c_str());
-                QPainter painter(&result);
+                if (targetSize.width > 0 && width > targetSize.width) {
+                    auto scale = (double) targetSize.width / width;
+                    int new_height = height * scale;
+                    outputImg = outputImg.scaledToHeight(new_height, Qt::SmoothTransformation);
 
-                painter.drawPixmap(
-                        result.width() / 2 - imgPixmap.width() / 2,
-                        result.height() / 2 - imgPixmap.height() / 2,
-                        imgPixmap
-                );
+                    height = new_height;
+                    width = width * scale;
+                }
+
+                if (targetSize.height > 0 && height > targetSize.height) {
+                    auto scale = (double) targetSize.height / height;
+                    int new_width = width * scale;
+                    outputImg = outputImg.scaledToWidth(new_width, Qt::SmoothTransformation);                    
+                }
 
                 auto tempImage = new QTemporaryFile;
                 tempImage->open();
-                result.toImage().save(tempImage, QString::fromStdString(
-                        selectedImage->getExtension()).toUpper().toStdString().c_str());
+                outputImg.save(tempImage,
+                           QString::fromStdString(image->getExtension()).toUpper().toStdString().c_str());
                 tempImage->close();
 
                 path = tempImage->fileName().toStdString();
             }
+        }
 
-            if (config.shouldResizeOutputImage()) {
-                auto targetSize = config.getResizeOutputToSize().value();
-                QImage image(selectedImage->getPath().c_str());
+#ifdef WIN32
+        auto img = QImage(QString(path.c_str()));
+        auto mirrored = img.mirrored(false, true);
+        
+        OpenClipboard(nullptr);
+        HBITMAP hBitmap = qt_pixmapToWinHBITMAP(QPixmap::fromImage(mirrored), 1);
+        DIBSECTION ds;
+        ::GetObject(hBitmap, sizeof(DIBSECTION), &ds);
+        //make sure compression is BI_RGB
+        ds.dsBmih.biCompression = BI_RGB;
+        HDC hdc = ::GetDC(NULL);
+        HBITMAP hbitmap_ddb = ::CreateDIBitmap(
+            hdc, &ds.dsBmih, CBM_INIT, ds.dsBm.bmBits, (BITMAPINFO*)&ds.dsBmih, DIB_RGB_COLORS);
+        ::ReleaseDC(NULL, hdc);
 
-                auto width = image.width();
-                auto height = image.height();
-
-                if (!whatsappResize || width > 320 || height > 320) {
-                    if (whatsappResize) {
-                        targetSize.width = 300;
-                        targetSize.height = 300;
-                    }
-
-                    if (targetSize.width > 0 && width > targetSize.width) {
-                        auto scale = (double) targetSize.width / width;
-                        int new_height = height * scale;
-                        image = image.scaledToHeight(new_height);
-                    }
-
-                    if (targetSize.height > 0 && height > targetSize.height) {
-                        auto scale = (double) targetSize.height / height;
-                        int new_width = width * scale;
-                        image = image.scaledToWidth(new_width);
-                    }
-
-                    auto tempImage = new QTemporaryFile;
-                    tempImage->open();
-                    image.save(tempImage,
-                               QString::fromStdString(selectedImage->getExtension()).toUpper().toStdString().c_str());
-                    tempImage->close();
-
-                    path = tempImage->fileName().toStdString();
-                }
-            }
-
-#if defined(Q_OS_LINUX)
-            auto ext = selectedImage->getExtension();
-            ext = ext == "jpg" ? "jpeg" : ext;
-
-            // TODO: handle 's in filenames
-            std::string command = "cat '" + path + "' | xclip -selection clipboard -target image/" + ext + " -i";
-            system(command.c_str());
+        EmptyClipboard();
+        SetClipboardData(CF_BITMAP, hbitmap_ddb);
+        CloseClipboard();
+        ::DeleteObject(hBitmap);
 #else
-            auto img = QPixmap(QString(path.c_str()));
-            QApplication::clipboard()->setPixmap(img, QClipboard::Clipboard);
-            QApplication::clipboard()->setPixmap(img, QClipboard::Selection);
-            QApplication::processEvents();
+        auto ext = image->getExtension();
+        ext = ext == "jpg" ? "jpeg" : ext;
+
+        // TODO: handle 's in filenames
+        std::string command = "cat '" + path + "' | xclip -selection clipboard -target image/" + ext + " -i";
+        system(command.c_str());
 #endif
-        }
-
-        if (config.shouldResizeOutputImage()) {
-            QFile file(QString::fromStdString(path));
-            file.remove();
-        }
-
-        this->imagePickerDrawer->clearFilter();
-        this->imagePickerDrawer->move(ImagePickerMove::HOME);
-
-        emit exitInstructionReceived();
     }
 
-    this->repaint();
+    if (config.shouldResizeOutputImage()) {
+        QFile file(QString::fromStdString(path));
+        file.remove();
+    }
+
+    this->imagePickerDrawer->clearFilter();
+    this->imagePickerDrawer->move(ImagePickerMove::HOME);
+
+    emit exitInstructionReceived();
+    emit imageCopied();
 }
 
 void MainWindow::focusOutEvent(QFocusEvent *event) {
@@ -250,8 +282,40 @@ void MainWindow::focusInEvent(QFocusEvent *event) {
     this->repaint();
 }
 
-void MainWindow::display() {
+void MainWindow::display(bool invalidateConfig) {
+    if (invalidateConfig) {
+        bool imageListChanged = ConfigManager::invalidateConfigIfImageListChanged();
+        imagePickerDrawer->reset(imageListChanged);
+    }
+
     auto config = ConfigManager::getOrLoadConfig();
+
+    if (config.getImages().empty()) {
+        auto defaultDir = Application::defaultLibraryDirectory();
+        auto imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
+
+        QMessageBox noImagesMsgBox;
+
+        QPushButton *getEmojisBtn = noImagesMsgBox.addButton("Get emojis", QMessageBox::ActionRole);
+        noImagesMsgBox.addButton("Ok", QMessageBox::ActionRole);
+
+        noImagesMsgBox.setParent(nullptr);
+        noImagesMsgBox.setIcon(QMessageBox::Icon::Critical);
+        noImagesMsgBox.setWindowTitle("No images found!");
+        noImagesMsgBox.setText(
+            "To use EMOJIGUN, you must first add emojis to your library. Please copy your emojis to your library folder at " + imageDirFromSettings + "."
+        );
+
+        noImagesMsgBox.exec();
+
+        if (noImagesMsgBox.clickedButton() == getEmojisBtn) {
+            QString link = "https://emojigun.com/#/loader";
+            QDesktopServices::openUrl(link);
+        }
+
+        return;
+    }
+
     auto geo = config.getScreenGeometry();
 
     setGeometry(geo);
@@ -272,12 +336,96 @@ void MainWindow::display() {
     emit displayed(WId());
 }
 
+void MainWindow::mousePressEvent (QMouseEvent *event) {
+    QWidget::mousePressEvent(event);
+
+    if (event->button() != Qt::LeftButton) {
+        return;
+    }
+
+    if (scrollingEndTimer.isActive()) {
+        return;
+    }
+
+    auto mousePos = event->localPos();
+    auto imageToCopy = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+
+    if (imageToCopy != nullptr) {
+        copyImage(imageToCopy);
+    }
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event) {
+    QWidget::mouseMoveEvent(event);
+
+    if (scrollingEndTimer.isActive()) {
+        return;
+    }
+
+    auto mousePos = event->localPos();
+    auto imageUnderCursor = imagePickerDrawer->getImageAtPos(mousePos.x(), mousePos.y());
+
+    if (imageUnderCursor != nullptr) {
+        if (imageUnderCursor != imagePickerDrawer->getSelectedImage()) {
+            imagePickerDrawer->drawFrame(imageUnderCursor);
+            repaint();
+        }
+
+        setCursor(Qt::PointingHandCursor);
+    } else {
+        setCursor(Qt::ArrowCursor);
+    }
+}
+
+void MainWindow::wheelEvent(QWheelEvent *event) {
+    QWidget::wheelEvent(event);
+    event->accept();
+        
+    setCursor(Qt::SizeVerCursor);
+    scrollingEndTimer.start((int)scrollEndMilis);
+
+    auto numDegrees = event->angleDelta() / 8;
+
+    xScrollAccumulator += numDegrees.x();
+    yScrollAccumulator += numDegrees.y();
+    
+    bool moved = false;
+
+    if (abs(yScrollAccumulator) >= scrollTreshold) {
+        auto direction = yScrollAccumulator < 0 ? ImagePickerMove::DOWN : ImagePickerMove::UP;
+        moved = this->imagePickerDrawer->move(direction);
+        yScrollAccumulator = 0;
+    }
+
+    if (abs(xScrollAccumulator) >= scrollTreshold) {
+        auto direction = xScrollAccumulator < 0 ? ImagePickerMove::RIGHT : ImagePickerMove::LEFT;
+        if(!moved) {
+            moved = this->imagePickerDrawer->move(direction);
+        }
+        xScrollAccumulator = 0;
+    }
+
+    if (moved) {
+        this->repaint();
+    }
+}
+
+void MainWindow::scrollEnd() {
+    yScrollAccumulator = 0;
+    xScrollAccumulator = 0;
+
+    QPoint mousePos = mapFromGlobal(QCursor::pos());
+    QMouseEvent fakeEvent(QEvent::MouseMove, mousePos, Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    qApp->sendEvent(this, &fakeEvent);
+}
+
 MainWindow::MainWindow() : QWidget() {
-    setWindowTitle(QApplication::translate("APPLICATION", "IMGSEL-QT"));
+    setWindowTitle("EMOJIGUN");
     setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
 
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
+    setAutoFillBackground(false);
 
     auto config = ConfigManager::getOrLoadConfig();
     auto geo = config.getScreenGeometry();
@@ -285,4 +433,14 @@ MainWindow::MainWindow() : QWidget() {
 
     this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
     this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
+
+    setMouseTracking(true);
+
+    scrollingEndTimer.setSingleShot(true);
+    scrollingEndTimer.setInterval(scrollEndMilis);
+
+    connect(
+        &scrollingEndTimer, &QTimer::timeout,
+        this, &MainWindow::scrollEnd
+    );
 }

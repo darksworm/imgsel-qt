@@ -4,19 +4,17 @@
 #include "gui/MainWindow.h"
 #include "util/lib/CLI11.hpp"
 #include "util/config/ConfigManager.h"
-#include "Application.h"
+#include "app/Application.h"
 #include "util/validators/IntXIntValidator.h"
 #include "util/validators/DirectoriesContainImages.h"
 #include <project_config.h>
+#include <iostream>
+#include "util/FileDownloader.h"
 
 #ifdef WITH_X11
-
 #include <QtX11Extras/QX11Info>
 #include <tkPort.h>
-
 #endif
-
-#include <iostream>
 
 #ifdef WIN32
 #include <QtPlugin>
@@ -28,12 +26,12 @@ int main(int argc, char *argv[]) {
 
     if (oneShotMode) {
         CLIParams params;
-        CLI::App cli_app{"IMGSEL - Image selection tool."};
+        CLI::App cli_app{"EMOJIGUN - emoji sharing tool."};
 
         cli_app.get_option("--help")
                 ->group("Meta");
         cli_app.add_flag("-v,--version", [](auto in) {
-                    std::cout << "IMGSEL v" << PROJECT_VER << "\n";
+                    std::cout << "EMOJIGUN v" << PROJECT_VER << "\n";
                     exit(0);
                 }, "Show application version")
                 ->group("Meta");
@@ -54,7 +52,7 @@ int main(int argc, char *argv[]) {
                 ->group("Visual");
 
         cli_app.add_option("--window-size", params.size,
-                           "IMGSEL window size {width}x{height}")
+                           "EMOJIGUN window size {width}x{height}")
                 ->check(intXIntValidator)
                 ->group("Visual");
 
@@ -90,29 +88,38 @@ int main(int argc, char *argv[]) {
     }
 
     Application app(argc, argv, oneShotMode);
-//    if (!app.lock()) {
-//        std::cout << "Another instance of the app is already running!";
-//        return -42;
-//    }
+    if (!app.lock()) {
+        std::cout << "Another instance of the app is already running!";
+        return -42;
+    }
 
     auto window = new MainWindow();
-
     app.setMainWindow(window);
+
+#ifdef WIN32
+    emojigunUpdater.setPathToExecutable(argv[0]);
+#endif
 
     if (oneShotMode) {
         window->display();
     } else {
-        auto settings = QSettings("EMOJIGUN", "EMOJIGUN");
+        Q_INIT_RESOURCE(qtres);
+
         auto settingsWindow = new SettingsWindow(window);
 
-        bool startMinimized = settings.value("start_minimized", false).toInt();
+        bool startMinimized = app.getSettings().value("start_minimized", false).toInt();
         if (!startMinimized) {
             settingsWindow->show();
         }
 
+        bool checkForUpdates = app.getSettings().value("check_for_updates_on_launch", true).toInt();
+        if (checkForUpdates) {
+            emojigunUpdater.checkForUpdates();
+        }
+
         app.setSettingsWindow(settingsWindow);
 
-        auto hkSequence = settings.value("hotkey_sequence", "meta+z").toString();
+        auto hkSequence = app.getSettings().value("hotkey_sequence", "ctrl+shift+x").toString();
         app.hotkeyBindingChange(hkSequence);
     }
 

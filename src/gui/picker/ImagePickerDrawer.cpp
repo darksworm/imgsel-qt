@@ -2,23 +2,38 @@
 
 #include <utility>
 #include <memory>
+#include <math.h>
 
 #include "../drawer/ImageDrawer.h"
 #include "ImagePickerMove.h"
-#include "../../util/config/ConfigManager.h"
 #include "../../util/exceptions/ImageNotLoadable.h"
 #include "../../util/exceptions/OutOfBounds.h"
 
 ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
+    shapeDrawer = new ImageDrawer(pixmap);
+    reset(true);
+}
+
+void ImagePickerDrawer::reset(bool imageListChanged) {
     auto config = ConfigManager::getOrLoadConfig();
 
-    this->page = 0;
-    this->selectedShape = nullptr;
+    if (imageListChanged) {
+        this->page = 0;
+        this->selectedShape = nullptr;
 
-    this->allImages = config.getImages();
-    this->images = config.getImages();
+        this->allImages = config.getImages();
+        this->images = config.getImages();
 
-    shapeDrawer = new ImageDrawer(pixmap);
+        shapes.clear();
+        redrawAllInNextFrame = true;
+
+        shapeDrawer->clearPixmap();
+    }
+
+    if (dynamic_cast<ImageDrawer*>(shapeDrawer)) {
+        ((ImageDrawer *) shapeDrawer)->clearCache();
+    }
+
     shapeProperties = shapeDrawer->calcShapeProps();
 }
 
@@ -41,10 +56,27 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
     unsigned int shapeCnt = shapeProperties.itemCounts.x * shapeProperties.itemCounts.y;
     int drawnShapeCnt = 0;
 
-    auto it = start;
     redrawAll = redrawAll || redrawAllInNextFrame;
 
-    for (; it != images.end(); ++it) {
+    if (dynamic_cast<ImageDrawer*>(shapeDrawer)) {
+        std::vector<Image> onScreenImages;
+
+        for (auto it = start; it != images.end(); ++it) {
+            if (filter.has_value() && !filter.operator*()(&*it)) {
+                continue;
+            }
+
+            onScreenImages.emplace_back(*it);
+
+            if (it - start >= shapeCnt) {
+                break;
+            }
+        }
+
+        ((ImageDrawer*) shapeDrawer)->cacheImages(onScreenImages);
+    }
+
+    for (auto it = start; it != images.end(); ++it) {
         if (filter.has_value() && !filter.operator*()(&*it)) {
             continue;
         }
@@ -128,8 +160,12 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
     if (drawnShapeCnt < shapeCnt && oldShapes.size() > drawnShapeCnt) {
         unsigned i = drawnShapeCnt;
         do {
-            auto oldShape = oldShapes.at(i);
-            shapeDrawer->clearShape(shapeProperties, oldShape);
+            try {
+                auto oldShape = oldShapes.at(i);
+                shapeDrawer->clearShape(shapeProperties, oldShape);
+            } catch (std::out_of_range &e) {
+                // nothing to do here
+            }
         } while (++i < oldShapes.size());
     }
 
@@ -190,31 +226,46 @@ void ImagePickerDrawer::goToImage(long hotkeyIdx) {
 }
 
 bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
+    if (selectedShape == nullptr) {
+        return false;
+    }
+
     bool canMove = false;
     long newSelectedShapeIdx = 0;
 
+    auto positionInRow = selectedShape->index % shapeProperties.itemCounts.x;
+    auto positionInColumn = selectedShape->index / shapeProperties.itemCounts.x;
+
     switch (move) {
-        case ImagePickerMove::LEFT:
+        case ImagePickerMove::PREVIOUS:
             canMove = selectedShape->index >= steps;
             newSelectedShapeIdx = selectedShape->index - steps;
             break;
-        case ImagePickerMove::RIGHT:
+        case ImagePickerMove::NEXT:
             preloadToIndex(selectedShape->index + steps);
-            canMove = selectedShape->index + steps < images.size();
+            canMove = (selectedShape->index + steps) < images.size();
             newSelectedShapeIdx = selectedShape->index + steps;
             break;
+        case ImagePickerMove::LEFT:
+            canMove = positionInRow >= steps;
+            newSelectedShapeIdx = selectedShape->index - steps;
+            break;
+        case ImagePickerMove::RIGHT:
+            canMove = (positionInRow != shapeProperties.itemCounts.x - 1)
+                && (selectedShape->index + steps) < images.size();
+
+            newSelectedShapeIdx = std::min(
+                (unsigned)selectedShape->index + steps, 
+                (unsigned)positionInColumn * shapeProperties.itemCounts.x + shapeProperties.itemCounts.x - 1
+            );
+            break;
         case ImagePickerMove::UP:
-            canMove = selectedShape->index - (steps * shapeProperties.itemCounts.x) >= 0;
-            if (canMove) {
-                newSelectedShapeIdx = selectedShape->index - (steps * shapeProperties.itemCounts.x);
-            } else {
-                newSelectedShapeIdx = selectedShape->index % shapeProperties.itemCounts.x;
-                canMove = true;
-            }
+            newSelectedShapeIdx = selectedShape->index - (steps * shapeProperties.itemCounts.x);
+            canMove = newSelectedShapeIdx >= 0;
             break;
         case ImagePickerMove::DOWN:
             preloadToIndex(selectedShape->index + (steps * shapeProperties.itemCounts.x));
-            canMove = selectedShape->index + (steps * shapeProperties.itemCounts.x) < images.size();
+            canMove = (selectedShape->index + (steps * shapeProperties.itemCounts.x)) < images.size();
             if (canMove) {
                 newSelectedShapeIdx = selectedShape->index + (steps * shapeProperties.itemCounts.x);
             } else {
@@ -226,7 +277,7 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             break;
         case ImagePickerMove::END:
             preloadToIndex(INT_MAX);
-            canMove = selectedShape->index != images.size() - 1;
+            canMove = selectedShape->index != (images.size() - 1);
             newSelectedShapeIdx = images.size() - 1;
             break;
         case ImagePickerMove::HOME:
@@ -235,7 +286,7 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             break;
         case ImagePickerMove::LINE:
             preloadToIndex(steps > 0 && shapeProperties.itemCounts.x * steps);
-            canMove = steps > 0 && shapeProperties.itemCounts.x * steps < images.size();
+            canMove = steps > 0 && (shapeProperties.itemCounts.x * steps) < images.size();
             if (canMove) {
                 newSelectedShapeIdx = shapeProperties.itemCounts.x * (steps - 1);
             } else {
@@ -258,7 +309,6 @@ bool ImagePickerDrawer::move(ImagePickerMove move, unsigned int steps) {
             canMove = selectedShape->index != newSelectedShapeIdx;
             break;
     }
-
 
     if (canMove) {
         goToImage(newSelectedShapeIdx);
@@ -295,4 +345,48 @@ void ImagePickerDrawer::clearFilter() {
     selectedShape = nullptr;
 
     redrawAllInNextFrame = true;
+}
+
+Image* ImagePickerDrawer::getImageAtPos(unsigned int x, unsigned int y) {
+    auto config = ConfigManager::getOrLoadConfig();
+    auto geo = config.getScreenGeometry();
+
+    int oneRowWidth = shapeProperties.getOneRowWidth();
+    int oneColumnHeight = shapeProperties.getOneColumnHeight();
+
+    int oneColumnWidth = shapeProperties.getOneColumnWidth();
+    int oneRowHeight = shapeProperties.getOneRowHeight();
+
+    int xMargin = ((int)geo.width() - oneRowWidth) / 2;
+    int yMargin = ((int)geo.height() - oneColumnHeight) / 2;
+
+    // margins are dead zones
+    if (x < xMargin || y < yMargin) {
+        return nullptr;
+    }
+
+    if (x > geo.width() - xMargin || y > geo.height() - yMargin) {
+        return nullptr;
+    }
+
+    int xRelativeToStartingPosition = x - xMargin;
+    int yRelativeToStartingPosition = y - yMargin;
+
+    int clickedRow = ceil((double)xRelativeToStartingPosition / oneColumnWidth);
+    int clickedColumn = ceil((double)yRelativeToStartingPosition / oneRowHeight);
+
+    int xRelativeToImageBox = xRelativeToStartingPosition - (clickedRow - 1) * oneColumnWidth;
+    int yRelativeToImageBox = yRelativeToStartingPosition - (clickedColumn - 1) * oneRowHeight;
+
+    if (xRelativeToImageBox > shapeProperties.dimensions.x) {
+        return nullptr;
+    }
+
+    if (yRelativeToImageBox > shapeProperties.dimensions.y) {
+        return nullptr;
+    }
+
+    int imageIndex = (clickedColumn - 1) * shapeProperties.itemCounts.x + clickedRow - 1;
+
+    return shapes[imageIndex].image;
 }

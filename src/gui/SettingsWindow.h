@@ -9,6 +9,7 @@ class SettingsWindow : public QDialog {
 public:
     explicit SettingsWindow(MainWindow* window);
     void setVisible(bool visible) override;
+    bool isChangingHotkey() { return changingHotkey; }
 
 signals:
     void hotkeyBindingChange(QString newBinding);
@@ -24,12 +25,18 @@ private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
     void onHotkeyChangeButton();
     void onHotkeyChangeCancelButton();
+    void onApplyOutputImageResizeSettingsButton();
 
     void resizeForWhatsappChanged(int state);
     void startMinimizedChanged(int state);
     void launchOnStartupChanged(int state);
+    void resizeOutputChanged(int state);
+
+    void outputSizeChanged(const QString &text);
 
     void onChangeDirectoryButton();
+
+    void checkForUpdatesOnStartupChanged(int state);
 
     void failedToRegisterHotkey(QString hotkey);
     void successfullyRegisteredHotkey(QString hotkey);
@@ -66,10 +73,17 @@ private:
 
     QCheckBox* resizeForWhatsappCheckbox;
 
-    QGroupBox* resizeOutputGroup;
+    QLabel* outputWidthLabel;
+    QLabel* outputHeightLabel;
+    QCheckBox* resizeOutputImageCheckbox;
+    QLineEdit* outputImageWidthLineEdit;
+    QLineEdit* outputImageHeightLineEdit;
+    QPushButton* applyOutputImageResizeSettingsButton;
 
     QLabel* libraryDirectoryLabel;
     QPushButton* changeDirectoryButton;
+
+    QCheckBox* checkForUpdatesOnStartupCheckbox;
 };
 
 

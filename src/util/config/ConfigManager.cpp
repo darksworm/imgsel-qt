@@ -12,60 +12,23 @@
 #include <set>
 #include <cmath>
 #include <QtCore/QProcess>
-#include "../../Application.h"
+#include "../../app/Application.h"
+#include <QtConcurrent>
+#include <iostream>
+
+QPair<unsigned, unsigned> loadImageSize(Image image) {
+    QImage qImg(QString::fromStdString(image.getPath()));
+    return QPair(qImg.width(), qImg.height());
+}
 
 void ConfigManager::loadConfig() {
-    std::vector<std::string> imageExtensions = Config::getImageExtensions();
     std::vector<Image> images;
 
     bool autoMode = !cliParams.rowsAndCols.has_value();
-    bool oneShotMode = ((Application *) qApp)->isOneShotMode();
-
-    QStringList allowedExtensions;
-    for (const auto &ext : Config::getImageExtensions()) {
-        allowedExtensions << "*." + QString::fromStdString(ext);
-    }
-
-    auto imageFilePaths = cliParams.imageFiles;
-
-    if (!oneShotMode) {
-        QSettings settings("EMOJIGUN", "EMOJIGUN");
-
-        auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = settings.value("library_path", defaultDir).toString();
-
-        if (imageDirFromSettings == defaultDir) {
-            QDir().mkdir(imageDirFromSettings);
-        }
-
-        imageFilePaths.emplace_back(imageDirFromSettings.toStdString());
-    }
+    auto imageFilePaths = getImagePaths();
 
     for (auto &path : imageFilePaths) {
-        QDir dir(QString::fromStdString(path));
-
-        if (dir.exists()) {
-            if (dir.isEmpty()) {
-                continue;
-            }
-
-            QStringList dirImages = dir.entryList(allowedExtensions);
-
-            if (dirImages.isEmpty()) {
-                continue;
-            }
-
-            for (const auto& img: dirImages) {
-                images.emplace_back(dir.absoluteFilePath(img).toStdString());
-            }
-        } else {
-            for (const auto &ext:imageExtensions) {
-                if (path.length() >= ext.length() && 0 == path.compare(path.length() - ext.length(), ext.length(), ext)) {
-                    images.emplace_back(path);
-                    break;
-                }
-            }
-        }
+        images.emplace_back(path);
     }
 
     QScreen *screen = nullptr;
@@ -97,24 +60,26 @@ void ConfigManager::loadConfig() {
         geo = screen->geometry();
     }
 
+    std::vector<int> maxImageSize;
+    std::vector<int> padding;
+    std::vector<int> margin;
+    std::vector<int> rowsAndCols;
+
     if (autoMode) {
         std::multiset<unsigned> widths;
         std::multiset<unsigned> heights;
 
-        QImage image;
 
-        for (auto &img:images) {
-            image.load(QString::fromStdString(img.getPath()));
+        if (images.empty() || images.size() >= 1000) {
+            widths.insert(64);
+            heights.insert(64);
+        } else {
+            auto sizes = QtConcurrent::blockingMapped(images, loadImageSize);
 
-            widths.insert(image.width());
-            heights.insert(image.height());
-
-            image.detach();
-        }
-
-        if (images.empty()) {
-            widths.insert(50);
-            heights.insert(50);
+            for (auto i = sizes.begin(); i != sizes.end(); ++i) {
+                widths.insert(i->first);
+                heights.insert(i->second);
+            }
         }
 
         // get middle elements
@@ -124,33 +89,39 @@ void ConfigManager::loadConfig() {
         auto heightsIterator = heights.begin();
         std::advance(heightsIterator, heights.size() / 2);
 
+        auto maxWidth = *widthsIterator;
+        auto maxHeight = *heightsIterator;
+
+        if (maxWidth > 64 || maxHeight > 64) { 
+            maxWidth = 64;
+            maxHeight = 64;
+        }
+
         // because we want medians
-        cliParams.maxImageSize = std::to_string((unsigned)*widthsIterator) + "x" + std::to_string((unsigned)*heightsIterator);
+        maxImageSize = { (int)maxWidth, (int)maxHeight };
 
-        auto imageSizes = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
+        unsigned xEmptySpace = maxImageSize.at(0) / 2.5;
+        unsigned yEmptySpace = maxImageSize.at(1) / 2.5;
 
-        unsigned xEmptySpace = imageSizes.at(0) / 2.5;
-        unsigned yEmptySpace = imageSizes.at(1) / 2.5;
-
-        cliParams.padding = std::to_string(xEmptySpace) + "x" + std::to_string(yEmptySpace);
-        cliParams.margin = *cliParams.padding;
+        padding = { (int)xEmptySpace, (int) yEmptySpace };
+        margin = padding;
 
         // we don't want to take up the whole screen
-        double screenUsageModifier = 0.9;
+        double screenUsageModifier = 0.85;
 
         unsigned maxImagesInHeight = geo.height() /
-                                     (imageSizes.at(1) + yEmptySpace * 3) * screenUsageModifier;
+                                     (maxImageSize.at(1) + yEmptySpace * 3) * screenUsageModifier;
 
         unsigned maxImagesInWidth = geo.width() /
-                                    (imageSizes.at(0) + xEmptySpace * 3) * screenUsageModifier;
+                                    (maxImageSize.at(0) + xEmptySpace * 3) * screenUsageModifier;
 
-        cliParams.rowsAndCols = std::to_string(maxImagesInWidth) + "x" + std::to_string(maxImagesInHeight);
+        rowsAndCols = { (int) maxImagesInWidth, (int) maxImagesInHeight };
+    } else {
+        rowsAndCols = StringTools::splitIntoInts(cliParams.rowsAndCols.value(), "x");
+        maxImageSize = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
+        padding = StringTools::splitIntoInts(cliParams.padding.value(), "x");
+        margin = StringTools::splitIntoInts(cliParams.margin.value(), "x");
     }
-
-    auto rowsAndCols = StringTools::splitIntoInts(cliParams.rowsAndCols.value(), "x");
-    auto maxImageSize = StringTools::splitIntoInts(cliParams.maxImageSize.value(), "x");
-    auto padding = StringTools::splitIntoInts(cliParams.padding.value(), "x");
-    auto margin = StringTools::splitIntoInts(cliParams.margin.value(), "x");
 
     builder.setIsDebug(DEBUG)
             .setDefaultInputMode(cliParams.startInVimMode ? InputMode::VIM : InputMode::DEFAULT)
@@ -199,22 +170,114 @@ void ConfigManager::loadConfig() {
     ConfigManager::configLoaded = true;
 }
 
-Config ConfigManager::getOrLoadConfig() {
+std::vector<std::string> ConfigManager::getImagePaths() {
+    std::vector<std::string> imageExtensions = Config::getImageExtensions();
+
+    QStringList allowedExtensions;
+    for (const auto &ext : imageExtensions) {
+        allowedExtensions << "*." + QString::fromStdString(ext);
+    }
+
+    bool oneShotMode = emojigunApp->isOneShotMode();
+    auto imageFilePaths = cliParams.imageFiles;
+
+    std::vector<std::string> images;
+
+    if (!oneShotMode) {
+        auto defaultDir = Application::defaultLibraryDirectory();
+        auto imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
+
+        if (imageDirFromSettings == defaultDir) {
+            QDir().mkdir(imageDirFromSettings);
+        }
+
+        imageFilePaths.emplace_back(imageDirFromSettings.toStdString());
+    }
+
+    for (auto &path : imageFilePaths) {
+        QDir dir(QString::fromStdString(path));
+
+        if (dir.exists()) {
+            if (dir.isEmpty()) {
+                continue;
+            }
+
+            QStringList dirImages = dir.entryList(allowedExtensions);
+
+            if (dirImages.isEmpty()) {
+                continue;
+            }
+
+            for (const auto& img: dirImages) {
+                images.emplace_back(dir.absoluteFilePath(img).toStdString());
+            }
+        } else {
+            for (const auto &ext:imageExtensions) {
+                if (path.length() >= ext.length() && 0 == path.compare(path.length() - ext.length(), ext.length(), ext)) {
+                    images.emplace_back(path);
+                    break;
+                }
+            }
+        }
+    }
+
+    return images;
+}
+
+Config& ConfigManager::getOrLoadConfig() {
     if (!ConfigManager::configLoaded) {
         loadConfig();
+
+        if (!emojigunApp->isOneShotMode()) {
+            applyConfigFromQSettings();
+        }
     }
 
     return *ConfigManager::config;
 }
 
-ConfigManager::ConfigManager() {
-    ConfigManager::configLoaded = false;
+void ConfigManager::applyConfigFromQSettings(){
+    auto resizeSettingEnabled = emojigunSettings.value("resize_output_image", true).toBool();
+
+    if (resizeSettingEnabled) {
+        auto resizeWidth = emojigunSettings.value("resize_output_image_width", 32).toInt();
+        auto resizeHeight = emojigunSettings.value("resize_output_image_height", 32).toInt();
+
+        config->resizeOutputToSize = {
+                .width = (unsigned) resizeWidth,
+                .height = (unsigned) resizeHeight
+        };
+    } else {
+        config->resizeOutputToSize.reset();
+    }
 }
 
 void ConfigManager::setCLIParams(CLIParams params) {
     ConfigManager::cliParams = std::move(params);
 }
 
-void ConfigManager::invalidateConfig() {
+bool ConfigManager::invalidateConfigIfImageListChanged() {
+    // return bool - whether image list has changed
+    if (!ConfigManager::configLoaded) {
+        return false;
+    }
+
+    auto oldImages = ConfigManager::config->getImages();
+    std::vector<std::string> oldImagePaths;
+
+    for (auto &img : oldImages) {
+        oldImagePaths.emplace_back(img.getPath());
+    }
+
+    auto newImagePaths = getImagePaths();
+
+    if (oldImagePaths == newImagePaths) {
+        return false;
+    }
+
+    delete ConfigManager::config->images;
+    delete ConfigManager::config;
     ConfigManager::configLoaded = false;
+
+    return true;
 }

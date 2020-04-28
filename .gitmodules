@@ -1,0 +1,6 @@
+[submodule "src/util/lib/QHotkey"]
+	path = src/util/lib/QHotkey
+	url = https://github.com/Skycoder42/QHotkey.git
+[submodule "src/util/lib/quazip"]
+	path = src/util/lib/quazip
+	url = https://github.com/stachenov/quazip.git

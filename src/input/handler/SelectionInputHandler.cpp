@@ -20,10 +20,10 @@ InputInstruction *SelectionInputHandler::handleKeyPress(unsigned keyCode) {
                 instruction = new ModeChangeInstruction(InputMode::DEFAULT);
                 break;
             case Qt::Key_H:
-                move = ImagePickerMove::LEFT;
+                move = ImagePickerMove::PREVIOUS;
                 break;
             case Qt::Key_L:
-                move = ImagePickerMove::RIGHT;
+                move = ImagePickerMove::NEXT;
                 break;
             case Qt::Key_J:
                 move = ImagePickerMove::DOWN;

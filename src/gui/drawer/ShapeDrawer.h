@@ -1,11 +1,14 @@
 #pragma once
 
+#include "../../util/config/ConfigManager.h"
 #include "../util/Shape.h"
 #include <climits>
 #include <numeric>
 #include <optional>
+#include <QPainter>
 
-class ShapeDrawer {
+class ShapeDrawer : public QObject {
+Q_OBJECT
     friend class ImagePickerDrawer;
 
 protected:
@@ -26,7 +29,15 @@ protected:
 
     virtual void clearShape(ShapeProperties shapeProperties, Shape shape) = 0;
 
+    void clearPixmap() {
+        pixmap.fill(getBackgroundColor());
+    }
+
+    QColor getBackgroundColor() {
+        return QColor(QRgba64::fromRgba(0, 0, 0, 200));
+    }
+
 public:
-    ShapeDrawer(QPixmap &pixmap) : pixmap(pixmap) {
+    ShapeDrawer(QPixmap &pixmap) : pixmap(pixmap), QObject() {
     }
 };

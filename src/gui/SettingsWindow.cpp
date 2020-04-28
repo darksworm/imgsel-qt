@@ -2,11 +2,9 @@
 #include "MainWindow.h"
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
-#include "../Application.h"
+#include "../app/Application.h"
 #include <QHotkey>
 #include <QStandardPaths>
-
-#include <iostream>
 
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
@@ -16,13 +14,18 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     createTrayIcon();
     connectUI();
 
-    QIcon icon("icon.png");
+    QIcon icon(":/assets/eyes-32x25.png");
 
+    setWindowTitle("EMOJIGUN");
     setWindowIcon(icon);
     window->setWindowIcon(icon);
     trayIcon->setIcon(icon);
 
     setAcceptDrops(true);
+
+    // remove the ? icon
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     trayIcon->show();
 }
 
@@ -59,6 +62,11 @@ void SettingsWindow::connectUI() {
         launchOnStartupCheckbox, &QCheckBox::stateChanged,
         this, &SettingsWindow::launchOnStartupChanged
     );
+
+    connect(
+        launchOnStartupCheckbox, &QCheckBox::stateChanged,
+        (Application *)Application::instance(), &Application::launchOnStartupChanged
+    );
 #endif
 
     connect(
@@ -69,6 +77,30 @@ void SettingsWindow::connectUI() {
     connect(
         (Application *)Application::instance(), &Application::successfullyRegisteredHotkey,
         this, &SettingsWindow::successfullyRegisteredHotkey
+    );
+
+    connect(
+        resizeOutputImageCheckbox, &QCheckBox::stateChanged,
+        this, &SettingsWindow::resizeOutputChanged
+    );
+
+    connect(
+        outputImageWidthLineEdit, &QLineEdit::textChanged,
+        this, &SettingsWindow::outputSizeChanged
+    );
+    connect(
+        outputImageHeightLineEdit, &QLineEdit::textChanged,
+        this, &SettingsWindow::outputSizeChanged
+    );
+
+    connect(
+        applyOutputImageResizeSettingsButton, &QAbstractButton::clicked,
+        this, &SettingsWindow::onApplyOutputImageResizeSettingsButton
+    );
+
+    connect (
+        checkForUpdatesOnStartupCheckbox, &QCheckBox::stateChanged,
+        this, &SettingsWindow::checkForUpdatesOnStartupChanged
     );
 }
 
@@ -136,7 +168,7 @@ void SettingsWindow::createActions() {
 }
 
 void SettingsWindow::createUI() {
-    auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+    auto hotkey = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
     auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
 
     hotkeyLabel = new QLabel("Hotkey: " + hotkey);
@@ -147,7 +179,7 @@ void SettingsWindow::createUI() {
     hotkeyChangeCancelButton->setAutoDefault(false);
     hotkeyChangeCancelButton->hide();
 
-    startMinimizedCheckbox = new QCheckBox("Launch EMOJIGUN minimized");
+    startMinimizedCheckbox = new QCheckBox("Launch minimized");
 
    // resizeForWhatsappCheckbox = new QCheckBox("Resize images to fit better in whatsapp");
 
@@ -169,18 +201,73 @@ void SettingsWindow::createUI() {
 
     hotkeyLayout->addLayout(hotkeyBtnLayout);
 
+    auto resizeOutputGroup = new QGridLayout();
+
+    resizeOutputImageCheckbox = new QCheckBox("Limit output image size");
+
+    auto resizeOutputEnabled = settings.value("resize_output_image", true).toBool();
+    auto defaultResize = resizeOutputEnabled ? "32" : "";
+    auto savedWidth = settings.value("resize_output_image_width", defaultResize).toString();
+    auto savedHeight = settings.value("resize_output_image_height", defaultResize).toString();
+
+    resizeOutputImageCheckbox->setChecked(resizeOutputEnabled);
+
+    QRegExpValidator* rxv = new QRegExpValidator(QRegExp("\\d*"), this); 
+
+    outputWidthLabel = new QLabel("Max width:");
+    outputHeightLabel = new QLabel("Max height:");
+
+    outputImageWidthLineEdit = new QLineEdit();
+    outputImageHeightLineEdit = new QLineEdit();
+
+    outputImageWidthLineEdit->setText(savedWidth);
+    outputImageHeightLineEdit->setText(savedHeight);
+    outputImageWidthLineEdit->setMaximumWidth(45);
+    outputImageHeightLineEdit->setMaximumWidth(45);
+
+    outputImageWidthLineEdit->setValidator(rxv);
+    outputImageHeightLineEdit->setValidator(rxv);
+
+    applyOutputImageResizeSettingsButton = new QPushButton("Apply");
+    applyOutputImageResizeSettingsButton->setEnabled(false);
+
+    if (!resizeOutputEnabled) {
+        outputWidthLabel->hide();
+        outputHeightLabel->hide();
+
+        outputImageWidthLineEdit->hide();
+        outputImageHeightLineEdit->hide();
+
+        applyOutputImageResizeSettingsButton->hide();
+    }
+
+    resizeOutputGroup->addWidget(outputWidthLabel, 1, 0);
+    resizeOutputGroup->addWidget(outputImageWidthLineEdit, 1, 1, Qt::AlignLeft);
+
+    resizeOutputGroup->addWidget(outputHeightLabel, 1, 2);
+    resizeOutputGroup->addWidget(outputImageHeightLineEdit, 1, 3, Qt::AlignLeft);
+
+    resizeOutputGroup->addWidget(applyOutputImageResizeSettingsButton, 3, 0, 1, 4);
+
+    checkForUpdatesOnStartupCheckbox = new QCheckBox("Check for updates when launched");
+    auto launchOnStartup = settings.value("check_for_updates_on_launch", true).toBool();
+    checkForUpdatesOnStartupCheckbox->setChecked(launchOnStartup);
+
     auto mainLayout = new QVBoxLayout();
 
     mainLayout->addLayout(hotkeyLayout);
 #ifdef WIN32
-    launchOnStartupCheckbox = new QCheckBox("Launch EMOJIGUN on system startup");
+    launchOnStartupCheckbox = new QCheckBox("Launch on system startup");
     launchOnStartupCheckbox->setChecked(settings.value("launch_on_startup").toInt());
     mainLayout->addWidget(launchOnStartupCheckbox);
 #endif
     // mainLayout->addWidget(resizeForWhatsappCheckbox);
     mainLayout->addWidget(libraryDirectoryLabel);
     mainLayout->addWidget(changeDirectoryButton);
+    mainLayout->addWidget(resizeOutputImageCheckbox);
+    mainLayout->addLayout(resizeOutputGroup);
     mainLayout->addWidget(startMinimizedCheckbox);
+    mainLayout->addWidget(checkForUpdatesOnStartupCheckbox);
     // mainLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
 
@@ -203,7 +290,7 @@ void SettingsWindow::onHotkeyChangeButton() {
 }
 
 void SettingsWindow::onHotkeyChangeCancelButton() {
-    auto hotkey = settings.value("hotkey_sequence", "meta+x").toString();
+    auto hotkey = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
 
     changingHotkey = false;
 
@@ -299,10 +386,10 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event) {
     bool onlyKeyIsFKey = keys.length() == 1 && event->key() >= Qt::Key_F1 && event->key() <= Qt::Key_F12;
 
     if (keys.length() >= 2|| onlyKeyIsFKey) {
-        auto oldHotkey = settings.value("hotkey_sequence", "meta+x").toString();
+        auto oldHotkey = settings.value("hotkey_sequence", "ctrl+shift+x").toString();
 
         if (oldHotkey == hotkeyAccumulator) {
-            hotkeyChangeButton->setEnabled(false);
+            hotkeyChangeButton->setEnabled(true);
             return;
         }
 
@@ -354,14 +441,61 @@ void SettingsWindow::onChangeDirectoryButton() {
     if (dialog.exec()) {
         auto newDir = dialog.selectedFiles().first();
         settings.setValue("library_path", newDir);
+        libraryDirectoryLabel->setText("Library path: " + newDir);
     }
 }
 
-void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
-    std::cout << event->mimeData()->text().toStdString();
+void SettingsWindow::resizeOutputChanged(int state) {
+    if (state) {
+        outputWidthLabel->show();
+        outputHeightLabel->show();
 
+        outputImageWidthLineEdit->show();
+        outputImageHeightLineEdit->show();
+        outputImageWidthLineEdit->setText("");
+        outputImageHeightLineEdit->setText("");
+
+        applyOutputImageResizeSettingsButton->show();
+    } else {
+        outputWidthLabel->hide();
+        outputHeightLabel->hide();
+
+        outputImageWidthLineEdit->hide();
+        outputImageHeightLineEdit->hide();
+
+        applyOutputImageResizeSettingsButton->hide();
+        settings.setValue("resize_output_image", false);
+    }
+}
+
+void SettingsWindow::outputSizeChanged(const QString &text) {
+    auto width = outputImageWidthLineEdit->text().toInt();
+    auto height = outputImageHeightLineEdit->text().toInt();
+
+    applyOutputImageResizeSettingsButton->setEnabled(width > 0 && height > 0);
+}
+
+void SettingsWindow::onApplyOutputImageResizeSettingsButton() {
+    auto width = outputImageWidthLineEdit->text().toInt();
+    auto height = outputImageHeightLineEdit->text().toInt();
+
+    settings.setValue("resize_output_image", true);
+    settings.setValue("resize_output_image_width", width);
+    settings.setValue("resize_output_image_height", height);
+
+    applyOutputImageResizeSettingsButton->setEnabled(false);
+
+    QMessageBox::information(this, "Success", "Resize settings saved successfully!");
+
+    ConfigManager::applyConfigFromQSettings();
+}
+
+void SettingsWindow::checkForUpdatesOnStartupChanged(int state) {
+    settings.setValue("check_for_updates_on_launch", state);
+}
+
+void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()->hasImage()){
-        std::cout << "YES";
         event->acceptProposedAction();
     }
 
@@ -381,6 +515,5 @@ void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
 
 void SettingsWindow::dropEvent(QDropEvent *event) {
     for(const auto& mimeType: event->mimeData()->formats()) {
-        std::cout << mimeType.toStdString();
     }
 }
