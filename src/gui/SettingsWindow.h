@@ -3,6 +3,7 @@
 #include <QtWidgets/QtWidgets>
 #include <QHotkey>
 #include "MainWindow.h"
+#include "../util/EmojiImporter.h"
 
 class SettingsWindow : public QDialog {
     Q_OBJECT
@@ -47,9 +48,9 @@ private:
     void createUI();
     void connectUI();
 
-    QString translateKey(int key);
+    EmojiImporter* importer = nullptr;
 
-    QHotkey *mainWindowHotkey;
+    QString translateKey(int key);
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;

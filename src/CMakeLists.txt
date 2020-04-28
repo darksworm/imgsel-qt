@@ -66,7 +66,8 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         util/Unzipper.h util/Unzipper.cpp util/FileDownloader.h
         util/FileDownloader.cpp app/ApplicationUpdater.h
         app/ApplicationUpdater.cpp gui/util/FileDownloaderProgressWindow.cpp
-        gui/util/FileDownloaderProgressWindow.h)
+        gui/util/FileDownloaderProgressWindow.h util/EmojiImporter.h
+        util/EmojiImporter.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC util/lib/QHotkey/QHotkey)
 

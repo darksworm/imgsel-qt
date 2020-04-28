@@ -495,25 +495,51 @@ void SettingsWindow::checkForUpdatesOnStartupChanged(int state) {
 }
 
 void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
-    if (event->mimeData()->hasImage()){
-        event->acceptProposedAction();
+    if (!event->mimeData()->hasUrls()) {
+        return; 
     }
 
-    std::vector<QString> archiveMimeTypes = {
-        "application/gzip",
-        "application/x-tar",
-        "application/x-rar-compressed",
-        "application/zip"
-    };
-
-    for(const auto& mimeType: archiveMimeTypes) {
-        if (event->mimeData()->hasFormat(mimeType)) {
+    foreach(auto url, event->mimeData()->urls()) {
+        if (url.fileName().toLower().endsWith(".zip")) {
             event->acceptProposedAction();
+            return;
+        }
+
+        for (const auto &ext : Config::getImageExtensions()) {
+            if (url.fileName().toLower().endsWith(QString(".") + ext.c_str())) {
+                event->acceptProposedAction();
+                return;
+            }
         }
     }
 }
 
 void SettingsWindow::dropEvent(QDropEvent *event) {
-    for(const auto& mimeType: event->mimeData()->formats()) {
+    QList<QUrl> filesToImport;
+
+    foreach(auto url, event->mimeData()->urls()) {
+        if (url.fileName().toLower().endsWith(".zip")) {
+            filesToImport.append(url);
+            continue;
+        }
+
+        for (const auto &ext : Config::getImageExtensions()) {
+            if (url.fileName().toLower().endsWith(QString(".") + ext.c_str())) {
+                filesToImport.append(url);
+                continue;
+            }
+        }
     }
+
+    if (filesToImport.isEmpty()) {
+        return;
+    }
+
+    auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
+
+    importer = new EmojiImporter(libraryPath, filesToImport);
+    // TODO connect import success & failure
+    // TODO connect UI
+    // TODO disable dragndrop while import in progress
+    importer->start();
 }
