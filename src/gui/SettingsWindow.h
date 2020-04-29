@@ -4,6 +4,7 @@
 #include <QHotkey>
 #include "MainWindow.h"
 #include "../util/EmojiImporter.h"
+#include "DragDropLayout.h"
 
 class SettingsWindow : public QDialog {
     Q_OBJECT
@@ -20,6 +21,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
     void dropEvent(QDropEvent *event) override;
 
 private slots:
@@ -43,10 +45,17 @@ private slots:
     void successfullyRegisteredHotkey(QString hotkey);
 
 private:
+    QVBoxLayout *settingsLayout;
+    DragDropLayout *dragDropLayout;
+    QWidget *settingsWidget;
+    QWidget *dragDropWidget;
+
     void createTrayIcon();
     void createActions();
     void createUI();
     void connectUI();
+
+    void hideDragDropLayout();
 
     EmojiImporter* importer = nullptr;
 
