@@ -197,7 +197,8 @@ void SettingsWindow::createUI() {
     libraryDirectoryLabel = new QLabel("Library path: " + libraryPath);
     changeDirectoryButton = new QPushButton("Change image library directory");
     
-    auto dragImagesLabel = new QLabel("- Drag images/archives on this window to add to library -");
+    auto dragImagesLabel = new QLabel("- Drop images and archives here -");
+    dragImagesLabel->setAlignment(Qt::AlignCenter);
 
     auto hotkeyLayout = new QVBoxLayout();
     hotkeyLayout->addWidget(hotkeyLabel);
@@ -282,7 +283,7 @@ void SettingsWindow::createUI() {
     settingsLayout->addLayout(resizeOutputGroup);
     settingsLayout->addWidget(startMinimizedCheckbox);
     settingsLayout->addWidget(checkForUpdatesOnStartupCheckbox);
-    // mainLayout->addWidget(dragImagesLabel);
+    settingsLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
 
     settingsLayout->setSizeConstraint(QLayout::SetFixedSize);
