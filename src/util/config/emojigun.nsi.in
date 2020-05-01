@@ -4,6 +4,9 @@
 #              by Vlasis K. Barkas aka Red Wine red_wine@freemail.gr Sep 2006               
 ############################################################################################
 
+!include "nsProcess.nsh"
+!include "LogicLib.nsh"
+
 !define APP_NAME "emojigun"
 !define COMP_NAME "emojigun"
 !define WEB_SITE "https://emojigun.com"
@@ -40,7 +43,7 @@ SetDatablockOptimize ON
 ######################################################################
 
 Name "${APP_NAME}"
-Caption "${APP_NAME}"
+Caption "${APP_NAME} installer"
 OutFile "${INSTALLER_NAME}"
 BrandingText "${APP_NAME}"
 XPStyle on
@@ -49,9 +52,43 @@ InstallDir $LOCALAPPDATA\${APP_NAME}
 
 ######################################################################
 
+Var /global slp 
+
+!macro CloseRunningExe Type
+    ${nsProcess::FindProcess} "${MAIN_APP_EXE}" $R0
+
+    ${If} $R0 == 0
+        StrCpy $slp 0
+        ${nsProcess::CloseProcess} "${MAIN_APP_EXE}" $R0
+
+        ${While} $R0 == 0
+            ${If} $slp > 20
+                MessageBox MB_OKCANCEL "The ${Type} cannot uninstall ${APP_NAME} while it is running. Please close ${APP_NAME} and press OK." IDOK closed IDCANCEL cancelled
+                closed:
+                    StrCpy $slp 0
+                    Goto next
+                cancelled:
+                    Quit
+                next:
+            ${EndIf}
+
+            Sleep 100
+            ${nsProcess::FindProcess} "${MAIN_APP_EXE}" $R0
+            IntOp $slp $slp + 1
+        ${EndWhile}
+    ${EndIf}    
+
+    ${nsProcess::Unload}
+!macroend
+
 Function .onInit
 SetShellVarContext current
 StrCpy $InstDir "$LOCALAPPDATA\${APP_NAME}"
+!insertmacro closeRunningExe "installer"
+FunctionEnd
+
+Function un.onInit
+!insertmacro closeRunningExe "uninstaller"
 FunctionEnd
 
 ######################################################################
