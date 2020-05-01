@@ -23,6 +23,7 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) Q_DECL_OVERRIDE;
     void dropEvent(QDropEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);

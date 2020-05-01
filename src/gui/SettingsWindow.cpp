@@ -4,6 +4,7 @@
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
 #include "../app/Application.h"
+#include <iostream>
 
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
@@ -21,9 +22,14 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     trayIcon->setIcon(icon);
 
     setAcceptDrops(true);
-
-    // remove the ? icon
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    
+    setWindowFlags(
+        windowFlags() 
+        // remove the ? icon
+        & ~Qt::WindowContextHelpButtonHint 
+        // disable resizing
+        | Qt::MSWindowsFixedSizeDialogHint
+    );
 
     trayIcon->show();
 }
@@ -518,37 +524,23 @@ void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
     settingsWidget->setVisible(false);
     dragDropWidget->setVisible(true);
 
-    foreach(auto url, event->mimeData()->urls()) {
-        if (url.fileName().toLower().endsWith(".zip")) {
-            event->acceptProposedAction();
-            return;
-        }
-
-        for (const auto &ext : Config::getImageExtensions()) {
-            if (url.fileName().toLower().endsWith(QString(".") + ext.c_str())) {
-                event->acceptProposedAction();
-                return;
-            }
-        }
-    }
-
-    dragDropLayout->noSuitableFilesDropped();
+    event->acceptProposedAction();
 }
 
 void SettingsWindow::dragLeaveEvent(QDragLeaveEvent *event) {
     QDialog::dragLeaveEvent(event);
-
     hideDragDropLayout();
 }
 
 void SettingsWindow::hideDragDropLayout() {
+    setAcceptDrops(true);
+
     settingsWidget->setVisible(true);
     dragDropWidget->setVisible(false);
-
-    adjustSize();
 }
 
 void SettingsWindow::dropEvent(QDropEvent *event) {
+    this->setAcceptDrops(false);
     QDialog::dropEvent(event);
 
     QList<QUrl> filesToImport;
@@ -567,6 +559,11 @@ void SettingsWindow::dropEvent(QDropEvent *event) {
         }
     }
 
+    if (filesToImport.empty()) {
+        dragDropLayout->noSuitableFilesDropped();
+        return;
+    }
+
     dragDropLayout->importStarted();
 
     auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
@@ -576,6 +573,11 @@ void SettingsWindow::dropEvent(QDropEvent *event) {
     connect(importer, &EmojiImporter::imported, dragDropLayout, &DragDropLayout::importFinished);
     connect(importer, &EmojiImporter::failed, dragDropLayout, &DragDropLayout::importFailed);
 
-    // TODO disable dragndrop while import in progress
     importer->start();
 }
+
+void SettingsWindow::showEvent(QShowEvent *event) {
+    QDialog::showEvent(event);
+    setFixedSize(width(), height());
+}
+

@@ -47,17 +47,16 @@ void EmojiImporter::startNextDownload() {
     downloadingFile = filesToDownload.takeFirst();
     downloader = new FileDownloader(&manager, downloadingFile, getLocalFilePath(downloadingFile));
 
-    connect(
-        downloader, &FileDownloader::finished,
-        this, &EmojiImporter::downloadFinished
-    );
-
-    // TODO handle error here?
+    connect(downloader, &FileDownloader::finished, this, &EmojiImporter::downloadFinished);
+    connect(downloader, &FileDownloader::error, this, &EmojiImporter::downloadFailed);
+    connect(downloader, &FileDownloader::IOError, this, &EmojiImporter::downloadFailed);
 
     downloader->start();
 }
 
-void EmojiImporter::downloadFailed() {}
+void EmojiImporter::downloadFailed() {
+    errorOut("download", downloadingFile);
+}
 
 void EmojiImporter::downloadFinished() {
     auto downloadedFilePath = getLocalFilePath(downloadingFile);
@@ -87,7 +86,7 @@ void EmojiImporter::startNextExtraction() {
         return;
     }
 
-    // TODO handle error here
+    errorOut("extract", extractingFile);
 }
 
 void EmojiImporter::startNextCopy() {
@@ -104,18 +103,24 @@ void EmojiImporter::startNextCopy() {
 
     auto newFilePath = targetDirectory.filePath(fileToCopyInfo.fileName());
 
-    // TODO file already exists?
-    
-    if (fileToCopy.rename(newFilePath)) {
+    QFile targetFile(newFilePath);
+    if (fileToCopy.copy(newFilePath) || targetFile.exists()) {
         startNextCopy();
         return;
     }
 
-    // TODO handle error here
+    errorOut("copy", pathToCopy);
 }
 
 QString EmojiImporter::getLocalFilePath(QString url) {
     auto downloadingFileName = QUrl(downloadingFile).fileName();
 
     return tempDir.filePath(downloadingFileName);
+}
+
+void EmojiImporter::errorOut(QString actionName, QString filePath) {
+    QFileInfo fileInfo(filePath);
+
+    QString errorMessage = "Failed to " + actionName + " file " +  fileInfo.fileName();
+    emit failed(errorMessage);
 }

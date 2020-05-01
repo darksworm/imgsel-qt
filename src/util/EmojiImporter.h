@@ -19,11 +19,12 @@ public slots:
     void downloadFailed();
 signals:
     void imported();
-    void failed();
+    void failed(QString errorMessage);
 private:
     void startNextDownload();
     void startNextExtraction();
     void startNextCopy();
+    void errorOut(QString actionName, QString filePath);
 
     QString getLocalFilePath(QString url);
 

@@ -12,7 +12,7 @@ public:
     void reset();
 public slots:
     void importFinished();
-    void importFailed();
+    void importFailed(QString errorMessage);
 signals:
     void expired();
 private:
