@@ -188,6 +188,7 @@ RmDir "$SMPROGRAMS\${APP_NAME}"
 
 DeleteRegKey ${REG_ROOT} "${REG_APP_PATH}"
 DeleteRegKey ${REG_ROOT} "${UNINSTALL_PATH}"
+DeleteRegValue HKCU "SOFTWARE\MICROSOFT\Windows\CurrentVersion\Run" "${APP_NAME}"
 SectionEnd
 
 ######################################################################
