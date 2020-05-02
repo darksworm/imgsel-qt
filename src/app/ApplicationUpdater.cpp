@@ -97,13 +97,11 @@ void ApplicationUpdater::updateDownloaded() {
 }
 
 void ApplicationUpdater::showErrorMsg() {
-    QIcon icon(":/assets/eyes-32x25.png");
     QMessageBox errorBox;
 
     errorBox.setText("Update download failed!");
     errorBox.setWindowTitle("Update failed!");
     errorBox.setIcon(QMessageBox::Critical);
-    errorBox.setWindowIcon(icon);
 
     errorBox.open();
 }

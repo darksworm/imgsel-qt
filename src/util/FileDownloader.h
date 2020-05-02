@@ -3,6 +3,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QFile>
 #include "../gui/util/FileDownloaderProgressWindow.h"
+#include <memory>
 
 class FileDownloader : public QObject {
 Q_OBJECT;
@@ -17,20 +18,20 @@ public slots:
     void downloadError(QNetworkReply::NetworkError code);
 public:
     FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath);
-    ~FileDownloader();
+    void dontDisplayErrorMessages();
     void start();
-    void pause();
     void cancel();
-    QString getTargetFilePath() { return targetFilePath; };
 private:
     void setupGUI();
 
     bool used = false;
+    bool noErrorMessages = false;
+
     QString downloadUrl;
     QString targetFilePath;
 
-    QFile* file = nullptr;
-    QNetworkReply* reply = nullptr;
     QNetworkAccessManager* manager = nullptr;
-    FileDownloaderProgressWindow* progressWindow = nullptr;
+    std::unique_ptr<QFile> file = nullptr;
+    std::unique_ptr<QNetworkReply> reply = nullptr;
+    std::unique_ptr<FileDownloaderProgressWindow> progressWindow = nullptr;
 };
