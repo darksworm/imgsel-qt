@@ -95,6 +95,7 @@ private:
     QPushButton* changeDirectoryButton;
 
     QCheckBox* checkForUpdatesOnStartupCheckbox;
+    QCheckBox* autoPasteCheckbox;
 };
 
 
