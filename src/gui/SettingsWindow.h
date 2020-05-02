@@ -34,7 +34,6 @@ private slots:
 
     void resizeForWhatsappChanged(int state);
     void startMinimizedChanged(int state);
-    void launchOnStartupChanged(int state);
     void resizeOutputChanged(int state);
 
     void outputSizeChanged(const QString &text);

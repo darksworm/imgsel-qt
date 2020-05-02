@@ -55,11 +55,6 @@ void SettingsWindow::connectUI() {
 #ifdef WIN32
     connect(
         launchOnStartupCheckbox, &QCheckBox::stateChanged,
-        this, &SettingsWindow::launchOnStartupChanged
-    );
-
-    connect(
-        launchOnStartupCheckbox, &QCheckBox::stateChanged,
         (Application *)Application::instance(), &Application::launchOnStartupChanged
     );
 #endif
@@ -263,7 +258,11 @@ void SettingsWindow::createUI() {
     settingsLayout->addLayout(hotkeyLayout);
 #ifdef WIN32
     launchOnStartupCheckbox = new QCheckBox("Launch on system startup");
-    launchOnStartupCheckbox->setChecked(settings.value("launch_on_startup").toInt());
+    QSettings bootUpSettings(
+        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 
+        QSettings::NativeFormat
+    );
+    launchOnStartupCheckbox->setChecked(bootUpSettings.value("emojigun", "").toString() != "");
     settingsLayout->addWidget(launchOnStartupCheckbox);
 #endif
     // mainLayout->addWidget(resizeForWhatsappCheckbox);
@@ -416,10 +415,6 @@ void SettingsWindow::resizeForWhatsappChanged(int state) {
 
 void SettingsWindow::startMinimizedChanged(int state) {
     settings.setValue("start_minimized", state);
-}
-
-void SettingsWindow::launchOnStartupChanged(int state) {
-    settings.setValue("launch_on_startup", state);
 }
 
 void SettingsWindow::failedToRegisterHotkey(QString hotkey) {
