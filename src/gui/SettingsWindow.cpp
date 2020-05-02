@@ -1,10 +1,9 @@
+#include <QHotkey>
+#include <QStandardPaths>
 #include "SettingsWindow.h"
-#include "MainWindow.h"
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
 #include "../app/Application.h"
-#include <QHotkey>
-#include <QStandardPaths>
 
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
@@ -17,6 +16,8 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     setWindowTitle("EMOJIGUN");
     trayIcon->setIcon(emojigunApp->windowIcon());
 
+    setAcceptDrops(true);
+    
     // remove the ? icon
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
@@ -96,6 +97,8 @@ void SettingsWindow::connectUI() {
         checkForUpdatesOnStartupCheckbox, &QCheckBox::stateChanged,
         this, &SettingsWindow::checkForUpdatesOnStartupChanged
     );
+
+    connect(dragDropLayout, &DragDropLayout::expired, this, [&]() { hideDragDropLayout(); });
 }
 
 void SettingsWindow::iconActivated(QSystemTrayIcon::ActivationReason reason) {
@@ -184,7 +187,8 @@ void SettingsWindow::createUI() {
     libraryDirectoryLabel = new QLabel("Library path: " + libraryPath);
     changeDirectoryButton = new QPushButton("Change image library directory");
     
-    auto dragImagesLabel = new QLabel("- Drag images/archives on this window to add to library -");
+    auto dragImagesLabel = new QLabel("- Drop images and archives here -");
+    dragImagesLabel->setAlignment(Qt::AlignCenter);
 
     auto hotkeyLayout = new QVBoxLayout();
     hotkeyLayout->addWidget(hotkeyLabel);
@@ -247,27 +251,40 @@ void SettingsWindow::createUI() {
     auto launchOnStartup = settings.value("check_for_updates_on_launch", true).toBool();
     checkForUpdatesOnStartupCheckbox->setChecked(launchOnStartup);
 
-    auto mainLayout = new QVBoxLayout();
+    settingsWidget = new QWidget();
+    settingsLayout = new QVBoxLayout(settingsWidget);
+    settingsLayout->setMargin(0);
 
-    mainLayout->addLayout(hotkeyLayout);
+    dragDropWidget = new QWidget();
+    dragDropLayout = new DragDropLayout(dragDropWidget);
+    dragDropLayout->setMargin(0);
+    dragDropWidget->setVisible(false);
+
+    settingsLayout->addLayout(hotkeyLayout);
 #ifdef WIN32
     launchOnStartupCheckbox = new QCheckBox("Launch on system startup");
     launchOnStartupCheckbox->setChecked(settings.value("launch_on_startup").toInt());
-    mainLayout->addWidget(launchOnStartupCheckbox);
+    settingsLayout->addWidget(launchOnStartupCheckbox);
 #endif
     // mainLayout->addWidget(resizeForWhatsappCheckbox);
-    mainLayout->addWidget(libraryDirectoryLabel);
-    mainLayout->addWidget(changeDirectoryButton);
-    mainLayout->addWidget(resizeOutputImageCheckbox);
-    mainLayout->addLayout(resizeOutputGroup);
-    mainLayout->addWidget(startMinimizedCheckbox);
-    mainLayout->addWidget(checkForUpdatesOnStartupCheckbox);
-    // mainLayout->addWidget(dragImagesLabel);
+    settingsLayout->addWidget(libraryDirectoryLabel);
+    settingsLayout->addWidget(changeDirectoryButton);
+    settingsLayout->addWidget(resizeOutputImageCheckbox);
+    settingsLayout->addLayout(resizeOutputGroup);
+    settingsLayout->addWidget(startMinimizedCheckbox);
+    settingsLayout->addWidget(checkForUpdatesOnStartupCheckbox);
+    settingsLayout->addWidget(dragImagesLabel);
     // mainLayout->addWidget(resizeOutputGroup);
 
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
+    settingsLayout->setSizeConstraint(QLayout::SetFixedSize);
+
+    auto mainLayout = new QVBoxLayout();
+    mainLayout->addWidget(settingsWidget);
+    mainLayout->addWidget(dragDropWidget);
+
+    dragDropWidget->setMaximumWidth(settingsWidget->width());
+
     setLayout(mainLayout);
-    setMinimumWidth(305);
 }
 
 void SettingsWindow::onHotkeyChangeButton() {
@@ -487,3 +504,69 @@ void SettingsWindow::onApplyOutputImageResizeSettingsButton() {
 void SettingsWindow::checkForUpdatesOnStartupChanged(int state) {
     settings.setValue("check_for_updates_on_launch", state);
 }
+
+void SettingsWindow::dragEnterEvent(QDragEnterEvent *event) {
+    QDialog::dragEnterEvent(event);
+
+    if (!event->mimeData()->hasUrls()) {
+        return; 
+    }
+
+    settingsWidget->setVisible(false);
+    dragDropWidget->setVisible(true);
+
+    event->acceptProposedAction();
+}
+
+void SettingsWindow::dragLeaveEvent(QDragLeaveEvent *event) {
+    QDialog::dragLeaveEvent(event);
+    hideDragDropLayout();
+}
+
+void SettingsWindow::hideDragDropLayout() {
+    setAcceptDrops(true);
+
+    settingsWidget->setVisible(true);
+    dragDropWidget->setVisible(false);
+}
+
+void SettingsWindow::dropEvent(QDropEvent *event) {
+    this->setAcceptDrops(false);
+    QDialog::dropEvent(event);
+
+    QList<QUrl> filesToImport;
+
+    foreach(auto url, event->mimeData()->urls()) {
+        if (url.fileName().toLower().endsWith(".zip")) {
+            filesToImport.append(url);
+            continue;
+        }
+
+        for (const auto &ext : Config::getImageExtensions()) {
+            if (url.fileName().toLower().endsWith(QString(".") + ext.c_str())) {
+                filesToImport.append(url);
+                continue;
+            }
+        }
+    }
+
+    if (filesToImport.empty()) {
+        dragDropLayout->noSuitableFilesDropped();
+        return;
+    }
+
+    auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
+    importer = std::make_unique<EmojiImporter>(libraryPath, filesToImport);
+
+    connect(&*importer, &EmojiImporter::imported, dragDropLayout, &DragDropLayout::importFinished);
+    connect(&*importer, &EmojiImporter::failed, dragDropLayout, &DragDropLayout::importFailed);
+    connect(&*importer, &EmojiImporter::started, dragDropLayout, &DragDropLayout::importStarted);
+
+    importer->start();
+}
+
+void SettingsWindow::showEvent(QShowEvent *event) {
+    QDialog::showEvent(event);
+    setFixedSize(width(), height());
+}
+

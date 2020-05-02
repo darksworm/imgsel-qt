@@ -2,7 +2,10 @@
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QtWidgets>
 #include <QHotkey>
+#include <memory>
 #include "MainWindow.h"
+#include "../util/EmojiImporter.h"
+#include "DragDropLayout.h"
 
 class SettingsWindow : public QDialog {
     Q_OBJECT
@@ -18,6 +21,10 @@ protected:
     void closeEvent(QCloseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
 private slots:
     void iconActivated(QSystemTrayIcon::ActivationReason reason);
@@ -40,14 +47,21 @@ private slots:
     void successfullyRegisteredHotkey(QString hotkey);
 
 private:
+    QVBoxLayout *settingsLayout;
+    DragDropLayout *dragDropLayout;
+    QWidget *settingsWidget;
+    QWidget *dragDropWidget;
+
     void createTrayIcon();
     void createActions();
     void createUI();
     void connectUI();
 
-    QString translateKey(int key);
+    void hideDragDropLayout();
 
-    QHotkey *mainWindowHotkey;
+    std::unique_ptr<EmojiImporter> importer;
+
+    QString translateKey(int key);
 
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
