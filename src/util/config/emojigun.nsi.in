@@ -42,6 +42,10 @@ SetDatablockOptimize ON
 
 ######################################################################
 
+RequestExecutionLevel user
+
+######################################################################
+
 Name "${APP_NAME}"
 Caption "${APP_NAME} installer"
 OutFile "${INSTALLER_NAME}"
