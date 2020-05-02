@@ -13,13 +13,13 @@ EmojiImporter::EmojiImporter(QString outputDirectoryPath, QList<QUrl> files) {
         }
 
         if (fileName.endsWith(".zip")) {
-            filesToExtract.append(fileUrl.path());
+            filesToExtract.append(fileUrl.toLocalFile());
             continue;
         }
 
         for (const auto &ext : imageExtensions) {
             if (fileName.endsWith(QString(".") + ext.c_str())) {
-                filesToCopy.append(fileUrl.path());
+                filesToCopy.append(fileUrl.toLocalFile());
                 continue;
             }
         }
@@ -103,6 +103,8 @@ void EmojiImporter::startNextCopy() {
         startNextCopy();
         return;
     }
+
+    qDebug() << "new" << newFilePath << "old" << pathToCopy;
 
     errorOut("copy", pathToCopy);
 }
