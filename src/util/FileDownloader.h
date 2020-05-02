@@ -30,8 +30,8 @@ private:
     QString downloadUrl;
     QString targetFilePath;
 
+    QNetworkReply* reply = nullptr;
     QNetworkAccessManager* manager = nullptr;
     std::unique_ptr<QFile> file = nullptr;
-    std::unique_ptr<QNetworkReply> reply = nullptr;
     std::unique_ptr<FileDownloaderProgressWindow> progressWindow = nullptr;
 };

@@ -24,20 +24,21 @@ void FileDownloader::start() {
     QNetworkRequest request(downloadUrl);
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
-    reply.reset(manager->get(request));
+    delete reply;
+    reply = manager->get(request);
 
     connect(
-        &*reply, &QNetworkReply::downloadProgress,
+        reply, &QNetworkReply::downloadProgress,
         this, &FileDownloader::downloadProgress
     );
 
     connect(
-        &*reply, &QNetworkReply::finished,
+        reply, &QNetworkReply::finished,
         this, &FileDownloader::downloadFinished
     );
 
     connect(
-        &*reply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
+        reply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
         this, &FileDownloader::downloadError
     );
 
@@ -87,6 +88,7 @@ void FileDownloader::downloadFinished() {
 
     file->write(reply->readAll());
     file->close();
+    delete reply;
 
     emit finished();
 }
@@ -97,6 +99,7 @@ void FileDownloader::downloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
 
 void FileDownloader::downloadError(QNetworkReply::NetworkError code) {
     emit error(code);
+    delete reply;
 }
 
 void FileDownloader::cancel() {
