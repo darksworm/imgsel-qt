@@ -1,17 +1,18 @@
 #include "FileDownloaderProgressWindow.h"
-#include <QIcon>
 
 FileDownloaderProgressWindow::FileDownloaderProgressWindow() {
-    QIcon icon(":/assets/eyes-32x25.png");
-
     progressDialog.setWindowTitle("Downloading file...");
     progressDialog.setMinimumWidth(300);
-    progressDialog.setWindowIcon(icon);
 
     connect(
         &progressDialog, &QProgressDialog::canceled,
         this, &FileDownloaderProgressWindow::cancelDownload
     );
+}
+
+FileDownloaderProgressWindow::~FileDownloaderProgressWindow() {
+    disconnect();
+    progressDialog.close();
 }
 
 void FileDownloaderProgressWindow::show() {
@@ -24,6 +25,11 @@ void FileDownloaderProgressWindow::onDownloadFail() {
     }
 
     toasted = true;
+
+    if (noErrorMessages) {
+        progressDialog.close();
+        return;
+    }
 
     progressDialog.setLabelText("Download failed!");
     progressDialog.setCancelButtonText("Close");
@@ -58,4 +64,8 @@ void FileDownloaderProgressWindow::cancelDownload() {
 
     toasted = true;
     emit cancelRequested();
+}
+
+void FileDownloaderProgressWindow::dontDisplayErrorMessages() {
+    noErrorMessages = true;
 }

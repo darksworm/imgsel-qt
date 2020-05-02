@@ -291,28 +291,7 @@ void MainWindow::display(bool invalidateConfig) {
     auto config = ConfigManager::getOrLoadConfig();
 
     if (config.getImages().empty()) {
-        auto defaultDir = Application::defaultLibraryDirectory();
-        auto imageDirFromSettings = emojigunSettings.value("library_path", defaultDir).toString();
-
-        QMessageBox noImagesMsgBox;
-
-        QPushButton *getEmojisBtn = noImagesMsgBox.addButton("Get emojis", QMessageBox::ActionRole);
-        noImagesMsgBox.addButton("Ok", QMessageBox::ActionRole);
-
-        noImagesMsgBox.setParent(nullptr);
-        noImagesMsgBox.setIcon(QMessageBox::Icon::Critical);
-        noImagesMsgBox.setWindowTitle("No images found!");
-        noImagesMsgBox.setText(
-            "To use EMOJIGUN, you must first add emojis to your library. Please copy your emojis to your library folder at " + imageDirFromSettings + "."
-        );
-
-        noImagesMsgBox.exec();
-
-        if (noImagesMsgBox.clickedButton() == getEmojisBtn) {
-            QString link = "https://emojigun.com/#/loader";
-            QDesktopServices::openUrl(link);
-        }
-
+        emit noImagesToDisplay();
         return;
     }
 

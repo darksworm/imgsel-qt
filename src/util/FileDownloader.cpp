@@ -1,12 +1,12 @@
 #include "FileDownloader.h"
-#include <iostream>
+#include <utility>
 
 FileDownloader::FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath) {
     this->manager = networkManager;
-    this->downloadUrl = downloadUrl;
-    this->targetFilePath = targetFilePath;
+    this->downloadUrl = std::move(downloadUrl);
+    this->targetFilePath = std::move(targetFilePath);
 
-    file = new QFile(this->targetFilePath);
+    file = std::make_unique<QFile>(this->targetFilePath);
 }
 
 void FileDownloader::start() {
@@ -24,20 +24,20 @@ void FileDownloader::start() {
     QNetworkRequest request(downloadUrl);
     request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
 
-    reply = manager->get(request);
+    reply.reset(manager->get(request));
 
     connect(
-        reply, &QNetworkReply::downloadProgress,
+        &*reply, &QNetworkReply::downloadProgress,
         this, &FileDownloader::downloadProgress
     );
 
     connect(
-        reply, &QNetworkReply::finished,
+        &*reply, &QNetworkReply::finished,
         this, &FileDownloader::downloadFinished
     );
 
     connect(
-        reply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
+        &*reply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error),
         this, &FileDownloader::downloadError
     );
 
@@ -45,30 +45,34 @@ void FileDownloader::start() {
 }
 
 void FileDownloader::setupGUI() {
-    progressWindow = new FileDownloaderProgressWindow();
+    progressWindow = std::make_unique<FileDownloaderProgressWindow>();
+
+    if (noErrorMessages) {
+        progressWindow->dontDisplayErrorMessages();
+    }
 
     connect(
         this, &FileDownloader::IOError,
-        progressWindow, &FileDownloaderProgressWindow::onDownloadFail
+        &*progressWindow, &FileDownloaderProgressWindow::onDownloadFail
     );
 
     connect(
         this, &FileDownloader::error,
-        progressWindow, &FileDownloaderProgressWindow::onDownloadFail
+        &*progressWindow, &FileDownloaderProgressWindow::onDownloadFail
     );
 
     connect(
         this, &FileDownloader::progress,
-        progressWindow, &FileDownloaderProgressWindow::onDownloadProgress
+        &*progressWindow, &FileDownloaderProgressWindow::onDownloadProgress
     );
 
     connect(
         this, &FileDownloader::finished,
-        progressWindow, &FileDownloaderProgressWindow::onDownloadFinish
+        &*progressWindow, &FileDownloaderProgressWindow::onDownloadFinish
     );
 
     connect(
-        progressWindow, &FileDownloaderProgressWindow::cancelRequested,
+        &*progressWindow, &FileDownloaderProgressWindow::cancelRequested,
         this, [&]() { cancel(); }
     );
 
@@ -95,11 +99,10 @@ void FileDownloader::downloadError(QNetworkReply::NetworkError code) {
     emit error(code);
 }
 
-FileDownloader::~FileDownloader() {
-    delete file;
-    delete reply;
-}
-
 void FileDownloader::cancel() {
     reply->abort();
+}
+
+void FileDownloader::dontDisplayErrorMessages() {
+    noErrorMessages = true;
 }

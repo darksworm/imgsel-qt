@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include "../input/handler/InputHandler.h"
 #include "picker/ImagePickerDrawer.h"
+#include "../util/EmojiZipDownloader.h"
 
 class MainWindow : public QWidget {
     Q_OBJECT
@@ -23,6 +24,7 @@ signals:
     void displayed(WId windowId);
     void exitInstructionReceived();
     void imageCopied();
+    void noImagesToDisplay();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
