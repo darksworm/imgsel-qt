@@ -1,5 +1,4 @@
 #include "FileDownloader.h"
-#include <memory>
 #include <utility>
 
 FileDownloader::FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath) {

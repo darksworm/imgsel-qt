@@ -3,6 +3,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QFile>
 #include "../gui/util/FileDownloaderProgressWindow.h"
+#include <memory>
 
 class FileDownloader : public QObject {
 Q_OBJECT;
