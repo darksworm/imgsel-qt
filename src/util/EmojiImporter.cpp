@@ -2,6 +2,7 @@
 
 EmojiImporter::EmojiImporter(QString outputDirectoryPath, QList<QUrl> files) {
     this->outputDirectoryPath = outputDirectoryPath;
+    auto imageExtensions = Config::getImageExtensions();
 
     foreach (auto fileUrl, files) {
         auto fileName = fileUrl.fileName().toLower();
@@ -16,7 +17,7 @@ EmojiImporter::EmojiImporter(QString outputDirectoryPath, QList<QUrl> files) {
             continue;
         }
 
-        for (const auto &ext : Config::getImageExtensions()) {
+        for (const auto &ext : imageExtensions) {
             if (fileName.endsWith(QString(".") + ext.c_str())) {
                 filesToCopy.append(fileUrl.path());
                 continue;
@@ -26,30 +27,26 @@ EmojiImporter::EmojiImporter(QString outputDirectoryPath, QList<QUrl> files) {
 }
 
 EmojiImporter::~EmojiImporter() {
-    delete downloader;
-    delete unzipper;
-
     tempDir.remove();
 }
 
 void EmojiImporter::start() {
-    startNextDownload();   
+    emit started();
+    startNextDownload();
 }
 
 void EmojiImporter::startNextDownload() {
-    delete downloader;
-
     if (filesToDownload.isEmpty()) {
         startNextExtraction();
         return;
     }
     
     downloadingFile = filesToDownload.takeFirst();
-    downloader = new FileDownloader(&manager, downloadingFile, getLocalFilePath(downloadingFile));
+    downloader = std::make_unique<FileDownloader>(&manager, downloadingFile, getLocalFilePath(downloadingFile));
 
-    connect(downloader, &FileDownloader::finished, this, &EmojiImporter::downloadFinished);
-    connect(downloader, &FileDownloader::error, this, &EmojiImporter::downloadFailed);
-    connect(downloader, &FileDownloader::IOError, this, &EmojiImporter::downloadFailed);
+    connect(&*downloader, &FileDownloader::finished, this, &EmojiImporter::downloadFinished);
+    connect(&*downloader, &FileDownloader::error, this, &EmojiImporter::downloadFailed);
+    connect(&*downloader, &FileDownloader::IOError, this, &EmojiImporter::downloadFailed);
 
     downloader->start();
 }
@@ -71,15 +68,13 @@ void EmojiImporter::downloadFinished() {
 }
 
 void EmojiImporter::startNextExtraction() {
-    delete unzipper;
-
     if (filesToExtract.isEmpty()) {
         startNextCopy();
         return;
     }
 
     extractingFile = filesToExtract.takeFirst();
-    unzipper = new Unzipper(extractingFile);
+    unzipper = std::make_unique<Unzipper>(extractingFile);
 
     if (unzipper->unzipAllFilesToPath(outputDirectoryPath)) {
         startNextExtraction();

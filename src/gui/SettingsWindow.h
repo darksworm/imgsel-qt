@@ -2,6 +2,7 @@
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QtWidgets>
 #include <QHotkey>
+#include <memory>
 #include "MainWindow.h"
 #include "../util/EmojiImporter.h"
 #include "DragDropLayout.h"
@@ -58,7 +59,7 @@ private:
 
     void hideDragDropLayout();
 
-    EmojiImporter* importer = nullptr;
+    std::unique_ptr<EmojiImporter> importer;
 
     QString translateKey(int key);
 

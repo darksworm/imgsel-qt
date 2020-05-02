@@ -2,12 +2,12 @@
 #include "../util/config/Config.h"
 
 DragDropLayout::DragDropLayout(QWidget* widget) : QVBoxLayout(widget) {
-    textLabel = new QLabel();
+    textLabel = std::make_unique<QLabel>();
     textLabel->setMaximumWidth(widget->width());
     textLabel->setAlignment(Qt::AlignCenter);
     textLabel->setWordWrap(true);
 
-    this->addWidget(textLabel, Qt::AlignCenter);
+    this->addWidget(&*textLabel, Qt::AlignCenter);
 
     expireTimer.setSingleShot(true);
     connect(&expireTimer, &QTimer::timeout, this, [&](){ emit expired(); reset(); });
@@ -23,12 +23,12 @@ void DragDropLayout::reset() {
 }
 
 void DragDropLayout::importStarted() {
-    textLabel->setText("Importing images...");
+    textLabel->setText("Importing emojis...");
     expireTimer.start();
 }
 
 void DragDropLayout::importFinished() {
-    textLabel->setText("Images imported!");
+    textLabel->setText("Emojis imported!");
     expireTimer.start();
 }
 

@@ -12,12 +12,12 @@ Q_OBJECT;
 public:
     EmojiImporter(QString outputDirectoryPath, QList<QUrl> files);
     ~EmojiImporter();
-
     void start();
 public slots:
     void downloadFinished();
     void downloadFailed();
 signals:
+    void started();
     void imported();
     void failed(QString errorMessage);
 private:
@@ -37,8 +37,8 @@ private:
     QString downloadingFile;
     QString extractingFile;
     
-    FileDownloader *downloader = nullptr;
-    Unzipper *unzipper = nullptr;
+    std::unique_ptr<FileDownloader> downloader;
+    std::unique_ptr<Unzipper> unzipper;
 
     QTemporaryDir tempDir;
     QNetworkAccessManager manager;

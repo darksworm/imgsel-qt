@@ -4,7 +4,6 @@
 #include "../util/config/Config.h"
 #include "../util/config/ConfigManager.h"
 #include "../app/Application.h"
-#include <iostream>
 
 SettingsWindow::SettingsWindow(MainWindow *window) {
     this->window = window;
@@ -19,13 +18,8 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
 
     setAcceptDrops(true);
     
-    setWindowFlags(
-        windowFlags() 
-        // remove the ? icon
-        & ~Qt::WindowContextHelpButtonHint 
-        // disable resizing
-        | Qt::MSWindowsFixedSizeDialogHint
-    );
+    // remove the ? icon
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     trayIcon->show();
 }
@@ -561,14 +555,12 @@ void SettingsWindow::dropEvent(QDropEvent *event) {
         return;
     }
 
-    dragDropLayout->importStarted();
-
     auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
+    importer = std::make_unique<EmojiImporter>(libraryPath, filesToImport);
 
-    importer = new EmojiImporter(libraryPath, filesToImport);
-
-    connect(importer, &EmojiImporter::imported, dragDropLayout, &DragDropLayout::importFinished);
-    connect(importer, &EmojiImporter::failed, dragDropLayout, &DragDropLayout::importFailed);
+    connect(&*importer, &EmojiImporter::imported, dragDropLayout, &DragDropLayout::importFinished);
+    connect(&*importer, &EmojiImporter::failed, dragDropLayout, &DragDropLayout::importFailed);
+    connect(&*importer, &EmojiImporter::started, dragDropLayout, &DragDropLayout::importStarted);
 
     importer->start();
 }
