@@ -10,16 +10,26 @@ FileDownloaderProgressWindow::FileDownloaderProgressWindow() {
     );
 }
 
+FileDownloaderProgressWindow::~FileDownloaderProgressWindow() {
+    disconnect();
+    progressDialog.close();
+}
+
 void FileDownloaderProgressWindow::show() {
     progressDialog.open();
 }
 
 void FileDownloaderProgressWindow::onDownloadFail() {
-    if (toasted || noErrorMessages) {
+    if (toasted) {
         return;
     }
 
     toasted = true;
+
+    if (noErrorMessages) {
+        progressDialog.close();
+        return;
+    }
 
     progressDialog.setLabelText("Download failed!");
     progressDialog.setCancelButtonText("Close");

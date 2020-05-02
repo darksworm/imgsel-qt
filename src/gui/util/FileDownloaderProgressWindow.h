@@ -7,6 +7,7 @@ class FileDownloaderProgressWindow : public QObject {
 Q_OBJECT;
 public:
     FileDownloaderProgressWindow();
+    ~FileDownloaderProgressWindow();
     void show();
     void cancelDownload();
     void dontDisplayErrorMessages();

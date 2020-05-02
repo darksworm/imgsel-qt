@@ -17,7 +17,6 @@ public slots:
     void downloadError(QNetworkReply::NetworkError code);
 public:
     FileDownloader(QNetworkAccessManager* networkManager, QString downloadUrl, QString targetFilePath);
-    ~FileDownloader() override;
     void dontDisplayErrorMessages();
     void start();
     void cancel();
@@ -30,8 +29,8 @@ private:
     QString downloadUrl;
     QString targetFilePath;
 
-    QFile* file = nullptr;
-    QNetworkReply* reply = nullptr;
     QNetworkAccessManager* manager = nullptr;
-    FileDownloaderProgressWindow* progressWindow = nullptr;
+    std::unique_ptr<QFile> file = nullptr;
+    std::unique_ptr<QNetworkReply> reply = nullptr;
+    std::unique_ptr<FileDownloaderProgressWindow> progressWindow = nullptr;
 };
