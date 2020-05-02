@@ -220,7 +220,7 @@ void Application::noImagesToDisplay() {
     noImagesMsgBox.setWindowFlags(Qt::WindowCloseButtonHint | Qt::WindowStaysOnTopHint | noImagesMsgBox.windowFlags());
 
     if (noImagesMsgBox.clickedButton() == getEmojisBtn.get()) {
-        QString url = "https://s3-eu-west-1.amazonaws.com/emojigun.com/top-emojis.zip";
+        QString url = "https://emojigun.com/top-emojis.zip";
         zipDownloader = new EmojiZipDownloader(emojigunNetworkManager, url, imageDirFromSettings);
 
         connect(
