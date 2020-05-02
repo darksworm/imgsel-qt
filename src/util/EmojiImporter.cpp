@@ -1,4 +1,5 @@
 #include "EmojiImporter.h"
+#include <QtConcurrent>
 
 EmojiImporter::EmojiImporter(QString outputDirectoryPath, QList<QUrl> files) {
     this->outputDirectoryPath = outputDirectoryPath;
@@ -37,7 +38,7 @@ void EmojiImporter::start() {
 
 void EmojiImporter::startNextDownload() {
     if (filesToDownload.isEmpty()) {
-        startNextExtraction();
+        QtConcurrent::run(this, &EmojiImporter::startNextExtraction);
         return;
     }
     
