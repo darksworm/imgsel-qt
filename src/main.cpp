@@ -21,6 +21,10 @@
 Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
 #endif
 
+#ifdef __linux__
+#include "util/linuxutils.h"
+#endif
+
 int main(int argc, char *argv[]) {
     bool oneShotMode = argc > 1;
 
@@ -92,6 +96,10 @@ int main(int argc, char *argv[]) {
         std::cout << "Another instance of the app is already running!";
         return -42;
     }
+
+#ifdef __linux__
+    catchUnixExitSignals({SIGQUIT, SIGINT, SIGTERM, SIGHUP});
+#endif
 
     auto window = new MainWindow();
     app.setMainWindow(window);
