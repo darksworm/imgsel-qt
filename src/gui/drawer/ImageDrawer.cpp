@@ -1,6 +1,5 @@
 #include "ImageDrawer.h"
 #include "../../util/config/ConfigManager.h"
-#include "../../util/exceptions/ImageNotLoadable.h"
 #include <qnamespace.h>
 
 std::pair<std::string, std::optional<QImage>> loadImage(Image img) {

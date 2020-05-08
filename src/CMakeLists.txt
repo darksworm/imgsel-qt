@@ -57,7 +57,7 @@ add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePi
         input/handler/instruction/ModeChangeInstruction.h input/handler/instruction/FilterInstruction.h
         util/config/ConfigManager.cpp util/config/ConfigManager.h util/config/Config.h util/config/ConfigBuilder.h
         gui/drawer/ImageDrawer.cpp gui/drawer/ImageDrawer.h input/handler/instruction/CopyInstruction.h
-        util/exceptions/ImageNotLoadable.h gui/picker/ImagePickerMove.h
+        gui/picker/ImagePickerMove.h
         util/lib/CLI11.hpp app/Application.cpp
         app/Application.h util/validators/IntXIntValidator.h util/StringTools.h util/Size.h
         input/handler/instruction/PreprocessorFlags.cpp input/handler/instruction/PreprocessorFlags.h
