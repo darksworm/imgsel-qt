@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>assets/eyes-32x25.png</file>
+        <file>assets/error.png</file>
     </qresource>
 </RCC>

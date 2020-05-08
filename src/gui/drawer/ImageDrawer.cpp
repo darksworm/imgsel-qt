@@ -43,10 +43,13 @@ std::pair<std::string, std::optional<QImage>> loadImage(Image img) {
 Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     auto config = ConfigManager::getOrLoadConfig();
 
-    auto img = imageCache.at(shape.image->getPath());
+    std::optional<QImage> img;
+    try {
+        img = imageCache.at(shape.image->getPath());
+    } catch (std::out_of_range &e) {}
 
     if (!img.has_value()) {
-        throw ImageNotLoadable();
+        img = imageCache.at(":/assets/error.png");
     }
 
     int width = img.value().width(),

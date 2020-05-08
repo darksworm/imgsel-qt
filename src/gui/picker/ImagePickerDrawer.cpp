@@ -73,6 +73,9 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
             }
         }
 
+        // always have error img cached
+        onScreenImages.emplace_back(Image(":/assets/error.png"));
+
         ((ImageDrawer*) shapeDrawer)->cacheImages(onScreenImages);
     }
 
@@ -134,11 +137,7 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
                 shapeDrawer->drawNextShape(shapeProperties, shape);
             } catch (ImageNotLoadable &e) {
                 images.erase(it);
-                if (--it < start) {
-                    break;
-                } else {
-                    continue;
-                }
+                continue;
             }
 
             lastShapePosition = shape.position;
