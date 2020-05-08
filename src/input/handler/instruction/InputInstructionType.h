@@ -7,5 +7,6 @@ enum class InputInstructionType {
     MOVE,
     FILTER,
     COPY,
-    CANCEL
+    CANCEL,
+    DELETE
 };

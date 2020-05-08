@@ -33,6 +33,10 @@ InputInstruction *InputHandler::handleKeyPress(unsigned keyCode) {
         return new InputInstruction(InputInstructionType::EXIT);
     }
 
+    if (keyCode == Qt::Key_Delete) {
+        return new InputInstruction(InputInstructionType::DELETE);
+    }
+
     ImagePickerMove move = ImagePickerMove::NONE;
 
     switch (keyCode) {

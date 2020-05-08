@@ -117,6 +117,12 @@ void MainWindow::handleInstruction(InputInstruction *instruction) {
 
     if (instruction->getType() == InputInstructionType::CANCEL) {
         this->imagePickerDrawer->clearFilter();
+    } else if (instruction->getType() == InputInstructionType::DELETE) {
+        auto image = this->imagePickerDrawer->getSelectedImage();
+        QFile imageFile(QString::fromStdString(image->getPath()));
+        imageFile.remove();
+        imagePickerDrawer->move(ImagePickerMove::NEXT, 1);
+        imagePickerDrawer->drawFrame(imagePickerDrawer->getSelectedImage());
     } else if (dynamic_cast<MoveInstruction *>(instruction)) {
         auto moveInstruction = ((MoveInstruction *) instruction);
         auto move = moveInstruction->getMoveDirection();
