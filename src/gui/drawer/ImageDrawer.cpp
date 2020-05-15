@@ -1,6 +1,7 @@
 #include "ImageDrawer.h"
 #include "../../util/config/ConfigManager.h"
 #include <qnamespace.h>
+#include "../../assets/assets.h"
 
 std::pair<std::string, std::optional<QImage>> loadImage(Image img) {
     std::optional<QImage> result;
@@ -48,7 +49,7 @@ Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     } catch (std::out_of_range &e) {}
 
     if (!img.has_value()) {
-        img = imageCache.at(":/assets/error.png");
+        img = imageCache.at(ASSET_ERROR_IMAGE);
     }
 
     int width = img.value().width(),

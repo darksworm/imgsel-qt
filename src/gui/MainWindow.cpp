@@ -10,6 +10,7 @@
 #include "../input/handler/instruction/ModeChangeInstruction.h"
 #include "../input/handler/instruction/FilterInstruction.h"
 #include "../input/handler/instruction/CopyInstruction.h"
+#include "../assets/assets.h"
 
 #ifdef WIN32
 QT_BEGIN_NAMESPACE
@@ -160,9 +161,14 @@ void MainWindow::copyImage(Image* image, PreprocessorFlags preprocessFlags) {
     if (image == nullptr) {
         return;
     }
-    
+
     auto config = ConfigManager::getOrLoadConfig();
     auto path = image->getPath();
+
+    QImage testImage(QString::fromStdString(path));
+    if (testImage.isNull()) {
+        return;
+    }
 
     if (config.shouldPrintFilePath()) {
         std::cout << path;

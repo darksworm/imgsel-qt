@@ -7,6 +7,7 @@
 #include "../drawer/ImageDrawer.h"
 #include "ImagePickerMove.h"
 #include "../../util/exceptions/OutOfBounds.h"
+#include "../../assets/assets.h"
 
 ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
     shapeDrawer = new ImageDrawer(pixmap);
@@ -73,7 +74,7 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
         }
 
         // always have error img cached
-        onScreenImages.emplace_back(Image(":/assets/error.png"));
+        onScreenImages.emplace_back(Image(ASSET_ERROR_IMAGE));
 
         ((ImageDrawer*) shapeDrawer)->cacheImages(onScreenImages);
     }

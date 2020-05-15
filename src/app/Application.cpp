@@ -6,6 +6,7 @@
 #include <QStandardPaths>
 #include <project_config.h>
 #include "../util/autopaste.h"
+#include "../assets/assets.h"
 
 Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplication(argc, argv, true) {
     _singular = new QSharedMemory("EMOJIGUN", this);
@@ -16,7 +17,7 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
     this->oneShotMode = oneShotMode;
     setQuitOnLastWindowClosed(oneShotMode);
 
-    const QIcon eyesIcon(":/assets/eyes-32x25.png");
+    const QIcon eyesIcon(ASSET_EYES_ICON);
     setWindowIcon(eyesIcon);
 
     connect(
