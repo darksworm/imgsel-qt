@@ -93,6 +93,7 @@ void SettingsWindow::connectUI() {
         this, &SettingsWindow::checkForUpdatesOnStartupChanged
     );
 
+    connect(autoPasteCheckbox, &QCheckBox::stateChanged, this, [&](bool value) { settings.setValue("auto_paste_enabled", value); });
     connect(dragDropLayout, &DragDropLayout::expired, this, [&]() { hideDragDropLayout(); });
 }
 
@@ -246,6 +247,10 @@ void SettingsWindow::createUI() {
     auto launchOnStartup = settings.value("check_for_updates_on_launch", true).toBool();
     checkForUpdatesOnStartupCheckbox->setChecked(launchOnStartup);
 
+    autoPasteCheckbox = new QCheckBox("Automatically paste selected emoji");
+    auto autoPasteState = settings.value("auto_paste_enabled", false).toBool();
+    autoPasteCheckbox->setChecked(autoPasteState);
+
     settingsWidget = new QWidget();
     settingsLayout = new QVBoxLayout(settingsWidget);
     settingsLayout->setMargin(0);
@@ -270,6 +275,7 @@ void SettingsWindow::createUI() {
     settingsLayout->addWidget(changeDirectoryButton);
     settingsLayout->addWidget(resizeOutputImageCheckbox);
     settingsLayout->addLayout(resizeOutputGroup);
+    settingsLayout->addWidget(autoPasteCheckbox);
     settingsLayout->addWidget(startMinimizedCheckbox);
     settingsLayout->addWidget(checkForUpdatesOnStartupCheckbox);
     settingsLayout->addWidget(dragImagesLabel);

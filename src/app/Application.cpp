@@ -5,6 +5,7 @@
 #endif
 #include <QStandardPaths>
 #include <project_config.h>
+#include "../util/autopaste.h"
 
 Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplication(argc, argv, true) {
     _singular = new QSharedMemory("EMOJIGUN", this);
@@ -100,14 +101,20 @@ void Application::setMainWindow(MainWindow *window) {
         this, [&]() {
             if (oneShotMode) {
                 return;
-            }         
+            }
+
+            bool autoPasteEnabled = getSettings().value("auto_paste_enabled", false).toBool();
+            if (autoPasteEnabled) {
+                sendPaste();
+                return;
+            }
 
             bool hasCopiedOnce = getSettings().value("has_copied_once", false).toBool();
-
             if (!hasCopiedOnce) {
                 QMessageBox::information(mainWindow, tr("Image copied to clipboard"),
                                          tr("The selected image has been copied to the clipboard, "
-                                            "you can now paste it with CTRL + V."));
+                                            "you can now paste it with CTRL + V. Alternatively, you "
+                                            "can enable the auto-paste option in settings."));
 
                 getSettings().setValue("has_copied_once", true);
             }
