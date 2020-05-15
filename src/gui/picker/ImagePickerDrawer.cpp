@@ -6,7 +6,6 @@
 
 #include "../drawer/ImageDrawer.h"
 #include "ImagePickerMove.h"
-#include "../../util/exceptions/ImageNotLoadable.h"
 #include "../../util/exceptions/OutOfBounds.h"
 
 ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
@@ -73,6 +72,9 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
             }
         }
 
+        // always have error img cached
+        onScreenImages.emplace_back(Image(":/assets/error.png"));
+
         ((ImageDrawer*) shapeDrawer)->cacheImages(onScreenImages);
     }
 
@@ -129,17 +131,8 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
             }
 
             shape.position = shapeProperties.position;
-
-            try {
-                shapeDrawer->drawNextShape(shapeProperties, shape);
-            } catch (ImageNotLoadable &e) {
-                images.erase(it);
-                if (--it < start) {
-                    break;
-                } else {
-                    continue;
-                }
-            }
+            
+            shapeDrawer->drawNextShape(shapeProperties, shape);
 
             lastShapePosition = shape.position;
         }
