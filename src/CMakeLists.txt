@@ -44,6 +44,8 @@ endif()
 
 IF (UNIX AND NOT APPLE)
     list(APPEND hotkey_SRCS util/lib/QHotkey/QHotkey/qhotkey_x11.cpp)
+    list(APPEND ADD_EXECUTABLE_PRE util/linuxutils.h)
+    list(APPEND ADD_EXECUTABLE_PRE util/linuxutils.cpp)
 endif()
 
 add_executable(${PROJECT_NAME} ${ADD_EXECUTABLE_PRE} main.cpp gui/picker/ImagePickerDrawer.cpp
