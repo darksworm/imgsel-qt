@@ -20,6 +20,10 @@ Application::Application(int &argc, char *argv[], bool oneShotMode) : QApplicati
     const QIcon eyesIcon(ASSET_EYES_ICON);
     setWindowIcon(eyesIcon);
 
+    QFontDatabase::addApplicationFont(ASSET_CABIN_FONT);
+    QFont cabinFont("Cabin-Regular");
+    QApplication::setFont(cabinFont);
+
     connect(
         updater, &ApplicationUpdater::updateAvailable,
         this, &Application::updateAvailable

@@ -13,13 +13,15 @@ SettingsWindow::SettingsWindow(MainWindow *window) {
     createTrayIcon();
     connectUI();
 
-    setWindowTitle("EMOJIGUN");
+    setWindowTitle("EMOJIGUN settings");
     trayIcon->setIcon(emojigunApp->windowIcon());
 
     setAcceptDrops(true);
     
     // remove the ? icon
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+    setFont(QApplication::font());
 
     trayIcon->show();
 }
@@ -165,6 +167,7 @@ void SettingsWindow::createUI() {
     auto libraryPath = settings.value("library_path", Application::defaultLibraryDirectory()).toString();
 
     hotkeyLabel = new QLabel("Hotkey: " + hotkey);
+    
     hotkeyChangeButton = new QPushButton("Change hotkey");
     hotkeyChangeButton->setAutoDefault(false);
 
