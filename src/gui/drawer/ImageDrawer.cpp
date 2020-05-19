@@ -1,3 +1,4 @@
+#include <QApplication>
 #include "ImageDrawer.h"
 #include "../../util/config/ConfigManager.h"
 #include <qnamespace.h>
@@ -64,8 +65,8 @@ Shape ImageDrawer::drawNextShape(ShapeProperties shapeProperties, Shape shape) {
     paint.begin(&pixmap);
     paint.drawImage(imagePos.x(), imagePos.y(), img.value());
 
-    QFont font;
-    font.setFamily(font.defaultFamily());
+    QFont font(QApplication::font().family());
+    font.setPixelSize(13);
     QFontMetrics fm(font);
 
     QString displayName = QString::fromUtf8(shape.image->getFilenameWithoutExtension().c_str());
