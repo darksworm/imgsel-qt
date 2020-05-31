@@ -50,7 +50,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     }
 
     QFont queryFont;
-    queryFont.setFamily(queryFont.defaultFamily());
+    queryFont.setFamily(font().family());
     queryFont.setPixelSize(28);
     QFontMetrics fm(queryFont);
 
@@ -78,7 +78,7 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     painter.drawText((config.getScreenGeometry().width() - textWidth) / 2, emptyHeight / 2  + 6, displayName);
 
     QFont inputModeFont;
-    inputModeFont.setFamily(inputModeFont.defaultFamily());
+    inputModeFont.setFamily(font().family());
     inputModeFont.setPixelSize(12);
 
     painter.setFont(inputModeFont);
@@ -411,6 +411,8 @@ MainWindow::MainWindow() : QWidget() {
     setAttribute(Qt::WA_NoSystemBackground, true);
     setAttribute(Qt::WA_TranslucentBackground, true);
     setAutoFillBackground(false);
+
+    setFont(QApplication::font());
 
     auto config = ConfigManager::getOrLoadConfig();
     auto geo = config.getScreenGeometry();

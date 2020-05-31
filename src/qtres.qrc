@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>assets/eyes-32x25.png</file>
         <file>assets/error.png</file>
+        <file>assets/Cabin-Regular.ttf</file>
         <file>assets/splash.png</file>
     </qresource>
 </RCC>
