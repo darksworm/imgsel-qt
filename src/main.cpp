@@ -10,6 +10,7 @@
 #include <project_config.h>
 #include <iostream>
 #include "util/FileDownloader.h"
+#include "assets/assets.h"
 
 #ifdef WITH_X11
 #include <QtX11Extras/QX11Info>
@@ -27,6 +28,24 @@ Q_IMPORT_PLUGIN (QWindowsIntegrationPlugin);
 
 int main(int argc, char *argv[]) {
     bool oneShotMode = argc > 1;
+
+    Application app(argc, argv, oneShotMode);
+    if (!app.lock()) {
+        std::cout << "Another instance of the app is already running!";
+        return -42;
+    }
+
+    bool startMinimized = app.getSettings().value("start_minimized", false).toInt();
+
+    QSplashScreen* splashScreen = nullptr;
+
+    if (!oneShotMode && !startMinimized) {
+        QPixmap splashScreenImage(ASSET_SPLASH_IMAGE);
+        splashScreen = new QSplashScreen(splashScreenImage);
+        splashScreen->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
+        splashScreen->show();
+        app.processEvents();
+    }
 
     if (oneShotMode) {
         CLIParams params;
@@ -64,9 +83,7 @@ int main(int argc, char *argv[]) {
                            "Padding between image and selection box in pixels. {horizontal}x{vertical}")
                 ->check(intXIntValidator)
                 ->group("Visual");
-
-        cli_app.add_option("--margin", params.margin,
-                           "Margin between image selection boxes in pixels. {horizontal}x{vertical}")
+cli_app.add_option("--margin", params.margin, "Margin between image selection boxes in pixels. {horizontal}x{vertical}")
                 ->check(intXIntValidator)
                 ->group("Visual");
 
@@ -91,12 +108,6 @@ int main(int argc, char *argv[]) {
         ConfigManager::setCLIParams(params);
     }
 
-    Application app(argc, argv, oneShotMode);
-    if (!app.lock()) {
-        std::cout << "Another instance of the app is already running!";
-        return -42;
-    }
-
 #ifdef __linux__
     catchUnixExitSignals({SIGQUIT, SIGINT, SIGTERM, SIGHUP});
 #endif
@@ -115,8 +126,11 @@ int main(int argc, char *argv[]) {
 
         auto settingsWindow = new SettingsWindow(window);
 
-        bool startMinimized = app.getSettings().value("start_minimized", false).toInt();
         if (!startMinimized) {
+            if (splashScreen != nullptr) {
+                splashScreen->finish(settingsWindow);
+            }
+
             settingsWindow->show();
         }
 
