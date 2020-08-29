@@ -38,9 +38,10 @@ private:
     bool redrawAllInNextFrame = false;
 
     QPixmap &pixmap;
+    QWidget* parentWidget;
 
 public:
-    ImagePickerDrawer(QPixmap &pixmap);
+    ImagePickerDrawer(QPixmap &pixmap, QWidget* parentWidget);
 
     void reset(bool imageListChanged);
 

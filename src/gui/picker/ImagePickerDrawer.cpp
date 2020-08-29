@@ -9,7 +9,11 @@
 #include "../../util/exceptions/OutOfBounds.h"
 #include "../../assets/assets.h"
 
-ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap) : pixmap(pixmap) {
+#include <QLabel>
+#include <QWidget>
+#include <QMovie>
+
+ImagePickerDrawer::ImagePickerDrawer(QPixmap &pixmap, QWidget* parentWidget) : pixmap(pixmap), parentWidget(parentWidget) {
     shapeDrawer = new ImageDrawer(pixmap);
     reset(true);
 }
@@ -133,7 +137,20 @@ void ImagePickerDrawer::drawFrame(Image *selectedImage, bool redrawAll) {
 
             shape.position = shapeProperties.position;
             
-            shapeDrawer->drawNextShape(shapeProperties, shape);
+            if (shape.image->getExtension() == "gif") {
+                auto widget = new QWidget(parentWidget);
+                widget->setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint | Qt::WindowStaysOnTopHint);
+                widget->resize(shapeProperties.dimensions.x, shapeProperties.dimensions.y);
+                widget->move(shapeProperties.position.x(), shapeProperties.position.y());
+                auto label = new QLabel(widget);
+                auto movie = new QMovie(QString::fromStdString(shape.image->getPath()));
+                movie->setScaledSize(QSize(shapeProperties.dimensions.x, shapeProperties.dimensions.y));
+                label->setMovie(movie);
+                movie->start();
+                widget->show();
+            } else {
+                shapeDrawer->drawNextShape(shapeProperties, shape);
+            }
 
             lastShapePosition = shape.position;
         }

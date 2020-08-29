@@ -29,6 +29,16 @@ struct ShapeProperties {
         return this->dimensions.y + this->margins.y;
     }
 
+    Dimensions getImagePos() {
+        return Dimensions(
+            this->position.x() + this->margins.x,
+            this->position.y() + this->margins.y
+        );
+    }
+
+    Dimensions getImageSize() {
+    }
+
    // int getXMargin() {
    //     return ((int)geo.width() - oneRowWidth) / 2;
    // }

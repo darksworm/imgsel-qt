@@ -23,6 +23,10 @@ void MainWindow::paintEvent(QPaintEvent *event) {
     QWidget::paintEvent(event);
     QPainter painter(this);
 
+    this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), false);
+
+    std::cout << "frame" << "\n";
+
     painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
     if (focused) {
         painter.drawPixmap(0, 0, screenBuffer);
@@ -418,8 +422,7 @@ MainWindow::MainWindow() : QWidget() {
     auto geo = config.getScreenGeometry();
     screenBuffer = QPixmap(geo.width(), geo.height());
 
-    this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer);
-    this->imagePickerDrawer->drawFrame(this->imagePickerDrawer->getSelectedImage(), true);
+    this->imagePickerDrawer = new ImagePickerDrawer(screenBuffer, this);
 
     setMouseTracking(true);
 
@@ -430,4 +433,13 @@ MainWindow::MainWindow() : QWidget() {
         &scrollingEndTimer, &QTimer::timeout,
         this, &MainWindow::scrollEnd
     );
+}
+
+void MainWindow::hide() {
+    auto childList = findChildren<QWidget*>();
+    for (auto child : childList) {
+        child->hide();
+    }
+
+    QWidget::hide();
 }

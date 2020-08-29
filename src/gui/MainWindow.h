@@ -16,6 +16,7 @@ public:
 
 public slots:
     void display(bool invalidateConfig = false);
+    void hide();
 
 private slots:
     void scrollEnd();
