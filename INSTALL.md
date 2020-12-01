@@ -19,8 +19,8 @@ apt-get install qt5-default libqt5x11extras5 cmake libx11-dev xclip g++ tk-dev t
 git clone --recursive https://github.com/darksworm/emojigun.git
 mkdir emojigun/src/build
 cd emojigun/src/build
-cmake ..
-make
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr .. 
+sudo make install
 ```
 
 ## Installation
