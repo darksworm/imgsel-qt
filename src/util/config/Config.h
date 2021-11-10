@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <optional>
 #include "../../input/InputMode.h"
 #include "../image.h"
 #include "../Size.h"
