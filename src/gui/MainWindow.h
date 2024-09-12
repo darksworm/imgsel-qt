@@ -51,7 +51,7 @@ private:
     bool focused = false;
 
     const unsigned scrollTreshold = 20;
-    const unsigned scrollEndMilis = 500;
+    const unsigned scrollEndMilis = 200;
 
     int xScrollAccumulator;
     int yScrollAccumulator;
